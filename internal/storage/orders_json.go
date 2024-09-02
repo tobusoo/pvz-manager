@@ -159,6 +159,15 @@ func (s *Storage) AddRefund(orderID uint64) (err error) {
 	return s.writeDataToFile()
 }
 
+func (s *Storage) RemoveReturned(orderID uint64) error {
+	if err := s.readDataFromFile(); err != nil {
+		return err
+	}
+	delete(s.Refunds, orderID)
+
+	return s.writeDataToFile()
+}
+
 func (s *Storage) RemoveOrder(orderID uint64, status string) error {
 	if err := s.readDataFromFile(); err != nil {
 		return err
