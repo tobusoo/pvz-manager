@@ -127,6 +127,19 @@ func (s *Storage) GetExpirationDate(userID, orderID uint64) (time.Time, error) {
 	return expDate.Truncate(24 * time.Hour), s.writeDataToFile()
 }
 
+func (s *Storage) GetRefunds() (res []uint64, err error) {
+	if err = s.readDataFromFile(); err != nil {
+		return nil, err
+	}
+
+	res = make([]uint64, 0)
+	for orderID := range s.Refunds {
+		res = append(res, orderID)
+	}
+
+	return
+}
+
 func (s *Storage) AddOrder(userID, orderID uint64, expirationDate string) error {
 	if err := s.readDataFromFile(); err != nil {
 		return err

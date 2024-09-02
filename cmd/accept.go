@@ -9,7 +9,6 @@ import (
 )
 
 func init() {
-	acceptOrderCmd.DisableSuggestions = false
 	acceptCmd.AddCommand(acceptOrderCmd)
 	acceptCmd.AddCommand(acceptRefundCmd)
 

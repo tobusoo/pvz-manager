@@ -9,8 +9,6 @@ import (
 )
 
 func init() {
-	returnCmd.DisableSuggestions = false
-
 	resetReturnFlags(returnCmd)
 	returnCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
