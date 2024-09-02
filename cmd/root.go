@@ -11,6 +11,7 @@ import (
 func init() {
 	rootCmd.AddCommand(acceptCmd)
 	rootCmd.AddCommand(fulfillCmd)
+	rootCmd.AddCommand(returnCmd)
 
 	rootCmd.DisableSuggestions = false
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
