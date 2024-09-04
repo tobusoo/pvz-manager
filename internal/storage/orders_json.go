@@ -140,6 +140,19 @@ func (s *Storage) GetRefunds() (res []uint64, err error) {
 	return
 }
 
+func (s *Storage) GetOrdersByUserID(userID uint64) (map[uint64]Order, error) {
+	if err := s.readDataFromFile(); err != nil {
+		return nil, err
+	}
+
+	orders, ok := s.Users[userID]
+	if !ok {
+		return nil, fmt.Errorf("not found user %d", userID)
+	}
+
+	return orders.Orders, nil
+}
+
 func (s *Storage) AddOrder(userID, orderID uint64, expirationDate string) error {
 	if err := s.readDataFromFile(); err != nil {
 		return err
