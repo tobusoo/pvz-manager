@@ -10,7 +10,7 @@ import (
 
 func init() {
 	rootCmd.AddCommand(acceptCmd)
-	rootCmd.AddCommand(fulfillCmd)
+	rootCmd.AddCommand(giveCmd)
 	rootCmd.AddCommand(returnCmd)
 	rootCmd.AddCommand(viewCmd)
 

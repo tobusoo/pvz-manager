@@ -10,34 +10,34 @@ import (
 )
 
 func init() {
-	fulfillCmd.DisableSuggestions = false
+	giveCmd.DisableSuggestions = false
 
-	resetFulfillCmd(fulfillCmd)
-	fulfillCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+	resetGiveCmd(giveCmd)
+	giveCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
-		resetFulfillCmd(cmd)
+		resetGiveCmd(cmd)
 	})
 }
 
 var (
 	orders []uint
 
-	fulfillCmd = &cobra.Command{
-		Use:   "fulfill",
-		Short: "fulfill orders to client",
-		Long:  "fulfill orders to client",
+	giveCmd = &cobra.Command{
+		Use:   "give",
+		Short: "Give orders to client",
+		Long:  "Give orders to client",
 		Run:   fulfillCmdRun,
 	}
 )
 
-func resetFulfillCmd(cmd *cobra.Command) {
+func resetGiveCmd(cmd *cobra.Command) {
 	cmd.ResetFlags()
 	cmd.PersistentFlags().UintSliceVarP(&orders, "orders", "o", []uint{}, "List of orderID")
 	cmd.MarkPersistentFlagRequired("orders")
 }
 
 func fulfillCmdRun(cmd *cobra.Command, args []string) {
-	defer resetFulfillCmd(cmd)
+	defer resetGiveCmd(cmd)
 
 	knowUserID := false
 	userID := uint64(0)
@@ -48,7 +48,7 @@ func fulfillCmdRun(cmd *cobra.Command, args []string) {
 	for _, order := range orders {
 		status, err := st.GetOrderStatus(uint64(order))
 		if err != nil {
-			fmt.Printf("can't fulfill: %s\n", err)
+			fmt.Printf("can't give: %s\n", err)
 			continue
 		}
 
@@ -58,23 +58,23 @@ func fulfillCmdRun(cmd *cobra.Command, args []string) {
 		}
 
 		if status.UserID != userID {
-			fmt.Printf("can't fulfill order %d: different userID", order)
+			fmt.Printf("can't give order %d: different userID", order)
 			continue
 		}
 
 		if status.Status != storage.StatusAccepted {
-			fmt.Printf("can't fulfill order %d: status = %s\n", order, status.Status)
+			fmt.Printf("can't give order %d: status = %s\n", order, status.Status)
 			continue
 		}
 
 		expDate, err := st.GetExpirationDate(status.UserID, uint64(order))
 		if err != nil {
-			fmt.Printf("can't fulfill: %s\n", err)
+			fmt.Printf("can't give: %s\n", err)
 			continue
 		}
 
 		if utils.CurrentDate().After(expDate) {
-			fmt.Printf("can't fulfill order %d: expiration date has already passed\n", order)
+			fmt.Printf("can't give order %d: expiration date has already passed\n", order)
 			continue
 		}
 
