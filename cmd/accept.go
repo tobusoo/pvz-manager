@@ -87,7 +87,7 @@ func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 
 	order, err := st.GetOrderStatus(orderID)
 	if err != nil {
-		fmt.Println(err, st.OrdersHistory)
+		fmt.Println(err)
 		return
 	}
 

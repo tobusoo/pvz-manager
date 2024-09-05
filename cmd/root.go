@@ -16,6 +16,10 @@ func init() {
 
 	rootCmd.DisableSuggestions = false
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
+	if len(os.Args) == 1 {
+		rootCmd.Use = ""
+	}
 }
 
 var (
@@ -26,7 +30,7 @@ var (
 	expirationDate string
 
 	rootCmd = &cobra.Command{
-		Use:  os.Args[0],
+		Use:  "manager",
 		Long: `Utility for managing an order pick-up point`,
 		Run: func(cmd *cobra.Command, args []string) {
 		},

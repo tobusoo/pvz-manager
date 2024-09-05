@@ -58,7 +58,7 @@ func fulfillCmdRun(cmd *cobra.Command, args []string) {
 		}
 
 		if status.UserID != userID {
-			fmt.Printf("can't give order %d: different userID", order)
+			fmt.Printf("can't give order %d: different userID\n", order)
 			continue
 		}
 

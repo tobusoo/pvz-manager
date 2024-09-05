@@ -19,6 +19,11 @@ func init() {
 		cmd.Usage()
 		resetViewOrderFlags(cmd)
 	})
+
+	viewCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		cmd.Usage()
+		cmd.ResetFlags()
+	})
 }
 
 var (
@@ -117,7 +122,7 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	if len(ordersMap) == 0 {
-		fmt.Printf("User %d doesn't have orders", userID)
+		fmt.Printf("User %d doesn't have orders\n", userID)
 		return
 	}
 

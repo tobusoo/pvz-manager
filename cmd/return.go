@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
@@ -18,7 +19,7 @@ func init() {
 
 var returnCmd = &cobra.Command{
 	Use:   "return",
-	Short: "Return order",
+	Short: "Return order to courier",
 	Long:  "Return order to courier",
 	Run:   returnCmdRun,
 }
@@ -50,7 +51,7 @@ func returnCmdRun(cmd *cobra.Command, args []string) {
 			return
 		}
 
-		if expDate.Before(utils.CurrentDate()) {
+		if expDate.Add(24 * time.Hour).After(utils.CurrentDate()) {
 			fmt.Printf("can't return order %d: expiration date hasn't expired yet\n", orderID)
 			return
 		}

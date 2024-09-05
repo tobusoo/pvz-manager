@@ -124,7 +124,7 @@ func (s *Storage) GetExpirationDate(userID, orderID uint64) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("error while parsing Expiration Date: %w", err)
 	}
 
-	return expDate.Truncate(24 * time.Hour), s.writeDataToFile()
+	return expDate.Truncate(24 * time.Hour), nil
 }
 
 func (s *Storage) GetRefunds() (res []uint64, err error) {
