@@ -4,14 +4,30 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"gitlab.ozon.dev/chppppr/homework/cmd"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
 )
 
 func main() {
-	storage := storage.NewStorage("storage.json")
+	storage, err := storage.NewStorage("storage.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer storage.Save()
+
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		storage.Save()
+		fmt.Println()
+		os.Exit(0)
+	}()
+
 	cmd.SetStorage(storage)
 	if len(os.Args[1:]) > 0 {
 		if err := cmd.Execute(); err != nil {

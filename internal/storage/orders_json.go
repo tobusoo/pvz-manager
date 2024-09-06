@@ -38,13 +38,20 @@ type Storage struct {
 	path string `json:"-"`
 }
 
-func NewStorage(path string) *Storage {
-	return &Storage{
+func NewStorage(path string) (*Storage, error) {
+	storage := &Storage{
 		path:          path,
 		Users:         make(map[uint64]User),
 		OrdersHistory: make(map[uint64]OrderStatus),
 		Refunds:       make(map[uint64]struct{}),
 	}
+
+	err := storage.readDataFromFile()
+	if err != nil {
+		return nil, err
+	}
+
+	return storage, nil
 }
 
 func (s *Storage) readDataFromFile() (err error) {
@@ -65,7 +72,7 @@ func (s *Storage) readDataFromFile() (err error) {
 	return
 }
 
-func (s *Storage) writeDataToFile() (err error) {
+func (s *Storage) Save() (err error) {
 	file, err := os.OpenFile(s.path, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
 		return
@@ -78,24 +85,16 @@ func (s *Storage) writeDataToFile() (err error) {
 }
 
 func (s *Storage) SetOrderStatus(orderID uint64, status string) error {
-	if err := s.readDataFromFile(); err != nil {
-		return err
-	}
-
 	order, ok := s.OrdersHistory[orderID]
 	if !ok {
 		return fmt.Errorf("order %d not found", orderID)
 	}
 
 	s.OrdersHistory[orderID] = OrderStatus{order.UserID, status, utils.CurrentDateString()}
-	return s.writeDataToFile()
+	return nil
 }
 
 func (s *Storage) GetOrderStatus(orderID uint64) (OrderStatus, error) {
-	if err := s.readDataFromFile(); err != nil {
-		return OrderStatus{}, err
-	}
-
 	status, ok := s.OrdersHistory[orderID]
 	if !ok {
 		return OrderStatus{}, fmt.Errorf("order %d not found", orderID)
@@ -105,10 +104,6 @@ func (s *Storage) GetOrderStatus(orderID uint64) (OrderStatus, error) {
 }
 
 func (s *Storage) GetExpirationDate(userID, orderID uint64) (time.Time, error) {
-	if err := s.readDataFromFile(); err != nil {
-		return time.Time{}, err
-	}
-
 	user, ok := s.Users[userID]
 	if !ok {
 		return time.Time{}, fmt.Errorf("user %d not found", userID)
@@ -128,10 +123,6 @@ func (s *Storage) GetExpirationDate(userID, orderID uint64) (time.Time, error) {
 }
 
 func (s *Storage) GetRefunds() (res []uint64, err error) {
-	if err = s.readDataFromFile(); err != nil {
-		return nil, err
-	}
-
 	res = make([]uint64, 0)
 	for orderID := range s.Refunds {
 		res = append(res, orderID)
@@ -141,10 +132,6 @@ func (s *Storage) GetRefunds() (res []uint64, err error) {
 }
 
 func (s *Storage) GetOrdersByUserID(userID uint64) (map[uint64]Order, error) {
-	if err := s.readDataFromFile(); err != nil {
-		return nil, err
-	}
-
 	orders, ok := s.Users[userID]
 	if !ok {
 		return nil, fmt.Errorf("not found user %d", userID)
@@ -154,10 +141,6 @@ func (s *Storage) GetOrdersByUserID(userID uint64) (map[uint64]Order, error) {
 }
 
 func (s *Storage) AddOrder(userID, orderID uint64, expirationDate string) error {
-	if err := s.readDataFromFile(); err != nil {
-		return err
-	}
-
 	if order, ok := s.OrdersHistory[orderID]; ok {
 		return fmt.Errorf("order %d has already been %s", orderID, order.Status)
 	}
@@ -169,36 +152,25 @@ func (s *Storage) AddOrder(userID, orderID uint64, expirationDate string) error 
 	s.Users[userID].Orders[orderID] = Order{expirationDate}
 	s.OrdersHistory[orderID] = OrderStatus{userID, StatusAccepted, utils.CurrentDateString()}
 
-	return s.writeDataToFile()
+	return nil
 }
 
 func (s *Storage) AddRefund(orderID uint64) (err error) {
-	if err = s.readDataFromFile(); err != nil {
-		return err
-	}
-
 	if err = s.SetOrderStatus(orderID, StatusReturned); err != nil {
 		return err
 	}
 
 	s.Refunds[orderID] = struct{}{}
-	return s.writeDataToFile()
+	return nil
 }
 
 func (s *Storage) RemoveReturned(orderID uint64) error {
-	if err := s.readDataFromFile(); err != nil {
-		return err
-	}
 	delete(s.Refunds, orderID)
 
-	return s.writeDataToFile()
+	return nil
 }
 
 func (s *Storage) RemoveOrder(orderID uint64, status string) error {
-	if err := s.readDataFromFile(); err != nil {
-		return err
-	}
-
 	order, ok := s.OrdersHistory[orderID]
 	if !ok {
 		return fmt.Errorf("order %d not found", orderID)
@@ -216,5 +188,5 @@ func (s *Storage) RemoveOrder(orderID uint64, status string) error {
 	s.OrdersHistory[orderID] = OrderStatus{order.UserID, status, utils.CurrentDateString()}
 
 	delete(user.Orders, orderID)
-	return s.writeDataToFile()
+	return nil
 }
