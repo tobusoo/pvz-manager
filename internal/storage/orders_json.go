@@ -236,7 +236,7 @@ func (s *Storage) RemoveReturned(orderID uint64) error {
 	return nil
 }
 
-func (s *Storage) RemoveOrder(orderID uint64, status string) error {
+func (s *Storage) CanRemoveOrder(orderID uint64) error {
 	order, ok := s.OrdersHistory[orderID]
 	if !ok {
 		return fmt.Errorf("order %d not found", orderID)
@@ -251,10 +251,19 @@ func (s *Storage) RemoveOrder(orderID uint64, status string) error {
 		return fmt.Errorf("user %d not found", order.UserID)
 	}
 
-	id, ok := user.OrdersIDatArray[orderID]
+	_, ok = user.OrdersIDatArray[orderID]
 	if !ok {
 		return fmt.Errorf("not found order %d at orders array of user %d", orderID, order.UserID)
 	}
+
+	return nil
+}
+
+// Use only before CanRemoveOrder!!!
+func (s *Storage) RemoveOrder(orderID uint64, status string) error {
+	order := s.OrdersHistory[orderID]
+	user := s.Users[order.UserID]
+	id := user.OrdersIDatArray[orderID]
 
 	s.OrdersHistory[orderID] = OrderStatus{order.UserID, status, utils.CurrentDateString()}
 	user.OrdersArray[id].Exist = false

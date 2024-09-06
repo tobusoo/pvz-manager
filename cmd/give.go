@@ -26,7 +26,7 @@ var (
 		Use:   "give",
 		Short: "Give orders to client",
 		Long:  "Give orders to client",
-		Run:   fulfillCmdRun,
+		Run:   giveCmdRun,
 	}
 )
 
@@ -36,7 +36,7 @@ func resetGiveCmd(cmd *cobra.Command) {
 	cmd.MarkPersistentFlagRequired("orders")
 }
 
-func fulfillCmdRun(cmd *cobra.Command, args []string) {
+func giveCmdRun(cmd *cobra.Command, args []string) {
 	defer resetGiveCmd(cmd)
 
 	knowUserID := false
@@ -45,10 +45,14 @@ func fulfillCmdRun(cmd *cobra.Command, args []string) {
 	slices.Sort(orders)
 	orders = slices.Compact(orders)
 
+	errors := make([]error, 0)
+	isGoodResponse := true
+
 	for _, order := range orders {
 		status, err := st.GetOrderStatus(uint64(order))
 		if err != nil {
-			fmt.Printf("can't give: %s\n", err)
+			errors = append(errors, fmt.Errorf("can't give: %s", err))
+			isGoodResponse = false
 			continue
 		}
 
@@ -58,27 +62,43 @@ func fulfillCmdRun(cmd *cobra.Command, args []string) {
 		}
 
 		if status.UserID != userID {
-			fmt.Printf("can't give order %d: different userID\n", order)
+			errors = append(errors, fmt.Errorf("can't give order %d: different userID", order))
+			isGoodResponse = false
 			continue
 		}
 
 		if status.Status != storage.StatusAccepted {
-			fmt.Printf("can't give order %d: status = %s\n", order, status.Status)
+			errors = append(errors, fmt.Errorf("can't give order %d: status = %s", order, status.Status))
+			isGoodResponse = false
 			continue
 		}
 
 		expDate, err := st.GetExpirationDate(status.UserID, uint64(order))
 		if err != nil {
-			fmt.Printf("can't give: %s\n", err)
+			errors = append(errors, fmt.Errorf("can't give: %s", err))
+			isGoodResponse = false
 			continue
 		}
 
 		if utils.CurrentDate().After(expDate) {
-			fmt.Printf("can't give order %d: expiration date has already passed\n", order)
+			errors = append(errors, fmt.Errorf("can't give order %d: expiration date has already passed", order))
+			isGoodResponse = false
 			continue
 		}
 
-		if err = st.RemoveOrder(uint64(order), storage.StatusGiveClient); err != nil {
+		if err = st.CanRemoveOrder(uint64(order)); err != nil {
+			errors = append(errors, err)
+			isGoodResponse = false
+		}
+	}
+
+	if isGoodResponse {
+		for _, order := range orders {
+			st.RemoveOrder(uint64(order), storage.StatusGiveClient)
+		}
+	} else {
+		fmt.Println("request was not done because:")
+		for _, err := range errors {
 			fmt.Println(err)
 		}
 	}
