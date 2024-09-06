@@ -20,8 +20,18 @@ type Order struct {
 	ExpirationDate string `json:"expirationDate"`
 }
 
+type OrderView struct {
+	Order
+	UserID  uint64 `json:"userID"`
+	OrderID uint64 `json:"orderID"`
+	Exist   bool   `json:"exist"`
+}
+
 type User struct {
 	Orders map[uint64]Order `json:"orders"`
+
+	OrdersArray     []OrderView    `json:"ordersArray"`
+	OrdersIDatArray map[uint64]int `json:"ordersIDatArray"`
 }
 
 type OrderStatus struct {
@@ -30,10 +40,15 @@ type OrderStatus struct {
 	Date   string `json:"date"`
 }
 
+type Refunds struct {
+	Orders          []OrderView    `json:"orders"`
+	OrdersIDatArray map[uint64]int `json:"ordersIDatArray"`
+}
+
 type Storage struct {
-	Users         map[uint64]User        `json:"users"`
+	Users         map[uint64]*User       `json:"users"`
 	OrdersHistory map[uint64]OrderStatus `json:"ordersHistory"`
-	Refunds       map[uint64]struct{}    `json:"refunds"`
+	Refunds       Refunds                `json:"refunds"`
 
 	path string `json:"-"`
 }
@@ -41,9 +56,9 @@ type Storage struct {
 func NewStorage(path string) (*Storage, error) {
 	storage := &Storage{
 		path:          path,
-		Users:         make(map[uint64]User),
+		Users:         make(map[uint64]*User),
 		OrdersHistory: make(map[uint64]OrderStatus),
-		Refunds:       make(map[uint64]struct{}),
+		Refunds:       Refunds{make([]OrderView, 0), make(map[uint64]int)},
 	}
 
 	err := storage.readDataFromFile()
@@ -55,10 +70,6 @@ func NewStorage(path string) (*Storage, error) {
 }
 
 func (s *Storage) readDataFromFile() (err error) {
-	clear(s.Users)
-	clear(s.OrdersHistory)
-	clear(s.Refunds)
-
 	file, err := os.OpenFile(s.path, os.O_RDWR, 0666)
 	if err != nil {
 		file, err = os.Create(s.path)
@@ -119,25 +130,62 @@ func (s *Storage) GetExpirationDate(userID, orderID uint64) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("error while parsing Expiration Date: %w", err)
 	}
 
-	return expDate.Truncate(24 * time.Hour), nil
+	return expDate.Truncate(24 * time.Hour).UTC(), nil
 }
 
-func (s *Storage) GetRefunds() (res []uint64, err error) {
-	res = make([]uint64, 0)
-	for orderID := range s.Refunds {
-		res = append(res, orderID)
+func (s *Storage) GetRefunds(pageID, ordersPerPage uint64) (res []OrderView, err error) {
+	if ordersPerPage == 0 {
+		return nil, fmt.Errorf("orders per page must be greater than 0")
+	}
+
+	res = make([]OrderView, 0)
+	firstOrderID := int(pageID * ordersPerPage)
+	ordersCount := 0
+
+	for i := firstOrderID; i < len(s.Refunds.Orders); i++ {
+		if s.Refunds.Orders[i].Exist {
+			res = append(res, s.Refunds.Orders[i])
+			ordersCount++
+		}
+
+		if ordersCount == int(ordersPerPage) {
+			break
+		}
 	}
 
 	return
 }
 
-func (s *Storage) GetOrdersByUserID(userID uint64) (map[uint64]Order, error) {
-	orders, ok := s.Users[userID]
+func (s *Storage) GetOrdersByUserID(userID, firstOrderID, limit uint64) ([]OrderView, error) {
+	user, ok := s.Users[userID]
 	if !ok {
 		return nil, fmt.Errorf("not found user %d", userID)
 	}
 
-	return orders.Orders, nil
+	var i int
+	if firstOrderID != 0 {
+		i, ok = user.OrdersIDatArray[firstOrderID]
+		if !ok {
+			return nil, fmt.Errorf("not found order %d", firstOrderID)
+		}
+	} else {
+		i = 0
+	}
+
+	if limit == 0 {
+		limit = uint64(len(user.OrdersArray))
+	}
+
+	res := make([]OrderView, 0)
+	orderCount := uint64(0)
+	for ; i < len(user.OrdersArray) && orderCount < limit; i++ {
+		if user.OrdersArray[i].Exist {
+			res = append(res, user.OrdersArray[i])
+			orderCount++
+		}
+	}
+
+	return res, nil
 }
 
 func (s *Storage) AddOrder(userID, orderID uint64, expirationDate string) error {
@@ -146,10 +194,17 @@ func (s *Storage) AddOrder(userID, orderID uint64, expirationDate string) error 
 	}
 
 	if _, ok := s.Users[userID]; !ok {
-		s.Users[userID] = User{make(map[uint64]Order)}
+		s.Users[userID] = &User{
+			make(map[uint64]Order),
+			make([]OrderView, 0),
+			make(map[uint64]int),
+		}
 	}
 
-	s.Users[userID].Orders[orderID] = Order{expirationDate}
+	order := Order{expirationDate}
+	s.Users[userID].Orders[orderID] = order
+	s.Users[userID].OrdersArray = append(s.Users[userID].OrdersArray, OrderView{order, userID, orderID, true})
+	s.Users[userID].OrdersIDatArray[orderID] = len(s.Users[userID].OrdersArray) - 1
 	s.OrdersHistory[orderID] = OrderStatus{userID, StatusAccepted, utils.CurrentDateString()}
 
 	return nil
@@ -160,12 +215,23 @@ func (s *Storage) AddRefund(orderID uint64) (err error) {
 		return err
 	}
 
-	s.Refunds[orderID] = struct{}{}
+	stat, err := s.GetOrderStatus(orderID)
+	if err != nil {
+		return err
+	}
+
+	s.Refunds.Orders = append(s.Refunds.Orders, OrderView{Order{stat.Date}, stat.UserID, orderID, true})
+	s.Refunds.OrdersIDatArray[orderID] = len(s.Refunds.Orders) - 1
 	return nil
 }
 
 func (s *Storage) RemoveReturned(orderID uint64) error {
-	delete(s.Refunds, orderID)
+	id, ok := s.Refunds.OrdersIDatArray[orderID]
+	if !ok {
+		return fmt.Errorf("not found order %d at refunded", orderID)
+	}
+
+	s.Refunds.Orders[id].Exist = false
 
 	return nil
 }
@@ -185,8 +251,13 @@ func (s *Storage) RemoveOrder(orderID uint64, status string) error {
 		return fmt.Errorf("user %d not found", order.UserID)
 	}
 
-	s.OrdersHistory[orderID] = OrderStatus{order.UserID, status, utils.CurrentDateString()}
+	id, ok := user.OrdersIDatArray[orderID]
+	if !ok {
+		return fmt.Errorf("not found order %d at orders array of user %d", orderID, order.UserID)
+	}
 
+	s.OrdersHistory[orderID] = OrderStatus{order.UserID, status, utils.CurrentDateString()}
+	user.OrdersArray[id].Exist = false
 	delete(user.Orders, orderID)
 	return nil
 }

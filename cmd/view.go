@@ -3,8 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"sort"
-	"time"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -13,6 +11,10 @@ import (
 func init() {
 	viewCmd.AddCommand(viewRefundCmd)
 	viewCmd.AddCommand(viewOrderCmd)
+	viewCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+		cmd.Usage()
+		cmd.ResetFlags()
+	})
 
 	resetViewOrderFlags(viewOrderCmd)
 	viewOrderCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
@@ -20,9 +22,10 @@ func init() {
 		resetViewOrderFlags(cmd)
 	})
 
-	viewCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+	resetViewRefundFlags(viewRefundCmd)
+	viewRefundCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
 		cmd.Usage()
-		cmd.ResetFlags()
+		resetViewRefundFlags(cmd)
 	})
 }
 
@@ -36,14 +39,15 @@ var (
 		},
 	}
 
-	viewRefundCmd = &cobra.Command{
+	pageID, ordersPerPage uint64
+	viewRefundCmd         = &cobra.Command{
 		Use:   "refund",
 		Short: "View refunds",
 		Long:  "View refunds",
 		Run:   viewRefundCmdRun,
 	}
 
-	ordersCount  uint
+	ordersLimit  uint64
 	viewOrderCmd = &cobra.Command{
 		Use:   "order",
 		Short: "View orders",
@@ -55,38 +59,29 @@ var (
 func resetViewOrderFlags(cmd *cobra.Command) {
 	cmd.ResetFlags()
 	cmd.PersistentFlags().Uint64VarP(&userID, "userID", "u", 0, "userID (required)")
-	cmd.PersistentFlags().UintVarP(&ordersCount, "n", "n", 0, "print maximum N last orders")
+	cmd.PersistentFlags().Uint64VarP(&orderID, "orderID", "o", 0, "first orderID which should be output")
+	cmd.PersistentFlags().Uint64VarP(&ordersLimit, "n", "n", 0, "limit of returned orders")
 	cmd.MarkPersistentFlagRequired("userID")
 }
 
-type orderView struct {
-	OrderID, UserID uint64
-	Date            string
+func resetViewRefundFlags(cmd *cobra.Command) {
+	cmd.ResetFlags()
+	cmd.PersistentFlags().Uint64VarP(&pageID, "pageID", "p", 0, "pageID (starts from 0)")
+	cmd.PersistentFlags().Uint64VarP(&ordersPerPage, "ordersPerPage", "c", 10, "orders per page")
 }
 
 func viewRefundCmdRun(cmd *cobra.Command, args []string) {
-	refunds, err := st.GetRefunds()
+	defer resetViewRefundFlags(cmd)
+	refunds, err := st.GetRefunds(pageID, ordersPerPage)
 	if err != nil {
 		fmt.Printf("error while view refund: %s\n", err)
 		return
 	}
 
 	if len(refunds) == 0 {
-		fmt.Println("there are no refunds")
+		fmt.Printf("there are no refunds for page ")
+		fmt.Printf("%d with ordersPerPage equal to %d\n", pageID, ordersPerPage)
 		return
-	}
-
-	orders := make([]orderView, 0)
-	for _, orderID := range refunds {
-		stat, err := st.GetOrderStatus(orderID)
-		if err != nil {
-			continue
-		}
-		orders = append(orders, orderView{
-			OrderID: orderID,
-			UserID:  stat.UserID,
-			Date:    stat.Date,
-		})
 	}
 
 	templates := &promptui.SelectTemplates{
@@ -97,12 +92,12 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 		Details: `-----Order-----
 {{ "OrderID:" | faint }}  {{ .OrderID }}
 {{ "UserID:" | faint }}  {{ .UserID }}
-{{ "Date of refund: " | faint }}  {{ .Date }}`,
+{{ "Date of refund: " | faint }}  {{ .ExpirationDate }}`,
 	}
 
 	promt := promptui.Select{
 		Label:     "OrderID:",
-		Items:     orders,
+		Items:     refunds,
 		Templates: templates,
 	}
 
@@ -115,28 +110,15 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 
 func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 	defer resetViewOrderFlags(cmd)
-	ordersMap, err := st.GetOrdersByUserID(userID)
+	orders, err := st.GetOrdersByUserID(userID, orderID, ordersLimit)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	if len(ordersMap) == 0 {
+	if len(orders) == 0 {
 		fmt.Printf("User %d doesn't have orders\n", userID)
 		return
-	}
-
-	orders := make([]orderView, 0)
-	for orderID, v := range ordersMap {
-		orders = append(orders, orderView{
-			OrderID: orderID,
-			UserID:  userID,
-			Date:    v.ExpirationDate,
-		})
-	}
-
-	if ordersCount > 0 && int(ordersCount) < len(orders) {
-		orders = sortOrdersByDate(orders)
 	}
 
 	templates := &promptui.SelectTemplates{
@@ -146,7 +128,7 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 		Selected: " ",
 		Details: `-----Order-----
 {{ "OrderID:" | faint }}  {{ .OrderID }}
-{{ "Expiration date: " | faint }}  {{ .Date }}`,
+{{ "Expiration date: " | faint }}  {{ .ExpirationDate }}`,
 	}
 
 	promt := promptui.Select{
@@ -160,26 +142,4 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func sortOrdersByDate(orders []orderView) []orderView {
-	sort.Slice(orders, func(i, j int) bool {
-		timeStr1 := orders[i].Date
-		timeStr2 := orders[j].Date
-		time1, err := time.Parse("02-01-2006", timeStr1)
-		if err != nil {
-			// Bad data at storage
-			fmt.Printf("Error while parsing time: %s\n", err)
-			os.Exit(1)
-		}
-		time2, err := time.Parse("02-01-2006", timeStr2)
-		if err != nil {
-			fmt.Printf("Error while parsing time: %s\n", err)
-			os.Exit(1)
-		}
-
-		return time1.Before(time2)
-	})
-
-	return orders[len(orders)-int(ordersCount):]
 }
