@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
 func init() {
@@ -71,8 +72,8 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	currentTime := time.Now().Truncate(24 * time.Hour)
-	if currentTime.After(expDate) {
+	currentDate := utils.CurrentDate()
+	if currentDate.After(expDate) {
 		fmt.Println("expiration date has already passed")
 		return
 	}
@@ -108,7 +109,7 @@ func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 	}
 
 	issuedDate = issuedDate.Add(2 * 24 * time.Hour)
-	currentDate := time.Now().Truncate(24 * time.Hour)
+	currentDate := utils.CurrentDate()
 
 	if currentDate.After(issuedDate) {
 		fmt.Println("2 days have passed since the order was issued to the client")
