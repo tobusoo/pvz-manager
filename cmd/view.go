@@ -66,7 +66,7 @@ func resetViewOrderFlags(cmd *cobra.Command) {
 
 func resetViewRefundFlags(cmd *cobra.Command) {
 	cmd.ResetFlags()
-	cmd.PersistentFlags().Uint64VarP(&pageID, "pageID", "p", 0, "pageID (starts from 0)")
+	cmd.PersistentFlags().Uint64VarP(&pageID, "pageID", "p", 1, "pageID (starts from 1)")
 	cmd.PersistentFlags().Uint64VarP(&ordersPerPage, "ordersPerPage", "c", 10, "orders per page")
 }
 

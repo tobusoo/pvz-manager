@@ -138,8 +138,12 @@ func (s *Storage) GetRefunds(pageID, ordersPerPage uint64) (res []OrderView, err
 		return nil, fmt.Errorf("orders per page must be greater than 0")
 	}
 
+	if pageID == 0 {
+		return nil, fmt.Errorf("pageID myst be greater than 0")
+	}
+
 	res = make([]OrderView, 0)
-	firstOrderID := int(pageID * ordersPerPage)
+	firstOrderID := int((pageID - 1) * ordersPerPage)
 	ordersCount := 0
 
 	for i := firstOrderID; i < len(s.Refunds.Orders); i++ {
