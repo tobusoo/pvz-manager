@@ -259,7 +259,7 @@ func (s *Storage) CanRemoveOrder(orderID uint64) error {
 	return nil
 }
 
-// Use only before CanRemoveOrder!!!
+// Использовать только перед вызовом CanRemoveOrder!!!
 func (s *Storage) RemoveOrder(orderID uint64, status string) error {
 	order := s.OrdersHistory[orderID]
 	user := s.Users[order.UserID]
