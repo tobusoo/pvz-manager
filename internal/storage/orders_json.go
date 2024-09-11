@@ -133,17 +133,20 @@ func (s *Storage) GetExpirationDate(userID, orderID uint64) (time.Time, error) {
 	return expDate.Truncate(24 * time.Hour).UTC(), nil
 }
 
-func (s *Storage) GetRefunds(pageID, ordersPerPage uint64) (res []OrderView, err error) {
+func (s *Storage) getRefundsCheckErr(pageID, ordersPerPage uint64) error {
 	if ordersPerPage == 0 {
-		return nil, fmt.Errorf("orders per page must be greater than 0")
+		return fmt.Errorf("orders per page must be greater than 0")
 	}
 
 	if pageID == 0 {
-		return nil, fmt.Errorf("pageID myst be greater than 0")
+		return fmt.Errorf("pageID myst be greater than 0")
 	}
 
-	res = make([]OrderView, 0)
-	firstOrderID := int((pageID - 1) * ordersPerPage)
+	return nil
+}
+
+func (s *Storage) getRefundsSlice(firstOrderID int, ordersPerPage uint64) []OrderView {
+	res := make([]OrderView, 0)
 	ordersCount := 0
 
 	for i := firstOrderID; i < len(s.Refunds.Orders); i++ {
@@ -157,34 +160,48 @@ func (s *Storage) GetRefunds(pageID, ordersPerPage uint64) (res []OrderView, err
 		}
 	}
 
-	return
+	return res
+}
+
+func (s *Storage) GetRefunds(pageID, ordersPerPage uint64) (res []OrderView, err error) {
+	if err := s.getRefundsCheckErr(pageID, ordersPerPage); err != nil {
+		return nil, err
+	}
+
+	firstOrderID := int((pageID - 1) * ordersPerPage)
+	return s.getRefundsSlice(firstOrderID, ordersPerPage), nil
+}
+
+func (s *Storage) getUserAndFirstOrderID(userID, firstOrderID uint64) (*User, int, error) {
+	user, ok := s.Users[userID]
+	if !ok {
+		return nil, 0, fmt.Errorf("not found user %d", userID)
+	}
+
+	id := 0
+	if firstOrderID != 0 {
+		id, ok = user.OrdersIDatArray[firstOrderID]
+		if !ok {
+			return nil, 0, fmt.Errorf("not found order %d", firstOrderID)
+		}
+	}
+
+	return user, id, nil
 }
 
 func (s *Storage) GetOrdersByUserID(userID, firstOrderID, limit uint64) ([]OrderView, error) {
-	user, ok := s.Users[userID]
-	if !ok {
-		return nil, fmt.Errorf("not found user %d", userID)
+	user, id, err := s.getUserAndFirstOrderID(userID, firstOrderID)
+	if err != nil {
+		return nil, err
 	}
 
-	var i int
-	if firstOrderID != 0 {
-		i, ok = user.OrdersIDatArray[firstOrderID]
-		if !ok {
-			return nil, fmt.Errorf("not found order %d", firstOrderID)
-		}
-	} else {
-		i = 0
-	}
-
-	if limit == 0 {
-		limit = uint64(len(user.OrdersArray))
-	}
-
+	limit = min(uint64(len(user.OrdersArray)), limit)
 	res := make([]OrderView, 0)
 	orderCount := uint64(0)
-	for ; i < len(user.OrdersArray) && orderCount < limit; i++ {
-		if user.OrdersArray[i].Exist {
-			res = append(res, user.OrdersArray[i])
+
+	for ; id < int(limit) && orderCount < limit; id++ {
+		if user.OrdersArray[id].Exist {
+			res = append(res, user.OrdersArray[id])
 			orderCount++
 		}
 	}
@@ -240,14 +257,22 @@ func (s *Storage) RemoveReturned(orderID uint64) error {
 	return nil
 }
 
+func canRemoveOrderCheckStatus(status string, orderID uint64) error {
+	if status == StatusGiveClient || status == StatusGiveCourier {
+		return fmt.Errorf("order %d has already been %s", orderID, StatusGiveClient)
+	}
+
+	return nil
+}
+
 func (s *Storage) CanRemoveOrder(orderID uint64) error {
 	order, ok := s.OrdersHistory[orderID]
 	if !ok {
 		return fmt.Errorf("order %d not found", orderID)
 	}
 
-	if order.Status == StatusGiveClient || order.Status == StatusGiveCourier {
-		return fmt.Errorf("order %d has already been %s", orderID, StatusGiveClient)
+	if err := canRemoveOrderCheckStatus(order.Status, orderID); err != nil {
+		return err
 	}
 
 	user, ok := s.Users[order.UserID]

@@ -30,6 +30,23 @@ func resetReturnFlags(cmd *cobra.Command) {
 	cmd.MarkPersistentFlagRequired("orderID")
 }
 
+func returnAccepted(order storage.OrderStatus) error {
+	expDate, err := st.GetExpirationDate(order.UserID, orderID)
+	if err != nil {
+		return err
+	}
+
+	if expDate.Add(24 * time.Hour).After(utils.CurrentDate()) {
+		return fmt.Errorf("can't return order %d: expiration date hasn't expired yet", orderID)
+	}
+
+	if err = st.RemoveOrder(orderID, storage.StatusGiveCourier); err != nil {
+		fmt.Println(err)
+	}
+
+	return nil
+}
+
 func returnCmdRun(cmd *cobra.Command, args []string) {
 	defer resetReturnFlags(cmd)
 
@@ -45,21 +62,9 @@ func returnCmdRun(cmd *cobra.Command, args []string) {
 		st.SetOrderStatus(orderID, storage.StatusGiveCourier)
 
 	case storage.StatusAccepted:
-		expDate, err := st.GetExpirationDate(order.UserID, orderID)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		if expDate.Add(24 * time.Hour).After(utils.CurrentDate()) {
-			fmt.Printf("can't return order %d: expiration date hasn't expired yet\n", orderID)
-			return
-		}
-
-		if err := st.RemoveOrder(orderID, storage.StatusGiveCourier); err != nil {
+		if err := returnAccepted(order); err != nil {
 			fmt.Println(err)
 		}
-
 	default:
 		fmt.Printf("can't return order %d: status = %s\n", orderID, order.Status)
 	}

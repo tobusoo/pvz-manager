@@ -36,62 +36,28 @@ func resetGiveCmd(cmd *cobra.Command) {
 	cmd.MarkPersistentFlagRequired("orders")
 }
 
-func giveCmdRun(cmd *cobra.Command, args []string) {
-	defer resetGiveCmd(cmd)
-
-	knowUserID := false
-	userID := uint64(0)
-
-	slices.Sort(orders)
-	orders = slices.Compact(orders)
-
-	errors := make([]error, 0)
-	isGoodResponse := true
-
-	for _, order := range orders {
-		status, err := st.GetOrderStatus(uint64(order))
-		if err != nil {
-			errors = append(errors, fmt.Errorf("can't give: %s", err))
-			isGoodResponse = false
-			continue
-		}
-
-		if !knowUserID {
-			userID = status.UserID
-			knowUserID = true
-		}
-
-		if status.UserID != userID {
-			errors = append(errors, fmt.Errorf("can't give order %d: different userID", order))
-			isGoodResponse = false
-			continue
-		}
-
-		if status.Status != storage.StatusAccepted {
-			errors = append(errors, fmt.Errorf("can't give order %d: status = %s", order, status.Status))
-			isGoodResponse = false
-			continue
-		}
-
-		expDate, err := st.GetExpirationDate(status.UserID, uint64(order))
-		if err != nil {
-			errors = append(errors, fmt.Errorf("can't give: %s", err))
-			isGoodResponse = false
-			continue
-		}
-
-		if utils.CurrentDate().After(expDate) {
-			errors = append(errors, fmt.Errorf("can't give order %d: expiration date has already passed", order))
-			isGoodResponse = false
-			continue
-		}
-
-		if err = st.CanRemoveOrder(uint64(order)); err != nil {
-			errors = append(errors, err)
-			isGoodResponse = false
-		}
+func giveCheckErr(userID, orderID uint64, status storage.OrderStatus) error {
+	if status.UserID != userID {
+		return fmt.Errorf("can't give order %d: different userID", orderID)
 	}
 
+	if status.Status != storage.StatusAccepted {
+		return fmt.Errorf("can't give order %d: status = %s", orderID, status.Status)
+	}
+
+	expDate, err := st.GetExpirationDate(status.UserID, uint64(orderID))
+	if err != nil {
+		return fmt.Errorf("can't give: %s", err)
+	}
+
+	if utils.CurrentDate().After(expDate) {
+		return fmt.Errorf("can't give order %d: expiration date has already passed", orderID)
+	}
+
+	return st.CanRemoveOrder(orderID)
+}
+
+func giveCmdProcess(isGoodResponse bool, errors []error) {
 	if isGoodResponse {
 		for _, order := range orders {
 			st.RemoveOrder(uint64(order), storage.StatusGiveClient)
@@ -102,4 +68,41 @@ func giveCmdRun(cmd *cobra.Command, args []string) {
 			fmt.Println(err)
 		}
 	}
+}
+
+func giveCheckOrder(orderID, userID uint64, knowUserID bool) (uint64, bool, error) {
+	status, err := st.GetOrderStatus(orderID)
+	if err != nil {
+		return userID, knowUserID, fmt.Errorf("can't give: %s", err)
+	}
+
+	if !knowUserID {
+		userID = status.UserID
+		knowUserID = true
+	}
+
+	return userID, knowUserID, giveCheckErr(userID, orderID, status)
+}
+
+func giveCmdRun(cmd *cobra.Command, args []string) {
+	defer resetGiveCmd(cmd)
+
+	var err error
+	userID := uint64(0)
+	knowUserID := false
+	isGoodResponse := true
+	errors := make([]error, 0)
+
+	slices.Sort(orders)
+	orders = slices.Compact(orders)
+
+	for _, orderID := range orders {
+		userID, knowUserID, err = giveCheckOrder(uint64(orderID), userID, knowUserID)
+		if err != nil {
+			errors = append(errors, err)
+			isGoodResponse = false
+		}
+	}
+
+	giveCmdProcess(isGoodResponse, errors)
 }

@@ -83,6 +83,30 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 	}
 }
 
+func acceptRefundCheckErr(order storage.OrderStatus) error {
+	if order.Status != storage.StatusGiveClient {
+		return fmt.Errorf("can not refund order %d: status = %s", orderID, order.Status)
+	}
+
+	if userID != order.UserID {
+		return fmt.Errorf("can not refund order %d: wrong userID", orderID)
+	}
+
+	issuedDate, err := time.Parse("02-01-2006", order.Date)
+	if err != nil {
+		return err
+	}
+
+	issuedDate = issuedDate.Add(2 * 24 * time.Hour)
+	currentDate := utils.CurrentDate()
+
+	if currentDate.After(issuedDate) {
+		return fmt.Errorf("2 days have passed since the order was issued to the client")
+	}
+
+	return nil
+}
+
 func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 	defer resetRefundFlags(cmd)
 
@@ -92,27 +116,8 @@ func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	if order.Status != storage.StatusGiveClient {
-		fmt.Printf("can not refund order %d: status = %s\n", orderID, order.Status)
-		return
-	}
-
-	if userID != order.UserID {
-		fmt.Printf("can not refund order %d: wrong userID\n", orderID)
-		return
-	}
-
-	issuedDate, err := time.Parse("02-01-2006", order.Date)
-	if err != nil {
+	if err = acceptRefundCheckErr(order); err != nil {
 		fmt.Println(err)
-		return
-	}
-
-	issuedDate = issuedDate.Add(2 * 24 * time.Hour)
-	currentDate := utils.CurrentDate()
-
-	if currentDate.After(issuedDate) {
-		fmt.Println("2 days have passed since the order was issued to the client")
 		return
 	}
 
