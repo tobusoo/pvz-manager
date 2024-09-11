@@ -8,7 +8,7 @@ import (
 	"strings"
 	"syscall"
 
-	"gitlab.ozon.dev/chppppr/homework/cmd"
+	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
 )
 
