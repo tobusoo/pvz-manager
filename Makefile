@@ -15,7 +15,7 @@ APP_PATH_BIN=$(BIN_DIR)/$(APP_NAME)
 all: build
 
 run: build
-	./$(APP_NAME)
+	./$(APP_PATH_BIN)
 
 build: dependancy-install mkdir-bin $(APP_PATH_BIN) gocyclo gocognit
 
@@ -50,7 +50,7 @@ depgraph-install:
 	@go install github.com/kisielk/godepgraph@latest
 
 depgraph-build:
-	$(GODEPGRAPH_PATH) -s main.go | dot -Tpng -o godepgraph.png
+	$(GODEPGRAPH_PATH) -s $(APP_PATH_SRC) | dot -Tpng -o godepgraph.png
 
 depgraph: depgraph-install depgraph-build
 
