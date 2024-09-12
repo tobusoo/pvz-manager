@@ -39,9 +39,15 @@ func RunInteractive() {
 }
 
 func main() {
-	storage, err := storage.NewStorage("storage.json")
+	ordersHistoryRep := storage.NewOrdersHistory()
+	refundsRep := storage.NewRefunds()
+	usersRep := storage.NewUsers()
+	storagePath := "storage.json"
+
+	storage, err := storage.NewStorage(ordersHistoryRep, refundsRep, usersRep, storagePath)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	defer storage.Save()
 

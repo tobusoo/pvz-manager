@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/domain"
+	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
@@ -35,12 +36,17 @@ var (
 			cmd.Usage()
 		},
 	}
+
+	cost, weight   uint64
+	containerType  string
+	useTape        bool
 	acceptOrderCmd = &cobra.Command{
 		Use:   "order",
 		Short: "Accept order",
 		Long:  "Accept order",
 		Run:   acceptOrderCmdRun,
 	}
+
 	acceptRefundCmd = &cobra.Command{
 		Use:   "refund",
 		Short: "Accept refund",
@@ -59,8 +65,33 @@ func resetRefundFlags(cmd *cobra.Command) {
 
 func resetOrderFlags(cmd *cobra.Command) {
 	resetRefundFlags(cmd)
+
+	cmd.PersistentFlags().Uint64VarP(&cost, "cost", "c", 0, "cost in rubles (required)")
+	cmd.PersistentFlags().Uint64VarP(&weight, "weight", "w", 0, "weight in grams (required)")
 	cmd.PersistentFlags().StringVarP(&expirationDate, "time", "t", "", "Expiration Date (required)")
+	cmd.MarkPersistentFlagRequired("cost")
+	cmd.MarkPersistentFlagRequired("weight")
 	cmd.MarkPersistentFlagRequired("time")
+
+	cmd.PersistentFlags().StringVarP(&containerType, "containerType", "p", "", "containerType (tape, package, box)")
+	cmd.PersistentFlags().BoolVarP(&useTape, "useTape", "s", false, "use additional tape")
+}
+
+func generateOrder(expDate string) (*domain.Order, error) {
+	var cs strategy.ContainerStrategy
+	cs, ok := strategy.ContainerTypeMap[containerType]
+	if !ok {
+		return nil, fmt.Errorf("%s isn't container type", containerType)
+	}
+
+	if useTape {
+		err := cs.UseTape()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return domain.NewOrder(cost, weight, expDate, cs)
 }
 
 func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
@@ -78,13 +109,19 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	if err := st.AddOrder(userID, orderID, expDate.Format("02-01-2006")); err != nil {
+	order, err := generateOrder(expDate.Format("02-01-2006"))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if err = st.AddOrder(userID, orderID, order); err != nil {
 		fmt.Println(err)
 	}
 }
 
-func acceptRefundCheckErr(order storage.OrderStatus) error {
-	if order.Status != storage.StatusGiveClient {
+func acceptRefundCheckErr(order *domain.OrderStatus) error {
+	if order.Status != domain.StatusGiveClient {
 		return fmt.Errorf("can not refund order %d: status = %s", orderID, order.Status)
 	}
 
@@ -121,7 +158,12 @@ func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	if err = st.AddRefund(orderID); err != nil {
+	if err = st.AddRefund(order.UserID, orderID, order.Order); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if err = st.SetOrderStatus(orderID, domain.StatusReturned); err != nil {
 		fmt.Println(err)
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"slices"
 
 	"github.com/spf13/cobra"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
@@ -36,12 +36,12 @@ func resetGiveCmd(cmd *cobra.Command) {
 	cmd.MarkPersistentFlagRequired("orders")
 }
 
-func giveCheckErr(userID, orderID uint64, status storage.OrderStatus) error {
+func giveCheckErr(userID, orderID uint64, status *domain.OrderStatus) error {
 	if status.UserID != userID {
 		return fmt.Errorf("can't give order %d: different userID", orderID)
 	}
 
-	if status.Status != storage.StatusAccepted {
+	if status.Status != domain.StatusAccepted {
 		return fmt.Errorf("can't give order %d: status = %s", orderID, status.Status)
 	}
 
@@ -60,7 +60,7 @@ func giveCheckErr(userID, orderID uint64, status storage.OrderStatus) error {
 func giveCmdProcess(isGoodResponse bool, errors []error) {
 	if isGoodResponse {
 		for _, order := range orders {
-			st.RemoveOrder(uint64(order), storage.StatusGiveClient)
+			st.RemoveOrder(uint64(order), domain.StatusGiveClient)
 		}
 	} else {
 		fmt.Println("request was not done because:")

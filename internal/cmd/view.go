@@ -90,9 +90,9 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 		Inactive: "  {{.OrderID | cyan}}",
 		Selected: " ",
 		Details: `-----Order-----
-{{ "OrderID:" | faint }}  {{ .OrderID }}
-{{ "UserID:" | faint }}  {{ .UserID }}
-{{ "Date of refund: " | faint }}  {{ .ExpirationDate }}`,
+{{ "OrderID:" | faint }}  {{ .OrderID }} {{ "UserID:" | faint }}  {{ .UserID }}
+{{"Cost:" | faint }} {{ .Cost }}rub {{"Weight:" | faint }} {{ .Weight }}gr
+{{ "Date of refund: " | faint }}  {{ .ExpirationDate }} {{ "Package Type:" | faint }} {{ .PackageType }}`,
 	}
 
 	promt := promptui.Select{
@@ -127,8 +127,8 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 		Inactive: "  {{.OrderID | cyan}}",
 		Selected: " ",
 		Details: `-----Order-----
-{{ "OrderID:" | faint }}  {{ .OrderID }}
-{{ "Expiration date: " | faint }}  {{ .ExpirationDate }}`,
+{{ "OrderID:" | faint }}  {{ .OrderID }} {{"Cost:" | faint }} {{ .Cost }}rub {{"Weight:" | faint }} {{ .Weight }}gr
+{{ "Expiration date:" | faint }} {{ .ExpirationDate }} {{ "Package Type:" | faint }} {{ .PackageType }}`,
 	}
 
 	promt := promptui.Select{
