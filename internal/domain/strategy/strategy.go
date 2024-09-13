@@ -15,7 +15,7 @@ const (
 )
 
 var ContainerTypeMap = map[string]ContainerStrategy{
-	"":        &DefaultCotainerStrategy{},
+	"":        &DefaultContainerStrategy{},
 	"package": &PackageStrategy{},
 	"box":     &BoxStrategy{},
 	"tape":    &TapeStrategy{},
@@ -28,21 +28,21 @@ type ContainerStrategy interface {
 	CalculateCost(weight, cost uint64) (uint64, error)
 }
 
-type DefaultCotainerStrategy struct{}
+type DefaultContainerStrategy struct{}
 
-func (s *DefaultCotainerStrategy) Type() string {
+func (s *DefaultContainerStrategy) Type() string {
 	return "default"
 }
 
-func (s *DefaultCotainerStrategy) UseTape() error {
+func (s *DefaultContainerStrategy) UseTape() error {
 	return nil
 }
 
-func (s *DefaultCotainerStrategy) IsTaped() bool {
+func (s *DefaultContainerStrategy) IsTaped() bool {
 	return false
 }
 
-func (s *DefaultCotainerStrategy) CalculateCost(weight, cost uint64) (uint64, error) {
+func (s *DefaultContainerStrategy) CalculateCost(weight, cost uint64) (uint64, error) {
 	return cost, nil
 }
 

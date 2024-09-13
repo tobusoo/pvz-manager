@@ -74,7 +74,15 @@ func resetOrderFlags(cmd *cobra.Command) {
 	cmd.MarkPersistentFlagRequired("time")
 
 	cmd.PersistentFlags().StringVarP(&containerType, "containerType", "p", "", "containerType (tape, package, box)")
-	cmd.PersistentFlags().BoolVarP(&useTape, "useTape", "s", false, "use additional tape")
+	cmd.PersistentFlags().BoolVarP(&useTape, "useTape", "s", false, "use additional tape (containerType must be defined)")
+}
+
+func addAdditionalTape(cs strategy.ContainerStrategy) error {
+	if containerType == "" {
+		return fmt.Errorf("can't use additional tape: containerType must be defined")
+	}
+
+	return cs.UseTape()
 }
 
 func generateOrder(expDate string) (*domain.Order, error) {
@@ -85,7 +93,7 @@ func generateOrder(expDate string) (*domain.Order, error) {
 	}
 
 	if useTape {
-		err := cs.UseTape()
+		err := addAdditionalTape(cs)
 		if err != nil {
 			return nil, err
 		}
