@@ -8,9 +8,14 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
 )
+
+func init() {
+	_ = godotenv.Load()
+}
 
 func RunWithExit() {
 	if err := cmd.Execute(); err != nil {
@@ -43,6 +48,9 @@ func main() {
 	refundsRep := storage.NewRefunds()
 	usersRep := storage.NewUsers()
 	storagePath := "storage.json"
+	if envStoragePath, ok := os.LookupEnv("STORAGE_PATH"); ok {
+		storagePath = envStoragePath
+	}
 
 	storage, err := storage.NewStorage(ordersHistoryRep, refundsRep, usersRep, storagePath)
 	if err != nil {
