@@ -2,11 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/spf13/cobra"
-	"gitlab.ozon.dev/chppppr/homework/internal/domain"
-	"gitlab.ozon.dev/chppppr/homework/internal/utils"
+	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 )
 
 func init() {
@@ -30,42 +28,14 @@ func resetReturnFlags(cmd *cobra.Command) {
 	cmd.MarkPersistentFlagRequired("orderID")
 }
 
-func returnAccepted(order *domain.OrderStatus) error {
-	expDate, err := st.GetExpirationDate(order.UserID, orderID)
-	if err != nil {
-		return err
-	}
-
-	if expDate.Add(24 * time.Hour).After(utils.CurrentDate()) {
-		return fmt.Errorf("can't return order %d: expiration date hasn't expired yet", orderID)
-	}
-
-	if err = st.RemoveOrder(orderID, domain.StatusGiveCourier); err != nil {
-		fmt.Println(err)
-	}
-
-	return nil
-}
-
 func returnCmdRun(cmd *cobra.Command, args []string) {
 	defer resetReturnFlags(cmd)
 
-	order, err := st.GetOrderStatus(orderID)
-	if err != nil {
-		fmt.Println(err)
-		return
+	req := &dto.ReturnRequest{
+		OrderID: orderID,
 	}
 
-	switch order.Status {
-	case domain.StatusReturned:
-		st.RemoveRefund(orderID)
-		st.SetOrderStatus(orderID, domain.StatusGiveCourier)
-
-	case domain.StatusAccepted:
-		if err := returnAccepted(order); err != nil {
-			fmt.Println(err)
-		}
-	default:
-		fmt.Printf("can't return order %d: status = %s\n", orderID, order.Status)
+	if err := returnUsecase.Return(req); err != nil {
+		fmt.Println(err)
 	}
 }

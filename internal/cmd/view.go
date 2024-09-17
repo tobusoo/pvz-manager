@@ -6,6 +6,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 )
 
 func init() {
@@ -39,15 +40,13 @@ var (
 		},
 	}
 
-	pageID, ordersPerPage uint64
-	viewRefundCmd         = &cobra.Command{
+	viewRefundCmd = &cobra.Command{
 		Use:   "refund",
 		Short: "View refunds",
 		Long:  "View refunds",
 		Run:   viewRefundCmdRun,
 	}
 
-	ordersLimit  uint64
 	viewOrderCmd = &cobra.Command{
 		Use:   "order",
 		Short: "View orders",
@@ -72,15 +71,14 @@ func resetViewRefundFlags(cmd *cobra.Command) {
 
 func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 	defer resetViewRefundFlags(cmd)
-	refunds, err := st.GetRefunds(pageID, ordersPerPage)
-	if err != nil {
-		fmt.Printf("error while view refund: %s\n", err)
-		return
+	req := &dto.ViewRefundsRequest{
+		PageID:        pageID,
+		OrdersPerPage: ordersPerPage,
 	}
 
-	if len(refunds) == 0 {
-		fmt.Printf("there are no refunds for page ")
-		fmt.Printf("%d with ordersPerPage equal to %d\n", pageID, ordersPerPage)
+	refunds, err := viewUsecase.GetRefunds(req)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
@@ -110,14 +108,16 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 
 func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 	defer resetViewOrderFlags(cmd)
-	orders, err := st.GetOrdersByUserID(userID, orderID, ordersLimit)
-	if err != nil {
-		fmt.Println(err)
-		return
+
+	req := &dto.ViewOrdersRequest{
+		UserID:       userID,
+		FirstOrderID: orderID,
+		OrdersLimit:  ordersLimit,
 	}
 
-	if len(orders) == 0 {
-		fmt.Printf("User %d doesn't have orders\n", userID)
+	orders, err := viewUsecase.GetOrders(req)
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
