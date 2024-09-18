@@ -70,7 +70,7 @@ func acceptRefundCheckErr(req *dto.RefundRequest, order *domain.OrderStatus) err
 	}
 
 	if req.UserID != order.UserID {
-		return fmt.Errorf("can not refund order %d: wrong userID", req.OrderID)
+		return fmt.Errorf("can not refund order %d: wrong userID %d; want %d", req.OrderID, req.UserID, order.UserID)
 	}
 
 	issuedDate, err := time.Parse("02-01-2006", order.Date)
