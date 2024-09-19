@@ -45,7 +45,7 @@ func (u *ReturnUsecase) Return(req *dto.ReturnRequest) error {
 	case domain.StatusAccepted:
 		return u.returnAccepted(req.OrderID, order)
 	default:
-		fmt.Printf("can't return order %d: status = %s\n", req.OrderID, order.Status)
+		return fmt.Errorf("can't return order %d: status = %s", req.OrderID, order.Status)
 	}
 
 	return nil

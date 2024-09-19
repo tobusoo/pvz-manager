@@ -50,6 +50,9 @@ func TestAcceptUsecase_AcceptOrder(t *testing.T) {
 
 	ctrl := minimock.NewController(t)
 
+	m := newMocks(ctrl)
+	u := newAcceptUsecase(m)
+
 	td := map[string]TestData{
 		"SuccessAccept": {
 			req: &dto.AddOrderRequest{
@@ -109,67 +112,67 @@ func TestAcceptUsecase_AcceptOrder(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		prepare func(m *mocks)
+		prepare func()
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name: "SuccessAccept",
 			args: args{td["SuccessAccept"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 				data := td["SuccessAccept"]
 				req := data.req
 				order := data.order
 
-				m.ohp.GetOrderStatusMock.Expect(req.UserID).Return(nil, fmt.Errorf("order %d not found", req.UserID))
-				m.up.AddOrderMock.Expect(req.UserID, req.OrderID, order).Return(nil)
-				m.ohp.AddOrderStatusMock.Expect(req.OrderID, req.UserID, domain.StatusAccepted, order).Return(nil)
+				m.ohp.GetOrderStatusMock.When(req.UserID).Then(nil, fmt.Errorf("order %d not found", req.UserID))
+				m.up.AddOrderMock.When(req.UserID, req.OrderID, order).Then(nil)
+				m.ohp.AddOrderStatusMock.When(req.OrderID, req.UserID, domain.StatusAccepted, order).Then(nil)
 			},
 			wantErr: assert.NoError,
 		},
 		{
 			name: "ExpirationDateWrongFormat",
 			args: args{td["ExpirationDateWrongFormat"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 			},
 			wantErr: assert.Error,
 		},
 		{
 			name: "ExpiraionDatePassed",
 			args: args{td["ExpiraionDatePassed"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 			},
 			wantErr: assert.Error,
 		},
 		{
 			name: "WrongContainerType",
 			args: args{td["WrongContainerType"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 			},
 			wantErr: assert.Error,
 		},
 		{
 			name: "UsingTwoTape",
 			args: args{td["UsingTwoTape"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 			},
 			wantErr: assert.Error,
 		},
 		{
 			name: "UsingTapeWithoutContainer",
 			args: args{td["UsingTapeWithoutContainer"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 			},
 			wantErr: assert.Error,
 		},
 	}
 
 	for _, tt := range tests {
+		tt.prepare()
+	}
+
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			mocks := newMocks(ctrl)
-			tt.prepare(mocks)
-			u := newAcceptUsecase(mocks)
 
 			err := u.AcceptOrder(tt.args.req)
 			tt.wantErr(t, err)
@@ -190,6 +193,8 @@ func TestAcceptUsecase_AcceptRefund(t *testing.T) {
 	)
 
 	ctrl := minimock.NewController(t)
+	m := newMocks(ctrl)
+	u := newAcceptUsecase(m)
 
 	td := map[string]TestData{
 		"SuccessRefund": {
@@ -242,68 +247,68 @@ func TestAcceptUsecase_AcceptRefund(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		prepare func(m *mocks)
+		prepare func()
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
 			name: "SuccessRefund",
 			args: args{td["SuccessRefund"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 				data := td["SuccessRefund"]
 				req := data.req
 				orderStat := data.order
 
-				m.ohp.GetOrderStatusMock.Expect(req.OrderID).Return(orderStat, nil)
-				m.rp.AddRefundMock.Expect(req.UserID, req.OrderID, orderStat.Order).Return(nil)
-				m.ohp.SetOrderStatusMock.Expect(req.OrderID, domain.StatusReturned).Return(nil)
+				m.ohp.GetOrderStatusMock.When(req.OrderID).Then(orderStat, nil)
+				m.rp.AddRefundMock.When(req.UserID, req.OrderID, orderStat.Order).Then(nil)
+				m.ohp.SetOrderStatusMock.When(req.OrderID, domain.StatusReturned).Then(nil)
 			},
 			wantErr: assert.NoError,
 		},
 		{
 			name: "WrongOrderStatus",
 			args: args{td["WrongOrderStatus"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 				data := td["WrongOrderStatus"]
 				req := data.req
 				orderStat := data.order
 
-				m.ohp.GetOrderStatusMock.Expect(req.OrderID).Return(orderStat, nil)
+				m.ohp.GetOrderStatusMock.When(req.OrderID).Then(orderStat, nil)
 			},
 			wantErr: assert.Error,
 		},
 		{
 			name: "WrongUserID",
 			args: args{td["WrongUserID"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 				data := td["WrongUserID"]
 				req := data.req
 				orderStat := data.order
 
-				m.ohp.GetOrderStatusMock.Expect(req.OrderID).Return(orderStat, nil)
+				m.ohp.GetOrderStatusMock.When(req.OrderID).Then(orderStat, nil)
 			},
 			wantErr: assert.Error,
 		},
 		{
 			name: "2DaysHavePassedSinceIssuedToClient",
 			args: args{td["2DaysHavePassedSinceIssuedToClient"].req},
-			prepare: func(m *mocks) {
+			prepare: func() {
 				data := td["2DaysHavePassedSinceIssuedToClient"]
 				req := data.req
 				orderStat := data.order
 
-				m.ohp.GetOrderStatusMock.Expect(req.OrderID).Return(orderStat, nil)
+				m.ohp.GetOrderStatusMock.When(req.OrderID).Then(orderStat, nil)
 			},
 			wantErr: assert.Error,
 		},
 	}
 
 	for _, tt := range tests {
+		tt.prepare()
+	}
+
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			mocks := newMocks(ctrl)
-			tt.prepare(mocks)
-			u := newAcceptUsecase(mocks)
 
 			err := u.AcceptRefund(tt.args.req)
 			tt.wantErr(t, err)

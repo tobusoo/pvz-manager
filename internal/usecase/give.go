@@ -53,20 +53,18 @@ func (u *GiveUsecase) giveCheckOrder(orderID, userID uint64, knowUserID bool) (u
 	return userID, knowUserID, u.giveCheckErr(userID, orderID, status)
 }
 
-func (u *GiveUsecase) giveProcess(orders []uint, isGoodResponse bool, errors []error) {
+func (u *GiveUsecase) giveProcess(orders []uint, isGoodResponse bool, errors []error) []error {
 	if isGoodResponse {
 		for _, order := range orders {
 			u.st.RemoveOrder(uint64(order), domain.StatusGiveClient)
 		}
-	} else {
-		fmt.Println("request was not done because:")
-		for _, err := range errors {
-			fmt.Println(err)
-		}
+		return nil
 	}
+
+	return errors
 }
 
-func (u *GiveUsecase) Give(req *dto.GiveOrdersRequest) error {
+func (u *GiveUsecase) Give(req *dto.GiveOrdersRequest) []error {
 	var err error
 	userID := uint64(0)
 	knowUserID := false
@@ -84,6 +82,5 @@ func (u *GiveUsecase) Give(req *dto.GiveOrdersRequest) error {
 		}
 	}
 
-	u.giveProcess(req.Orders, isGoodResponse, errors)
-	return nil
+	return u.giveProcess(req.Orders, isGoodResponse, errors)
 }

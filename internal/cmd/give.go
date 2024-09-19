@@ -39,7 +39,10 @@ func giveCmdRun(cmd *cobra.Command, args []string) {
 		Orders: orders,
 	}
 
-	if err := giveUsecase.Give(req); err != nil {
-		fmt.Println(err)
+	if errors := giveUsecase.Give(req); errors != nil {
+		fmt.Println("request was not done because:")
+		for _, err := range errors {
+			fmt.Println(err)
+		}
 	}
 }
