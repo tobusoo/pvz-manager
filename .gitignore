@@ -1,3 +1,5 @@
 .vscode/
 bin/
 godepgraph.png
+coverage.out
+coverage.html

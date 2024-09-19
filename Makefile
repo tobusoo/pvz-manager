@@ -10,12 +10,18 @@ APP_NAME=manager
 APP_PATH_SRC=cmd/$(APP_NAME)/main.go
 APP_PATH_BIN=$(BIN_DIR)/$(APP_NAME)
 
-.PHONY: all mkdir-bin run build tidy clean gocyclo gocognit
+.PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
 
 all: build
 
 run: build
 	./$(APP_PATH_BIN)
+
+test: build
+	go test ./internal/usecase/ -coverprofile=coverage.out
+
+coverage: test
+	go tool cover -html=coverage.out -o coverage.html 
 
 build: dependancy-install mkdir-bin $(APP_PATH_BIN) gocyclo gocognit
 
@@ -41,10 +47,10 @@ gocognit-install:
 	@go install github.com/uudashr/gocognit/cmd/gocognit@latest
 
 gocyclo: gocyclo-install
-	$(GOCYCLO_PATH) -over $(THRESHOLD) .
+	$(GOCYCLO_PATH) -over $(THRESHOLD) -ignore "_mock|_test" .
 
 gocognit: gocognit-install
-	$(GOCOGNIT_PATH) -over $(THRESHOLD) .
+	$(GOCOGNIT_PATH) -over $(THRESHOLD) -ignore "_mock|_test" .
 
 depgraph-install:
 	@go install github.com/kisielk/godepgraph@latest
