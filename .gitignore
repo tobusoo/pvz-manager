@@ -1,5 +1,7 @@
 .vscode/
 bin/
 godepgraph.png
+coverage_usecase.out
+coverage_storage.out
 coverage.out
 coverage.html

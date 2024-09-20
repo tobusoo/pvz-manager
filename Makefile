@@ -17,8 +17,19 @@ all: build
 run: build
 	./$(APP_PATH_BIN)
 
-test: build
-	go test ./internal/usecase/ -coverprofile=coverage.out
+unit-test:
+	@echo "Unit Tests:"
+	@go test ./internal/usecase/ -coverprofile=coverage_usecase.out
+
+integration-test:
+	@echo "Integration Tests:"
+	@go test -coverpkg=./internal/storage -coverprofile=coverage_storage.out ./tests/
+
+test: unit-test integration-test
+	@echo "mode: set" > coverage.out
+	@tail -n +2 coverage_usecase.out >> coverage.out
+	@tail -n +2 coverage_storage.out >> coverage.out
+	@rm coverage_usecase.out coverage_storage.out
 
 coverage: test
 	go tool cover -html=coverage.out -o coverage.html 

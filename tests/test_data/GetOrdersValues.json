@@ -1,0 +1,52 @@
+[
+    {
+        "expirationDate": "10-10-2024",
+        "packageType": "tape",
+        "cost": 101,
+        "weight": 100,
+        "useTape": true,
+        "userID": 1,
+        "orderID": 2,
+        "exist": true
+    },
+    {
+        "expirationDate": "10-10-2024",
+        "packageType": "package",
+        "cost": 105,
+        "weight": 100,
+        "useTape": false,
+        "userID": 1,
+        "orderID": 3,
+        "exist": true
+    },
+    {
+        "expirationDate": "10-10-2024",
+        "packageType": "box",
+        "cost": 120,
+        "weight": 100,
+        "useTape": false,
+        "userID": 1,
+        "orderID": 4,
+        "exist": true
+    },
+    {
+        "expirationDate": "10-10-2024",
+        "packageType": "taped package",
+        "cost": 106,
+        "weight": 100,
+        "useTape": true,
+        "userID": 1,
+        "orderID": 5,
+        "exist": true
+    },
+    {
+        "expirationDate": "10-10-2024",
+        "packageType": "taped box",
+        "cost": 121,
+        "weight": 100,
+        "useTape": true,
+        "userID": 1,
+        "orderID": 6,
+        "exist": true
+    }
+]

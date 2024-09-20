@@ -1,0 +1,354 @@
+{
+    "historyRepository": {
+        "ordersHistory": {
+            "1": {
+                "expirationDate": "10-10-2024",
+                "packageType": "default",
+                "cost": 100,
+                "weight": 100,
+                "useTape": false,
+                "status": "issued to client",
+                "date": "20-09-2024",
+                "userID": 1
+            },
+            "10": {
+                "expirationDate": "10-10-2024",
+                "packageType": "taped box",
+                "cost": 121,
+                "weight": 10000,
+                "useTape": true,
+                "status": "returned",
+                "date": "20-09-2024",
+                "userID": 2
+            },
+            "11": {
+                "expirationDate": "10-10-2024",
+                "packageType": "taped package",
+                "cost": 1007,
+                "weight": 1000,
+                "useTape": true,
+                "status": "returned",
+                "date": "20-09-2024",
+                "userID": 2
+            },
+            "2": {
+                "expirationDate": "10-10-2024",
+                "packageType": "tape",
+                "cost": 101,
+                "weight": 100,
+                "useTape": true,
+                "status": "accepted",
+                "date": "20-09-2024",
+                "userID": 1
+            },
+            "3": {
+                "expirationDate": "10-10-2024",
+                "packageType": "package",
+                "cost": 105,
+                "weight": 100,
+                "useTape": false,
+                "status": "accepted",
+                "date": "20-09-2024",
+                "userID": 1
+            },
+            "4": {
+                "expirationDate": "10-10-2024",
+                "packageType": "box",
+                "cost": 120,
+                "weight": 100,
+                "useTape": false,
+                "status": "accepted",
+                "date": "20-09-2024",
+                "userID": 1
+            },
+            "5": {
+                "expirationDate": "10-10-2024",
+                "packageType": "taped package",
+                "cost": 106,
+                "weight": 100,
+                "useTape": true,
+                "status": "accepted",
+                "date": "20-09-2024",
+                "userID": 1
+            },
+            "6": {
+                "expirationDate": "10-10-2024",
+                "packageType": "taped box",
+                "cost": 121,
+                "weight": 100,
+                "useTape": true,
+                "status": "accepted",
+                "date": "20-09-2024",
+                "userID": 1
+            },
+            "7": {
+                "expirationDate": "10-10-2024",
+                "packageType": "tape",
+                "cost": 101,
+                "weight": 100,
+                "useTape": true,
+                "status": "returned",
+                "date": "20-09-2024",
+                "userID": 2
+            },
+            "8": {
+                "expirationDate": "10-10-2024",
+                "packageType": "box",
+                "cost": 120,
+                "weight": 100,
+                "useTape": false,
+                "status": "returned",
+                "date": "20-09-2024",
+                "userID": 2
+            },
+            "9": {
+                "expirationDate": "10-10-2024",
+                "packageType": "taped package",
+                "cost": 106,
+                "weight": 100,
+                "useTape": true,
+                "status": "returned",
+                "date": "20-09-2024",
+                "userID": 2
+            }
+        }
+    },
+    "refundsRepository": {
+        "orders": [
+            {
+                "expirationDate": "10-10-2024",
+                "packageType": "tape",
+                "cost": 101,
+                "weight": 100,
+                "useTape": true,
+                "userID": 2,
+                "orderID": 7,
+                "exist": true
+            },
+            {
+                "expirationDate": "10-10-2024",
+                "packageType": "box",
+                "cost": 120,
+                "weight": 100,
+                "useTape": false,
+                "userID": 2,
+                "orderID": 8,
+                "exist": true
+            },
+            {
+                "expirationDate": "10-10-2024",
+                "packageType": "taped package",
+                "cost": 106,
+                "weight": 100,
+                "useTape": true,
+                "userID": 2,
+                "orderID": 9,
+                "exist": true
+            },
+            {
+                "expirationDate": "10-10-2024",
+                "packageType": "taped box",
+                "cost": 121,
+                "weight": 10000,
+                "useTape": true,
+                "userID": 2,
+                "orderID": 10,
+                "exist": true
+            },
+            {
+                "expirationDate": "10-10-2024",
+                "packageType": "taped package",
+                "cost": 1007,
+                "weight": 1000,
+                "useTape": true,
+                "userID": 2,
+                "orderID": 11,
+                "exist": true
+            }
+        ],
+        "ordersIDatArray": {
+            "10": 3,
+            "11": 4,
+            "7": 0,
+            "8": 1,
+            "9": 2
+        }
+    },
+    "usersRepository": {
+        "users": {
+            "1": {
+                "orders": {
+                    "2": {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "tape",
+                        "cost": 101,
+                        "weight": 100,
+                        "useTape": true
+                    },
+                    "3": {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "package",
+                        "cost": 105,
+                        "weight": 100,
+                        "useTape": false
+                    },
+                    "4": {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "box",
+                        "cost": 120,
+                        "weight": 100,
+                        "useTape": false
+                    },
+                    "5": {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "taped package",
+                        "cost": 106,
+                        "weight": 100,
+                        "useTape": true
+                    },
+                    "6": {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "taped box",
+                        "cost": 121,
+                        "weight": 100,
+                        "useTape": true
+                    }
+                },
+                "ordersArray": [
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "default",
+                        "cost": 100,
+                        "weight": 100,
+                        "useTape": false,
+                        "userID": 1,
+                        "orderID": 1,
+                        "exist": false
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "tape",
+                        "cost": 101,
+                        "weight": 100,
+                        "useTape": true,
+                        "userID": 1,
+                        "orderID": 2,
+                        "exist": true
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "package",
+                        "cost": 105,
+                        "weight": 100,
+                        "useTape": false,
+                        "userID": 1,
+                        "orderID": 3,
+                        "exist": true
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "box",
+                        "cost": 120,
+                        "weight": 100,
+                        "useTape": false,
+                        "userID": 1,
+                        "orderID": 4,
+                        "exist": true
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "taped package",
+                        "cost": 106,
+                        "weight": 100,
+                        "useTape": true,
+                        "userID": 1,
+                        "orderID": 5,
+                        "exist": true
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "taped box",
+                        "cost": 121,
+                        "weight": 100,
+                        "useTape": true,
+                        "userID": 1,
+                        "orderID": 6,
+                        "exist": true
+                    }
+                ],
+                "ordersIDatArray": {
+                    "1": 0,
+                    "2": 1,
+                    "3": 2,
+                    "4": 3,
+                    "5": 4,
+                    "6": 5
+                },
+                "userID": 1
+            },
+            "2": {
+                "orders": {},
+                "ordersArray": [
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "tape",
+                        "cost": 101,
+                        "weight": 100,
+                        "useTape": true,
+                        "userID": 2,
+                        "orderID": 7,
+                        "exist": false
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "box",
+                        "cost": 120,
+                        "weight": 100,
+                        "useTape": false,
+                        "userID": 2,
+                        "orderID": 8,
+                        "exist": false
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "taped package",
+                        "cost": 106,
+                        "weight": 100,
+                        "useTape": true,
+                        "userID": 2,
+                        "orderID": 9,
+                        "exist": false
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "taped box",
+                        "cost": 121,
+                        "weight": 10000,
+                        "useTape": true,
+                        "userID": 2,
+                        "orderID": 10,
+                        "exist": false
+                    },
+                    {
+                        "expirationDate": "10-10-2024",
+                        "packageType": "taped package",
+                        "cost": 1007,
+                        "weight": 1000,
+                        "useTape": true,
+                        "userID": 2,
+                        "orderID": 11,
+                        "exist": false
+                    }
+                ],
+                "ordersIDatArray": {
+                    "10": 3,
+                    "11": 4,
+                    "7": 0,
+                    "8": 1,
+                    "9": 2
+                },
+                "userID": 2
+            }
+        }
+    }
+}
