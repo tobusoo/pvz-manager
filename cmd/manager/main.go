@@ -17,11 +17,12 @@ func init() {
 	_ = godotenv.Load()
 }
 
-func RunWithExit() {
+func RunWithExit(st *storage.Storage) {
 	if err := cmd.Execute(); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
+
+	st.Save()
 	os.Exit(0)
 }
 
@@ -72,7 +73,7 @@ func main() {
 	}()
 
 	if len(os.Args[1:]) > 0 {
-		RunWithExit()
+		RunWithExit(storage)
 	}
 
 	RunInteractive()

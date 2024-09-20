@@ -11,7 +11,7 @@ APP_PATH_SRC=cmd/$(APP_NAME)/main.go
 APP_PATH_BIN=$(BIN_DIR)/$(APP_NAME)
 
 .PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
-.PHONY: unit-test integration-test benchmark
+.PHONY: unit-test integration-test e2e-test benchmark
 
 all: build
 
@@ -26,7 +26,11 @@ integration-test:
 	@echo "Integration Tests:"
 	@go test -coverpkg=./internal/storage -coverprofile=coverage_storage.out ./tests/
 
-test: unit-test integration-test
+e2e-test:
+	@echo "E2E Tests:"
+	@go test tests/e2e_test.go
+
+test: unit-test integration-test e2e-test
 	@echo "mode: set" > coverage.out
 	@tail -n +2 coverage_usecase.out >> coverage.out
 	@tail -n +2 coverage_storage.out >> coverage.out
