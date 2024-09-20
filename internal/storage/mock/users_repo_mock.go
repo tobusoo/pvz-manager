@@ -2,7 +2,7 @@
 
 package mock
 
-//go:generate minimock -i gitlab.ozon.dev/chppppr/homework/internal/storage.UsersRepository -o users_repo.go -n UsersRepositoryMock -p mock
+//go:generate minimock -i gitlab.ozon.dev/chppppr/homework/internal/storage.UsersRepository -o users_repo_mock.go -n UsersRepositoryMock -p mock
 
 import (
 	"sync"
@@ -40,6 +40,13 @@ type UsersRepositoryMock struct {
 	beforeGetExpirationDateCounter uint64
 	GetExpirationDateMock          mUsersRepositoryMockGetExpirationDate
 
+	funcGetOrder          func(userID uint64, orderID uint64) (op1 *domain.Order, err error)
+	funcGetOrderOrigin    string
+	inspectFuncGetOrder   func(userID uint64, orderID uint64)
+	afterGetOrderCounter  uint64
+	beforeGetOrderCounter uint64
+	GetOrderMock          mUsersRepositoryMockGetOrder
+
 	funcGetOrders          func(userID uint64, firstOrderID uint64, limit uint64) (oa1 []domain.OrderView, err error)
 	funcGetOrdersOrigin    string
 	inspectFuncGetOrders   func(userID uint64, firstOrderID uint64, limit uint64)
@@ -71,6 +78,9 @@ func NewUsersRepositoryMock(t minimock.Tester) *UsersRepositoryMock {
 
 	m.GetExpirationDateMock = mUsersRepositoryMockGetExpirationDate{mock: m}
 	m.GetExpirationDateMock.callArgs = []*UsersRepositoryMockGetExpirationDateParams{}
+
+	m.GetOrderMock = mUsersRepositoryMockGetOrder{mock: m}
+	m.GetOrderMock.callArgs = []*UsersRepositoryMockGetOrderParams{}
 
 	m.GetOrdersMock = mUsersRepositoryMockGetOrders{mock: m}
 	m.GetOrdersMock.callArgs = []*UsersRepositoryMockGetOrdersParams{}
@@ -1141,6 +1151,349 @@ func (m *UsersRepositoryMock) MinimockGetExpirationDateInspect() {
 	}
 }
 
+type mUsersRepositoryMockGetOrder struct {
+	optional           bool
+	mock               *UsersRepositoryMock
+	defaultExpectation *UsersRepositoryMockGetOrderExpectation
+	expectations       []*UsersRepositoryMockGetOrderExpectation
+
+	callArgs []*UsersRepositoryMockGetOrderParams
+	mutex    sync.RWMutex
+
+	expectedInvocations       uint64
+	expectedInvocationsOrigin string
+}
+
+// UsersRepositoryMockGetOrderExpectation specifies expectation struct of the UsersRepository.GetOrder
+type UsersRepositoryMockGetOrderExpectation struct {
+	mock               *UsersRepositoryMock
+	params             *UsersRepositoryMockGetOrderParams
+	paramPtrs          *UsersRepositoryMockGetOrderParamPtrs
+	expectationOrigins UsersRepositoryMockGetOrderExpectationOrigins
+	results            *UsersRepositoryMockGetOrderResults
+	returnOrigin       string
+	Counter            uint64
+}
+
+// UsersRepositoryMockGetOrderParams contains parameters of the UsersRepository.GetOrder
+type UsersRepositoryMockGetOrderParams struct {
+	userID  uint64
+	orderID uint64
+}
+
+// UsersRepositoryMockGetOrderParamPtrs contains pointers to parameters of the UsersRepository.GetOrder
+type UsersRepositoryMockGetOrderParamPtrs struct {
+	userID  *uint64
+	orderID *uint64
+}
+
+// UsersRepositoryMockGetOrderResults contains results of the UsersRepository.GetOrder
+type UsersRepositoryMockGetOrderResults struct {
+	op1 *domain.Order
+	err error
+}
+
+// UsersRepositoryMockGetOrderOrigins contains origins of expectations of the UsersRepository.GetOrder
+type UsersRepositoryMockGetOrderExpectationOrigins struct {
+	origin        string
+	originUserID  string
+	originOrderID string
+}
+
+// Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
+// the test will fail minimock's automatic final call check if the mocked method was not called at least once.
+// Optional() makes method check to work in '0 or more' mode.
+// It is NOT RECOMMENDED to use this option unless you really need it, as default behaviour helps to
+// catch the problems when the expected method call is totally skipped during test run.
+func (mmGetOrder *mUsersRepositoryMockGetOrder) Optional() *mUsersRepositoryMockGetOrder {
+	mmGetOrder.optional = true
+	return mmGetOrder
+}
+
+// Expect sets up expected params for UsersRepository.GetOrder
+func (mmGetOrder *mUsersRepositoryMockGetOrder) Expect(userID uint64, orderID uint64) *mUsersRepositoryMockGetOrder {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("UsersRepositoryMock.GetOrder mock is already set by Set")
+	}
+
+	if mmGetOrder.defaultExpectation == nil {
+		mmGetOrder.defaultExpectation = &UsersRepositoryMockGetOrderExpectation{}
+	}
+
+	if mmGetOrder.defaultExpectation.paramPtrs != nil {
+		mmGetOrder.mock.t.Fatalf("UsersRepositoryMock.GetOrder mock is already set by ExpectParams functions")
+	}
+
+	mmGetOrder.defaultExpectation.params = &UsersRepositoryMockGetOrderParams{userID, orderID}
+	mmGetOrder.defaultExpectation.expectationOrigins.origin = minimock.CallerInfo(1)
+	for _, e := range mmGetOrder.expectations {
+		if minimock.Equal(e.params, mmGetOrder.defaultExpectation.params) {
+			mmGetOrder.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetOrder.defaultExpectation.params)
+		}
+	}
+
+	return mmGetOrder
+}
+
+// ExpectUserIDParam1 sets up expected param userID for UsersRepository.GetOrder
+func (mmGetOrder *mUsersRepositoryMockGetOrder) ExpectUserIDParam1(userID uint64) *mUsersRepositoryMockGetOrder {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("UsersRepositoryMock.GetOrder mock is already set by Set")
+	}
+
+	if mmGetOrder.defaultExpectation == nil {
+		mmGetOrder.defaultExpectation = &UsersRepositoryMockGetOrderExpectation{}
+	}
+
+	if mmGetOrder.defaultExpectation.params != nil {
+		mmGetOrder.mock.t.Fatalf("UsersRepositoryMock.GetOrder mock is already set by Expect")
+	}
+
+	if mmGetOrder.defaultExpectation.paramPtrs == nil {
+		mmGetOrder.defaultExpectation.paramPtrs = &UsersRepositoryMockGetOrderParamPtrs{}
+	}
+	mmGetOrder.defaultExpectation.paramPtrs.userID = &userID
+	mmGetOrder.defaultExpectation.expectationOrigins.originUserID = minimock.CallerInfo(1)
+
+	return mmGetOrder
+}
+
+// ExpectOrderIDParam2 sets up expected param orderID for UsersRepository.GetOrder
+func (mmGetOrder *mUsersRepositoryMockGetOrder) ExpectOrderIDParam2(orderID uint64) *mUsersRepositoryMockGetOrder {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("UsersRepositoryMock.GetOrder mock is already set by Set")
+	}
+
+	if mmGetOrder.defaultExpectation == nil {
+		mmGetOrder.defaultExpectation = &UsersRepositoryMockGetOrderExpectation{}
+	}
+
+	if mmGetOrder.defaultExpectation.params != nil {
+		mmGetOrder.mock.t.Fatalf("UsersRepositoryMock.GetOrder mock is already set by Expect")
+	}
+
+	if mmGetOrder.defaultExpectation.paramPtrs == nil {
+		mmGetOrder.defaultExpectation.paramPtrs = &UsersRepositoryMockGetOrderParamPtrs{}
+	}
+	mmGetOrder.defaultExpectation.paramPtrs.orderID = &orderID
+	mmGetOrder.defaultExpectation.expectationOrigins.originOrderID = minimock.CallerInfo(1)
+
+	return mmGetOrder
+}
+
+// Inspect accepts an inspector function that has same arguments as the UsersRepository.GetOrder
+func (mmGetOrder *mUsersRepositoryMockGetOrder) Inspect(f func(userID uint64, orderID uint64)) *mUsersRepositoryMockGetOrder {
+	if mmGetOrder.mock.inspectFuncGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("Inspect function is already set for UsersRepositoryMock.GetOrder")
+	}
+
+	mmGetOrder.mock.inspectFuncGetOrder = f
+
+	return mmGetOrder
+}
+
+// Return sets up results that will be returned by UsersRepository.GetOrder
+func (mmGetOrder *mUsersRepositoryMockGetOrder) Return(op1 *domain.Order, err error) *UsersRepositoryMock {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("UsersRepositoryMock.GetOrder mock is already set by Set")
+	}
+
+	if mmGetOrder.defaultExpectation == nil {
+		mmGetOrder.defaultExpectation = &UsersRepositoryMockGetOrderExpectation{mock: mmGetOrder.mock}
+	}
+	mmGetOrder.defaultExpectation.results = &UsersRepositoryMockGetOrderResults{op1, err}
+	mmGetOrder.defaultExpectation.returnOrigin = minimock.CallerInfo(1)
+	return mmGetOrder.mock
+}
+
+// Set uses given function f to mock the UsersRepository.GetOrder method
+func (mmGetOrder *mUsersRepositoryMockGetOrder) Set(f func(userID uint64, orderID uint64) (op1 *domain.Order, err error)) *UsersRepositoryMock {
+	if mmGetOrder.defaultExpectation != nil {
+		mmGetOrder.mock.t.Fatalf("Default expectation is already set for the UsersRepository.GetOrder method")
+	}
+
+	if len(mmGetOrder.expectations) > 0 {
+		mmGetOrder.mock.t.Fatalf("Some expectations are already set for the UsersRepository.GetOrder method")
+	}
+
+	mmGetOrder.mock.funcGetOrder = f
+	mmGetOrder.mock.funcGetOrderOrigin = minimock.CallerInfo(1)
+	return mmGetOrder.mock
+}
+
+// When sets expectation for the UsersRepository.GetOrder which will trigger the result defined by the following
+// Then helper
+func (mmGetOrder *mUsersRepositoryMockGetOrder) When(userID uint64, orderID uint64) *UsersRepositoryMockGetOrderExpectation {
+	if mmGetOrder.mock.funcGetOrder != nil {
+		mmGetOrder.mock.t.Fatalf("UsersRepositoryMock.GetOrder mock is already set by Set")
+	}
+
+	expectation := &UsersRepositoryMockGetOrderExpectation{
+		mock:               mmGetOrder.mock,
+		params:             &UsersRepositoryMockGetOrderParams{userID, orderID},
+		expectationOrigins: UsersRepositoryMockGetOrderExpectationOrigins{origin: minimock.CallerInfo(1)},
+	}
+	mmGetOrder.expectations = append(mmGetOrder.expectations, expectation)
+	return expectation
+}
+
+// Then sets up UsersRepository.GetOrder return parameters for the expectation previously defined by the When method
+func (e *UsersRepositoryMockGetOrderExpectation) Then(op1 *domain.Order, err error) *UsersRepositoryMock {
+	e.results = &UsersRepositoryMockGetOrderResults{op1, err}
+	return e.mock
+}
+
+// Times sets number of times UsersRepository.GetOrder should be invoked
+func (mmGetOrder *mUsersRepositoryMockGetOrder) Times(n uint64) *mUsersRepositoryMockGetOrder {
+	if n == 0 {
+		mmGetOrder.mock.t.Fatalf("Times of UsersRepositoryMock.GetOrder mock can not be zero")
+	}
+	mm_atomic.StoreUint64(&mmGetOrder.expectedInvocations, n)
+	mmGetOrder.expectedInvocationsOrigin = minimock.CallerInfo(1)
+	return mmGetOrder
+}
+
+func (mmGetOrder *mUsersRepositoryMockGetOrder) invocationsDone() bool {
+	if len(mmGetOrder.expectations) == 0 && mmGetOrder.defaultExpectation == nil && mmGetOrder.mock.funcGetOrder == nil {
+		return true
+	}
+
+	totalInvocations := mm_atomic.LoadUint64(&mmGetOrder.mock.afterGetOrderCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmGetOrder.expectedInvocations)
+
+	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
+}
+
+// GetOrder implements mm_storage.UsersRepository
+func (mmGetOrder *UsersRepositoryMock) GetOrder(userID uint64, orderID uint64) (op1 *domain.Order, err error) {
+	mm_atomic.AddUint64(&mmGetOrder.beforeGetOrderCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetOrder.afterGetOrderCounter, 1)
+
+	mmGetOrder.t.Helper()
+
+	if mmGetOrder.inspectFuncGetOrder != nil {
+		mmGetOrder.inspectFuncGetOrder(userID, orderID)
+	}
+
+	mm_params := UsersRepositoryMockGetOrderParams{userID, orderID}
+
+	// Record call args
+	mmGetOrder.GetOrderMock.mutex.Lock()
+	mmGetOrder.GetOrderMock.callArgs = append(mmGetOrder.GetOrderMock.callArgs, &mm_params)
+	mmGetOrder.GetOrderMock.mutex.Unlock()
+
+	for _, e := range mmGetOrder.GetOrderMock.expectations {
+		if minimock.Equal(*e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.op1, e.results.err
+		}
+	}
+
+	if mmGetOrder.GetOrderMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetOrder.GetOrderMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetOrder.GetOrderMock.defaultExpectation.params
+		mm_want_ptrs := mmGetOrder.GetOrderMock.defaultExpectation.paramPtrs
+
+		mm_got := UsersRepositoryMockGetOrderParams{userID, orderID}
+
+		if mm_want_ptrs != nil {
+
+			if mm_want_ptrs.userID != nil && !minimock.Equal(*mm_want_ptrs.userID, mm_got.userID) {
+				mmGetOrder.t.Errorf("UsersRepositoryMock.GetOrder got unexpected parameter userID, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+					mmGetOrder.GetOrderMock.defaultExpectation.expectationOrigins.originUserID, *mm_want_ptrs.userID, mm_got.userID, minimock.Diff(*mm_want_ptrs.userID, mm_got.userID))
+			}
+
+			if mm_want_ptrs.orderID != nil && !minimock.Equal(*mm_want_ptrs.orderID, mm_got.orderID) {
+				mmGetOrder.t.Errorf("UsersRepositoryMock.GetOrder got unexpected parameter orderID, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+					mmGetOrder.GetOrderMock.defaultExpectation.expectationOrigins.originOrderID, *mm_want_ptrs.orderID, mm_got.orderID, minimock.Diff(*mm_want_ptrs.orderID, mm_got.orderID))
+			}
+
+		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetOrder.t.Errorf("UsersRepositoryMock.GetOrder got unexpected parameters, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+				mmGetOrder.GetOrderMock.defaultExpectation.expectationOrigins.origin, *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetOrder.GetOrderMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetOrder.t.Fatal("No results are set for the UsersRepositoryMock.GetOrder")
+		}
+		return (*mm_results).op1, (*mm_results).err
+	}
+	if mmGetOrder.funcGetOrder != nil {
+		return mmGetOrder.funcGetOrder(userID, orderID)
+	}
+	mmGetOrder.t.Fatalf("Unexpected call to UsersRepositoryMock.GetOrder. %v %v", userID, orderID)
+	return
+}
+
+// GetOrderAfterCounter returns a count of finished UsersRepositoryMock.GetOrder invocations
+func (mmGetOrder *UsersRepositoryMock) GetOrderAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetOrder.afterGetOrderCounter)
+}
+
+// GetOrderBeforeCounter returns a count of UsersRepositoryMock.GetOrder invocations
+func (mmGetOrder *UsersRepositoryMock) GetOrderBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetOrder.beforeGetOrderCounter)
+}
+
+// Calls returns a list of arguments used in each call to UsersRepositoryMock.GetOrder.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetOrder *mUsersRepositoryMockGetOrder) Calls() []*UsersRepositoryMockGetOrderParams {
+	mmGetOrder.mutex.RLock()
+
+	argCopy := make([]*UsersRepositoryMockGetOrderParams, len(mmGetOrder.callArgs))
+	copy(argCopy, mmGetOrder.callArgs)
+
+	mmGetOrder.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetOrderDone returns true if the count of the GetOrder invocations corresponds
+// the number of defined expectations
+func (m *UsersRepositoryMock) MinimockGetOrderDone() bool {
+	if m.GetOrderMock.optional {
+		// Optional methods provide '0 or more' call count restriction.
+		return true
+	}
+
+	for _, e := range m.GetOrderMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	return m.GetOrderMock.invocationsDone()
+}
+
+// MinimockGetOrderInspect logs each unmet expectation
+func (m *UsersRepositoryMock) MinimockGetOrderInspect() {
+	for _, e := range m.GetOrderMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to UsersRepositoryMock.GetOrder at\n%s with params: %#v", e.expectationOrigins.origin, *e.params)
+		}
+	}
+
+	afterGetOrderCounter := mm_atomic.LoadUint64(&m.afterGetOrderCounter)
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetOrderMock.defaultExpectation != nil && afterGetOrderCounter < 1 {
+		if m.GetOrderMock.defaultExpectation.params == nil {
+			m.t.Errorf("Expected call to UsersRepositoryMock.GetOrder at\n%s", m.GetOrderMock.defaultExpectation.returnOrigin)
+		} else {
+			m.t.Errorf("Expected call to UsersRepositoryMock.GetOrder at\n%s with params: %#v", m.GetOrderMock.defaultExpectation.expectationOrigins.origin, *m.GetOrderMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetOrder != nil && afterGetOrderCounter < 1 {
+		m.t.Errorf("Expected call to UsersRepositoryMock.GetOrder at\n%s", m.funcGetOrderOrigin)
+	}
+
+	if !m.GetOrderMock.invocationsDone() && afterGetOrderCounter > 0 {
+		m.t.Errorf("Expected %d calls to UsersRepositoryMock.GetOrder at\n%s but found %d calls",
+			mm_atomic.LoadUint64(&m.GetOrderMock.expectedInvocations), m.GetOrderMock.expectedInvocationsOrigin, afterGetOrderCounter)
+	}
+}
+
 type mUsersRepositoryMockGetOrders struct {
 	optional           bool
 	mock               *UsersRepositoryMock
@@ -1867,6 +2220,8 @@ func (m *UsersRepositoryMock) MinimockFinish() {
 
 			m.MinimockGetExpirationDateInspect()
 
+			m.MinimockGetOrderInspect()
+
 			m.MinimockGetOrdersInspect()
 
 			m.MinimockRemoveOrderInspect()
@@ -1896,6 +2251,7 @@ func (m *UsersRepositoryMock) minimockDone() bool {
 		m.MinimockAddOrderDone() &&
 		m.MinimockCanRemoveDone() &&
 		m.MinimockGetExpirationDateDone() &&
+		m.MinimockGetOrderDone() &&
 		m.MinimockGetOrdersDone() &&
 		m.MinimockRemoveOrderDone()
 }

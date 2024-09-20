@@ -2,7 +2,7 @@
 
 package mock
 
-//go:generate minimock -i gitlab.ozon.dev/chppppr/homework/internal/storage.RefundsRepository -o refunds_repo.go -n RefundsRepositoryMock -p mock
+//go:generate minimock -i gitlab.ozon.dev/chppppr/homework/internal/storage.RefundsRepository -o refunds_repo_mock.go -n RefundsRepositoryMock -p mock
 
 import (
 	"sync"

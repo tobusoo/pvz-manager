@@ -2,7 +2,7 @@
 
 package mock
 
-//go:generate minimock -i gitlab.ozon.dev/chppppr/homework/internal/storage.OrdersHistoryRepository -o orders_history.go -n OrdersHistoryRepositoryMock -p mock
+//go:generate minimock -i gitlab.ozon.dev/chppppr/homework/internal/storage.OrdersHistoryRepository -o orders_history_mock.go -n OrdersHistoryRepositoryMock -p mock
 
 import (
 	"sync"

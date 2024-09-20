@@ -24,6 +24,7 @@ type (
 
 	UsersRepository interface {
 		AddOrder(userID, orderID uint64, order *domain.Order) error
+		GetOrder(userID, orderID uint64) (*domain.Order, error)
 		CanRemove(userID, orderID uint64) error
 		RemoveOrder(userID, orderID uint64) error
 		GetExpirationDate(userID, orderID uint64) (time.Time, error)
@@ -98,6 +99,10 @@ func (s *Storage) AddOrder(userID, orderID uint64, order *domain.Order) error {
 	}
 
 	return s.AddOrderStatus(orderID, userID, domain.StatusAccepted, order)
+}
+
+func (s *Storage) GetOrder(userID, orderID uint64) (*domain.Order, error) {
+	return s.Users.GetOrder(userID, orderID)
 }
 
 func (s *Storage) GetExpirationDate(userID, orderID uint64) (time.Time, error) {

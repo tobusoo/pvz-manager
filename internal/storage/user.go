@@ -42,6 +42,15 @@ func (u *User) Add(orderID uint64, order *domain.Order) error {
 	return nil
 }
 
+func (u *User) Get(orderID uint64) (*domain.Order, error) {
+	order, ok := u.Orders[orderID]
+	if !ok {
+		return nil, fmt.Errorf("not found order %d", orderID)
+	}
+
+	return order, nil
+}
+
 func (u *User) CanRemove(orderID uint64) error {
 	_, ok := u.OrdersIDatArray[orderID]
 	if !ok {
