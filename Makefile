@@ -11,6 +11,7 @@ APP_PATH_SRC=cmd/$(APP_NAME)/main.go
 APP_PATH_BIN=$(BIN_DIR)/$(APP_NAME)
 
 .PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
+.PHONY: unit-test integration-test benchmark
 
 all: build
 
@@ -33,6 +34,9 @@ test: unit-test integration-test
 
 coverage: test
 	go tool cover -html=coverage.out -o coverage.html 
+
+benchmark:
+	@go test -bench=. -benchtime=10x  -benchmem ./benchmark/storage_test.go
 
 build: dependancy-install mkdir-bin $(APP_PATH_BIN) gocyclo gocognit
 
