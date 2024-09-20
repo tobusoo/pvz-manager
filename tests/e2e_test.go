@@ -10,6 +10,8 @@ import (
 )
 
 func TestAddOrder(t *testing.T) {
+	t.Parallel()
+
 	expected_output := ""
 	storagePATH := "storage_e2e_add_order.json"
 	defer os.Remove(storagePATH)
@@ -24,13 +26,14 @@ func TestAddOrder(t *testing.T) {
 
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err)
-
 	require.Equal(t, expected_output, string(output))
 }
 
 func TestAddOrderWrongPackageType(t *testing.T) {
+	t.Parallel()
+
 	expected_output := "wrong isn't container type\n"
-	storagePATH := "storage_e2e_add_order.json"
+	storagePATH := "storage_e2e_add_order_wrong_package_type.json"
 	defer os.Remove(storagePATH)
 
 	expDate := utils.CurrentDateString()
@@ -43,11 +46,12 @@ func TestAddOrderWrongPackageType(t *testing.T) {
 
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err)
-
 	require.Equal(t, expected_output, string(output))
 }
 
 func TestGiveOrder(t *testing.T) {
+	t.Parallel()
+
 	expected_output := ""
 	storagePATH := "storage_e2e_give_order.json"
 	defer os.Remove(storagePATH)
@@ -60,7 +64,6 @@ func TestGiveOrder(t *testing.T) {
 
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err)
-
 	require.Equal(t, expected_output, string(output))
 
 	cmd = exec.Command(cmdName, "give", "-o=10")
@@ -69,6 +72,51 @@ func TestGiveOrder(t *testing.T) {
 
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)
+	require.Equal(t, expected_output, string(output))
+}
 
+func TestOrderFullCircle(t *testing.T) {
+	t.Parallel()
+
+	expected_output := ""
+	storagePATH := "storage_e2e_order_full_circle.json"
+	defer os.Remove(storagePATH)
+
+	// Заказ принят
+	expDate := utils.CurrentDateString()
+	cmdName := "../bin/manager"
+	cmd := exec.Command(cmdName, "accept", "order", "-u", "103", "-o", "724", "-c", "9132", "-w", "15433", "-p", "box", "-s", "-t", expDate)
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+
+	output, err := cmd.CombinedOutput()
+	require.NoError(t, err)
+	require.Equal(t, expected_output, string(output))
+
+	// Заказ забрали
+	cmd = exec.Command(cmdName, "give", "-o=724")
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+
+	output, err = cmd.CombinedOutput()
+	require.NoError(t, err)
+	require.Equal(t, expected_output, string(output))
+
+	// Заказ вернули на ПВЗ
+	cmd = exec.Command(cmdName, "accept", "refund", "-u", "103", "-o", "724")
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+
+	output, err = cmd.CombinedOutput()
+	require.NoError(t, err)
+	require.Equal(t, expected_output, string(output))
+
+	// Заказ вернули курьеру
+	cmd = exec.Command(cmdName, "return", "-o", "724")
+	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+
+	output, err = cmd.CombinedOutput()
+	require.NoError(t, err)
 	require.Equal(t, expected_output, string(output))
 }
