@@ -30,6 +30,17 @@ type (
 		GetExpirationDate(userID, orderID uint64) (time.Time, error)
 		GetOrders(userID, firstOrderID, limit uint64) ([]domain.OrderView, error)
 	}
+
+	Storage interface {
+		RefundsRepository
+		OrdersHistoryRepository
+		AddOrder(userID, orderID uint64, order *domain.Order) error
+		GetOrder(userID, orderID uint64) (*domain.Order, error)
+		GetExpirationDate(userID, orderID uint64) (time.Time, error)
+		GetOrdersByUserID(userID, firstOrderID, limit uint64) ([]domain.OrderView, error)
+		CanRemoveOrder(orderID uint64) error
+		RemoveOrder(orderID uint64, status string) error
+	}
 )
 
 type StorageJSON struct {

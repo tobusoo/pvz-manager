@@ -12,10 +12,10 @@ import (
 )
 
 type AcceptUsecase struct {
-	st *storage.StorageJSON
+	st storage.Storage
 }
 
-func NewAcceptUsecase(st *storage.StorageJSON) *AcceptUsecase {
+func NewAcceptUsecase(st storage.Storage) *AcceptUsecase {
 	return &AcceptUsecase{st}
 }
 

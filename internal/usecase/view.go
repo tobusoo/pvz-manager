@@ -9,10 +9,10 @@ import (
 )
 
 type ViewUsecase struct {
-	st *storage.StorageJSON
+	st storage.Storage
 }
 
-func NewViewUsecase(st *storage.StorageJSON) *ViewUsecase {
+func NewViewUsecase(st storage.Storage) *ViewUsecase {
 	return &ViewUsecase{st}
 }
 

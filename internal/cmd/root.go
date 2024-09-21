@@ -24,7 +24,7 @@ func init() {
 }
 
 var (
-	st *storage.StorageJSON
+	st storage.Storage
 
 	acceptUsecase *usecase.AcceptUsecase
 	giveUsecase   *usecase.GiveUsecase
@@ -51,7 +51,7 @@ var (
 	}
 )
 
-func SetStorage(s *storage.StorageJSON) {
+func SetStorage(s storage.Storage) {
 	st = s
 	acceptUsecase = usecase.NewAcceptUsecase(st)
 	giveUsecase = usecase.NewGiveUsecase(st)
