@@ -17,7 +17,7 @@ func init() {
 	_ = godotenv.Load()
 }
 
-func RunWithExit(st *storage.Storage) {
+func RunWithExit(st *storage.StorageJSON) {
 	if err := cmd.Execute(); err != nil {
 		fmt.Println(err)
 	}

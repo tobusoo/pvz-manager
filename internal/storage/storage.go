@@ -32,7 +32,7 @@ type (
 	}
 )
 
-type Storage struct {
+type StorageJSON struct {
 	OrdersHistoryRepository `json:"historyRepository"`
 	RefundsRepository       `json:"refundsRepository"`
 	Users                   UsersRepository `json:"usersRepository"`
@@ -45,8 +45,8 @@ func NewStorage(
 	rp RefundsRepository,
 	up UsersRepository,
 	path string,
-) (*Storage, error) {
-	storage := &Storage{
+) (*StorageJSON, error) {
+	storage := &StorageJSON{
 		OrdersHistoryRepository: ohp,
 		RefundsRepository:       rp,
 		Users:                   up,
@@ -61,7 +61,7 @@ func NewStorage(
 	return storage, nil
 }
 
-func (s *Storage) readDataFromFile() (err error) {
+func (s *StorageJSON) readDataFromFile() (err error) {
 	file, err := os.OpenFile(s.path, os.O_RDWR, 0666)
 	if err != nil {
 		file, err = os.Create(s.path)
@@ -75,7 +75,7 @@ func (s *Storage) readDataFromFile() (err error) {
 	return
 }
 
-func (s *Storage) Save() (err error) {
+func (s *StorageJSON) Save() (err error) {
 	file, err := os.OpenFile(s.path, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
 		return
@@ -87,7 +87,7 @@ func (s *Storage) Save() (err error) {
 	return
 }
 
-func (s *Storage) AddOrder(userID, orderID uint64, order *domain.Order) error {
+func (s *StorageJSON) AddOrder(userID, orderID uint64, order *domain.Order) error {
 	stat, err := s.GetOrderStatus(orderID)
 	if err == nil {
 		return fmt.Errorf("order %d has already been %s", orderID, stat.Status)
@@ -101,15 +101,15 @@ func (s *Storage) AddOrder(userID, orderID uint64, order *domain.Order) error {
 	return s.AddOrderStatus(orderID, userID, domain.StatusAccepted, order)
 }
 
-func (s *Storage) GetOrder(userID, orderID uint64) (*domain.Order, error) {
+func (s *StorageJSON) GetOrder(userID, orderID uint64) (*domain.Order, error) {
 	return s.Users.GetOrder(userID, orderID)
 }
 
-func (s *Storage) GetExpirationDate(userID, orderID uint64) (time.Time, error) {
+func (s *StorageJSON) GetExpirationDate(userID, orderID uint64) (time.Time, error) {
 	return s.Users.GetExpirationDate(userID, orderID)
 }
 
-func (s *Storage) GetOrdersByUserID(userID, firstOrderID, limit uint64) ([]domain.OrderView, error) {
+func (s *StorageJSON) GetOrdersByUserID(userID, firstOrderID, limit uint64) ([]domain.OrderView, error) {
 	return s.Users.GetOrders(userID, firstOrderID, limit)
 }
 
@@ -121,7 +121,7 @@ func canRemoveOrderCheckStatus(status string, orderID uint64) error {
 	return nil
 }
 
-func (s *Storage) CanRemoveOrder(orderID uint64) error {
+func (s *StorageJSON) CanRemoveOrder(orderID uint64) error {
 	stat, err := s.GetOrderStatus(orderID)
 	if err != nil {
 		return err
@@ -135,7 +135,7 @@ func (s *Storage) CanRemoveOrder(orderID uint64) error {
 }
 
 // Использовать только перед вызовом CanRemoveOrder!!!
-func (s *Storage) RemoveOrder(orderID uint64, status string) error {
+func (s *StorageJSON) RemoveOrder(orderID uint64, status string) error {
 	stat, _ := s.GetOrderStatus(orderID)
 
 	err := s.Users.RemoveOrder(stat.UserID, orderID)

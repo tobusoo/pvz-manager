@@ -13,7 +13,7 @@ import (
 
 const StoragePath = "storage_bench.json"
 
-func newStorage() (*storage.Storage, error) {
+func newStorage() (*storage.StorageJSON, error) {
 	ohp := storage.NewOrdersHistory()
 	rp := storage.NewRefunds()
 	up := storage.NewUsers()

@@ -12,7 +12,7 @@ import (
 )
 
 func newViewUsecase(mocks *mocks) *ViewUsecase {
-	st := &storage.Storage{
+	st := &storage.StorageJSON{
 		OrdersHistoryRepository: mocks.ohp,
 		RefundsRepository:       mocks.rp,
 		Users:                   mocks.up,

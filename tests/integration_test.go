@@ -14,7 +14,7 @@ import (
 )
 
 func TestSuite(t *testing.T) {
-	suite.Run(t, &storage_suite.StorageSuite{})
+	suite.Run(t, &storage_suite.StorageJSONSuite{})
 }
 
 func TestStorageSuccessAddOrder(t *testing.T) {

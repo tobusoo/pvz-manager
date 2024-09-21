@@ -13,7 +13,7 @@ import (
 )
 
 func newGiveUsecase(mocks *mocks) *GiveUsecase {
-	st := &storage.Storage{
+	st := &storage.StorageJSON{
 		OrdersHistoryRepository: mocks.ohp,
 		RefundsRepository:       mocks.rp,
 		Users:                   mocks.up,

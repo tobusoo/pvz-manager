@@ -11,10 +11,10 @@ import (
 )
 
 type ReturnUsecase struct {
-	st *storage.Storage
+	st *storage.StorageJSON
 }
 
-func NewReturnUsecase(st *storage.Storage) *ReturnUsecase {
+func NewReturnUsecase(st *storage.StorageJSON) *ReturnUsecase {
 	return &ReturnUsecase{st}
 }
 

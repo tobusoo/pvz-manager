@@ -13,7 +13,7 @@ import (
 )
 
 func newReturnUsecase(mocks *mocks) *ReturnUsecase {
-	st := &storage.Storage{
+	st := &storage.StorageJSON{
 		OrdersHistoryRepository: mocks.ohp,
 		RefundsRepository:       mocks.rp,
 		Users:                   mocks.up,

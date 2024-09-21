@@ -13,12 +13,12 @@ import (
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
-type StorageSuite struct {
+type StorageJSONSuite struct {
 	suite.Suite
-	st *storage.Storage
+	st *storage.StorageJSON
 }
 
-func (s *StorageSuite) SetupSuite() {
+func (s *StorageJSONSuite) SetupSuite() {
 	var err error
 	ohp := storage.NewOrdersHistory()
 	rp := storage.NewRefunds()
@@ -28,7 +28,7 @@ func (s *StorageSuite) SetupSuite() {
 	s.Require().NoError(err)
 }
 
-func (s *StorageSuite) TestOrderAlreadyExist() {
+func (s *StorageJSONSuite) TestOrderAlreadyExist() {
 	userID := uint64(101)
 	orderID := uint64(1)
 	cost := uint64(100)
@@ -46,27 +46,27 @@ func (s *StorageSuite) TestOrderAlreadyExist() {
 	s.Require().Error(err)
 }
 
-func (s *StorageSuite) TestSetOrderStatusNotFound() {
+func (s *StorageJSONSuite) TestSetOrderStatusNotFound() {
 	err := s.st.SetOrderStatus(123, domain.StatusAccepted)
 	s.Require().Error(err)
 }
 
-func (s *StorageSuite) TestRemoveOrderWrongStatus() {
+func (s *StorageJSONSuite) TestRemoveOrderWrongStatus() {
 	err := s.st.CanRemoveOrder(1)
 	s.Require().Error(err)
 }
 
-func (s *StorageSuite) TestRemoveOrderWrongOrderID() {
+func (s *StorageJSONSuite) TestRemoveOrderWrongOrderID() {
 	err := s.st.CanRemoveOrder(10101)
 	s.Require().Error(err)
 }
 
-func (s *StorageSuite) TestGetOrderUserNotFound() {
+func (s *StorageJSONSuite) TestGetOrderUserNotFound() {
 	_, err := s.st.GetOrder(10, 10)
 	s.Require().Error(err)
 }
 
-func (s *StorageSuite) TestGetExpirationDateUserNotFound() {
+func (s *StorageJSONSuite) TestGetExpirationDateUserNotFound() {
 	_, err := s.st.GetExpirationDate(10, 10)
 	s.Require().Error(err)
 }
@@ -88,7 +88,7 @@ func readFromGoldenFile(t *testing.T, path string, actual []byte, isUpdate bool)
 	return
 }
 
-func (s *StorageSuite) TestSuccessGetOrders() {
+func (s *StorageJSONSuite) TestSuccessGetOrders() {
 	var expected []domain.OrderView
 	actual, err := s.st.GetOrdersByUserID(1, 2, 0)
 	s.Require().NoError(err)
@@ -112,17 +112,17 @@ func (s *StorageSuite) TestSuccessGetOrders() {
 	s.Equal(expected[1:4], actual)
 }
 
-func (s *StorageSuite) TestGetOrdersUserNotFound() {
+func (s *StorageJSONSuite) TestGetOrdersUserNotFound() {
 	_, err := s.st.GetOrdersByUserID(101, 2, 0)
 	s.Require().Error(err)
 }
 
-func (s *StorageSuite) TestGetOrdersWrongFirstUserID() {
+func (s *StorageJSONSuite) TestGetOrdersWrongFirstUserID() {
 	_, err := s.st.GetOrdersByUserID(1, 101, 0)
 	s.Require().Error(err)
 }
 
-func (s *StorageSuite) TestSuccessGetRefunds() {
+func (s *StorageJSONSuite) TestSuccessGetRefunds() {
 	var expected []domain.OrderView
 	actual, err := s.st.GetRefunds(1, 10)
 	s.Require().NoError(err)
@@ -150,12 +150,12 @@ func (s *StorageSuite) TestSuccessGetRefunds() {
 	s.Equal(expected[2:3], actual)
 }
 
-func (s *StorageSuite) TestRemoveRefundOrderNotFound() {
+func (s *StorageJSONSuite) TestRemoveRefundOrderNotFound() {
 	err := s.st.RemoveRefund(101)
 	s.Require().Error(err)
 }
 
-func (s *StorageSuite) TestFailGetRefunds() {
+func (s *StorageJSONSuite) TestFailGetRefunds() {
 	_, err := s.st.GetRefunds(0, 10)
 	s.Require().Error(err)
 
