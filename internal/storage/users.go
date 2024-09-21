@@ -23,6 +23,15 @@ func (u *Users) AddOrder(userID, orderID uint64, order *domain.Order) error {
 	return u.UsersMap[userID].Add(orderID, order)
 }
 
+func (u *Users) GetOrder(userID, orderID uint64) (*domain.Order, error) {
+	user, ok := u.UsersMap[userID]
+	if !ok {
+		return nil, fmt.Errorf("user %d not found", userID)
+	}
+
+	return user.Get(orderID)
+}
+
 func (u *Users) CanRemove(userID, orderID uint64) error {
 	user, ok := u.UsersMap[userID]
 	if !ok {

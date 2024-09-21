@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
 )
 
 func init() {
@@ -25,9 +26,22 @@ func init() {
 var (
 	st *storage.Storage
 
+	acceptUsecase *usecase.AcceptUsecase
+	giveUsecase   *usecase.GiveUsecase
+	returnUsecase *usecase.ReturnUsecase
+	viewUsecase   *usecase.ViewUsecase
+
+	cost           uint64
+	weight         uint64
+	pageID         uint64
 	userID         uint64
 	orderID        uint64
+	useTape        bool
+	ordersLimit    uint64
+	ordersPerPage  uint64
+	containerType  string
 	expirationDate string
+	orders         []uint
 
 	rootCmd = &cobra.Command{
 		Use:  "manager",
@@ -39,6 +53,10 @@ var (
 
 func SetStorage(s *storage.Storage) {
 	st = s
+	acceptUsecase = usecase.NewAcceptUsecase(st)
+	giveUsecase = usecase.NewGiveUsecase(st)
+	returnUsecase = usecase.NewReturnUsecase(st)
+	viewUsecase = usecase.NewViewUsecase(st)
 }
 
 func SetArgs(args []string) {

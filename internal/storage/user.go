@@ -42,6 +42,15 @@ func (u *User) Add(orderID uint64, order *domain.Order) error {
 	return nil
 }
 
+func (u *User) Get(orderID uint64) (*domain.Order, error) {
+	order, ok := u.Orders[orderID]
+	if !ok {
+		return nil, fmt.Errorf("not found order %d", orderID)
+	}
+
+	return order, nil
+}
+
 func (u *User) CanRemove(orderID uint64) error {
 	_, ok := u.OrdersIDatArray[orderID]
 	if !ok {
@@ -91,17 +100,25 @@ func (u *User) findID(firstOrderID uint64) (int, error) {
 	return id, nil
 }
 
+func (u *User) calcLimit(limit, arrayLen uint64) uint64 {
+	if limit == 0 {
+		return arrayLen
+	}
+
+	return min(limit, arrayLen)
+}
+
 func (u *User) GetOrders(firstOrderID, limit uint64) ([]domain.OrderView, error) {
 	id, err := u.findID(firstOrderID)
 	if err != nil {
 		return nil, err
 	}
 
-	limit = min(uint64(len(u.OrdersArray)), max(limit, uint64(len(u.OrdersArray))))
+	limit = u.calcLimit(limit, uint64(len(u.OrdersArray)))
 	res := make([]domain.OrderView, 0)
 	orderCount := uint64(0)
 
-	for ; id < int(limit) && orderCount < limit; id++ {
+	for ; id < len(u.OrdersArray) && orderCount < limit; id++ {
 		if u.OrdersArray[id].Exist {
 			res = append(res, u.OrdersArray[id])
 			orderCount++

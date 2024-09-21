@@ -10,12 +10,37 @@ APP_NAME=manager
 APP_PATH_SRC=cmd/$(APP_NAME)/main.go
 APP_PATH_BIN=$(BIN_DIR)/$(APP_NAME)
 
-.PHONY: all mkdir-bin run build tidy clean gocyclo gocognit
+.PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
+.PHONY: unit-test integration-test e2e-test benchmark
 
 all: build
 
 run: build
 	./$(APP_PATH_BIN)
+
+unit-test:
+	@echo "Unit Tests:"
+	@go test ./internal/usecase/ -coverprofile=coverage_usecase.out
+
+integration-test:
+	@echo "Integration Tests:"
+	@go test -coverpkg=./internal/storage -coverprofile=coverage_storage.out ./tests/integration_test.go
+
+e2e-test: build
+	@echo "E2E Tests:"
+	@go test tests/e2e_test.go
+
+test: unit-test integration-test e2e-test
+	@echo "mode: set" > coverage.out
+	@tail -n +2 coverage_usecase.out >> coverage.out
+	@tail -n +2 coverage_storage.out >> coverage.out
+	@rm coverage_usecase.out coverage_storage.out
+
+coverage: test
+	go tool cover -html=coverage.out -o coverage.html 
+
+benchmark:
+	@go test -bench=. -benchtime=10x  -benchmem ./benchmark/storage_test.go
 
 build: dependancy-install mkdir-bin $(APP_PATH_BIN) gocyclo gocognit
 
@@ -41,10 +66,10 @@ gocognit-install:
 	@go install github.com/uudashr/gocognit/cmd/gocognit@latest
 
 gocyclo: gocyclo-install
-	$(GOCYCLO_PATH) -over $(THRESHOLD) .
+	$(GOCYCLO_PATH) -over $(THRESHOLD) -ignore "_mock|_test" .
 
 gocognit: gocognit-install
-	$(GOCOGNIT_PATH) -over $(THRESHOLD) .
+	$(GOCOGNIT_PATH) -over $(THRESHOLD) -ignore "_mock|_test" .
 
 depgraph-install:
 	@go install github.com/kisielk/godepgraph@latest
