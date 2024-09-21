@@ -26,7 +26,7 @@ integration-test:
 	@echo "Integration Tests:"
 	@go test -coverpkg=./internal/storage -coverprofile=coverage_storage.out ./tests/integration_test.go
 
-e2e-test:
+e2e-test: build
 	@echo "E2E Tests:"
 	@go test tests/e2e_test.go
 
