@@ -10,20 +10,17 @@ import (
 
 	"github.com/joho/godotenv"
 	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
 )
 
 func init() {
 	_ = godotenv.Load()
 }
 
-func RunWithExit(st *storage.StorageJSON) {
+func RunOnce(st *storage_json.Storage) {
 	if err := cmd.Execute(); err != nil {
 		fmt.Println(err)
 	}
-
-	st.Save()
-	os.Exit(0)
 }
 
 func RunInteractive() {
@@ -46,15 +43,15 @@ func RunInteractive() {
 }
 
 func main() {
-	ordersHistoryRep := storage.NewOrdersHistory()
-	refundsRep := storage.NewRefunds()
-	usersRep := storage.NewUsers()
+	ordersHistoryRep := storage_json.NewOrdersHistory()
+	refundsRep := storage_json.NewRefunds()
+	usersRep := storage_json.NewUsers()
 	storagePath := "storage.json"
 	if envStoragePath, ok := os.LookupEnv("STORAGE_PATH"); ok {
 		storagePath = envStoragePath
 	}
 
-	storage, err := storage.NewStorage(ordersHistoryRep, refundsRep, usersRep, storagePath)
+	storage, err := storage_json.NewStorage(ordersHistoryRep, refundsRep, usersRep, storagePath)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -73,8 +70,8 @@ func main() {
 	}()
 
 	if len(os.Args[1:]) > 0 {
-		RunWithExit(storage)
+		RunOnce(storage)
+	} else {
+		RunInteractive()
 	}
-
-	RunInteractive()
 }

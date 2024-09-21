@@ -9,22 +9,22 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
 type StorageJSONSuite struct {
 	suite.Suite
-	st *storage.StorageJSON
+	st *storage_json.Storage
 }
 
 func (s *StorageJSONSuite) SetupSuite() {
 	var err error
-	ohp := storage.NewOrdersHistory()
-	rp := storage.NewRefunds()
-	up := storage.NewUsers()
+	ohp := storage_json.NewOrdersHistory()
+	rp := storage_json.NewRefunds()
+	up := storage_json.NewUsers()
 
-	s.st, err = storage.NewStorage(ohp, rp, up, "test_data/storage_test.json")
+	s.st, err = storage_json.NewStorage(ohp, rp, up, "test_data/storage_test.json")
 	s.Require().NoError(err)
 }
 

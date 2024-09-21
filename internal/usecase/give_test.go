@@ -8,12 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
 func newGiveUsecase(mocks *mocks) *GiveUsecase {
-	st := &storage.StorageJSON{
+	st := &storage_json.Storage{
 		OrdersHistoryRepository: mocks.ohp,
 		RefundsRepository:       mocks.rp,
 		Users:                   mocks.up,
