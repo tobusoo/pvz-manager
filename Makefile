@@ -1,6 +1,10 @@
 GOCYCLO_PATH=$(shell go env GOPATH)/bin/gocyclo
 GOCOGNIT_PATH=$(shell go env GOPATH)/bin/gocognit
 GODEPGRAPH_PATH=$(shell go env GOPATH)/bin/godepgraph
+GOOSEE_PATH=$(shell go env GOPATH)/bin/goose
+
+MIGRATIONS_PATH=./migrations
+POSTGRESQL_URI="postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
 
 THRESHOLD=5
 
@@ -79,7 +83,37 @@ depgraph-build:
 
 depgraph: depgraph-install depgraph-build
 
-.PHONY: depgraph
+compose-up:
+	docker-compose up -d postgres
+
+compose-down:
+	docker-compose down
+
+compose-stop:
+	docker-compose stop postgres
+
+compose-start:
+	docker-compose start postgres
+
+compose-ps:
+	docker-compose ps postgres
+
+goose-install:
+	go install github.com/pressly/goose/v3/cmd/goose@latest
+
+goose-add:
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_URI) create rename_me sql
+
+goose-up:
+	$(GOOSEE_PATH) -dir .$(MIGRATIONS_PATH) postgres $(POSTGRESQL_URI) up
+
+goose-down:
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_URI) down
+
+goose-status:
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_URI) status
+
+.PHONY: depgraph compose-up compose-down compose-stop compose-start goose-install goose-add goose-up goose-status goose-down
 
 clean:
 	rm -rf $(BIN_DIR) godepgraph.png
