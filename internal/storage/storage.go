@@ -26,6 +26,7 @@ type (
 		GetOrdersByUserID(userID, firstOrderID, limit uint64) ([]domain.OrderView, error)
 		CanRemoveOrder(orderID uint64) error
 		RemoveOrder(orderID uint64, status string) error
+		RemoveOrders(ordersID []uint64, status string) error
 	}
 
 	Storage interface {

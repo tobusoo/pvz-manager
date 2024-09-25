@@ -28,7 +28,7 @@ unit-test:
 
 integration-test:
 	@echo "Integration Tests:"
-	@go test -coverpkg=./internal/storage -coverprofile=coverage_storage.out ./tests/integration_test.go
+	@go test -coverpkg=./internal/storage/storage_json -coverprofile=coverage_storage.out ./tests/integration_test.go
 
 e2e-test: build
 	@echo "E2E Tests:"
@@ -58,7 +58,7 @@ dependancy-update:
 	@go get -u
 
 dependancy-install:
-	@go get ./...
+	@go get ./internal/... ./benchmark/... ./tests/...
 
 tidy:
 	@go mod tidy
@@ -70,10 +70,10 @@ gocognit-install:
 	@go install github.com/uudashr/gocognit/cmd/gocognit@latest
 
 gocyclo: gocyclo-install
-	$(GOCYCLO_PATH) -over $(THRESHOLD) -ignore "_mock|_test" .
+	$(GOCYCLO_PATH) -over $(THRESHOLD) -ignore "_mock|_test" internal
 
 gocognit: gocognit-install
-	$(GOCOGNIT_PATH) -over $(THRESHOLD) -ignore "_mock|_test" .
+	$(GOCOGNIT_PATH) -over $(THRESHOLD) -ignore "_mock|_test" internal
 
 depgraph-install:
 	@go install github.com/kisielk/godepgraph@latest
@@ -105,7 +105,7 @@ goose-add:
 	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_URI) create rename_me sql
 
 goose-up:
-	$(GOOSEE_PATH) -dir .$(MIGRATIONS_PATH) postgres $(POSTGRESQL_URI) up
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_URI) up
 
 goose-down:
 	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_URI) down

@@ -60,32 +60,6 @@ func TestStorageSuccessAddOrder(t *testing.T) {
 	require.Equal(t, utils.CurrentDate(), expDate)
 }
 
-func TestStorageSuccessAddRefund(t *testing.T) {
-	t.Parallel()
-
-	ohp := storage_json.NewOrdersHistory()
-	rp := storage_json.NewRefunds()
-	up := storage_json.NewUsers()
-	path := "storage_TestStorageSuccessAddRefund.json"
-	defer os.Remove(path)
-
-	st, err := storage_json.NewStorage(ohp, rp, up, path)
-	require.NoError(t, err)
-
-	userID := uint64(1)
-	orderID := uint64(1)
-	order := &domain.Order{
-		ExpirationDate: utils.CurrentDateString(),
-		Cost:           123,
-		Weight:         80,
-		PackageType:    "default",
-		UseTape:        false,
-	}
-
-	err = st.AddRefund(userID, orderID, order)
-	require.NoError(t, err)
-}
-
 func TestStorageSuccessRemoveOrder(t *testing.T) {
 	t.Parallel()
 

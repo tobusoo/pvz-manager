@@ -13,9 +13,9 @@ import (
 
 func newViewUsecase(mocks *mocks) *ViewUsecase {
 	st := &storage_json.Storage{
-		OrdersHistoryRepository: mocks.ohp,
-		RefundsRepository:       mocks.rp,
-		Users:                   mocks.up,
+		Ohp:   mocks.ohp,
+		Rp:    mocks.rp,
+		Users: mocks.up,
 	}
 	return NewViewUsecase(st)
 }

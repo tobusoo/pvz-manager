@@ -98,9 +98,5 @@ func (u *AcceptUsecase) AcceptRefund(req *dto.RefundRequest) error {
 		return err
 	}
 
-	if err = u.st.AddRefund(req.UserID, req.OrderID, order.Order); err != nil {
-		return err
-	}
-
-	return u.st.SetOrderStatus(req.OrderID, domain.StatusReturned)
+	return u.st.AddRefund(req.UserID, req.OrderID, order.Order)
 }

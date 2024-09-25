@@ -20,9 +20,9 @@ type UsersRepository interface {
 }
 
 type Storage struct {
-	storage.OrdersHistoryRepository `json:"historyRepository"`
-	storage.RefundsRepository       `json:"refundsRepository"`
-	Users                           UsersRepository `json:"usersRepository"`
+	Ohp   storage.OrdersHistoryRepository `json:"historyRepository"`
+	Rp    storage.RefundsRepository       `json:"refundsRepository"`
+	Users UsersRepository                 `json:"usersRepository"`
 
 	path string `json:"-"`
 }
@@ -34,10 +34,10 @@ func NewStorage(
 	path string,
 ) (*Storage, error) {
 	storage := &Storage{
-		OrdersHistoryRepository: ohp,
-		RefundsRepository:       rp,
-		Users:                   up,
-		path:                    path,
+		Ohp:   ohp,
+		Rp:    rp,
+		Users: up,
+		path:  path,
 	}
 
 	err := storage.readDataFromFile()
@@ -72,6 +72,38 @@ func (s *Storage) Save() (err error) {
 	encoder := json.NewEncoder(file)
 	err = encoder.Encode(s)
 	return
+}
+
+func (s *Storage) AddOrderStatus(orderID, userID uint64, status string, order *domain.Order) error {
+	return s.Ohp.AddOrderStatus(orderID, userID, status, order)
+}
+
+func (s *Storage) GetOrderStatus(orderID uint64) (*domain.OrderStatus, error) {
+	return s.Ohp.GetOrderStatus(orderID)
+}
+
+func (s *Storage) SetOrderStatus(orderID uint64, status string) error {
+	return s.Ohp.SetOrderStatus(orderID, status)
+}
+
+func (s *Storage) AddRefund(userID, orderID uint64, order *domain.Order) error {
+	if err := s.Rp.AddRefund(userID, orderID, order); err != nil {
+		return err
+	}
+
+	return s.SetOrderStatus(orderID, domain.StatusReturned)
+}
+
+func (s *Storage) RemoveRefund(orderID uint64) error {
+	if err := s.Rp.RemoveRefund(orderID); err != nil {
+		return err
+	}
+
+	return s.SetOrderStatus(orderID, domain.StatusGiveCourier)
+}
+
+func (s *Storage) GetRefunds(pageID, ordersPerPage uint64) ([]domain.OrderView, error) {
+	return s.Rp.GetRefunds(pageID, ordersPerPage)
 }
 
 func (s *Storage) AddOrder(userID, orderID uint64, order *domain.Order) error {
@@ -131,5 +163,12 @@ func (s *Storage) RemoveOrder(orderID uint64, status string) error {
 	}
 
 	s.SetOrderStatus(orderID, status)
+	return nil
+}
+
+func (s *Storage) RemoveOrders(ordersID []uint64, status string) error {
+	for _, orderID := range ordersID {
+		s.RemoveOrder(orderID, status)
+	}
 	return nil
 }
