@@ -73,7 +73,7 @@ func acceptRefundCheckErr(req *dto.RefundRequest, order *domain.OrderStatus) err
 		return fmt.Errorf("can not refund order %d: wrong userID", req.OrderID)
 	}
 
-	issuedDate, err := time.Parse("02-01-2006", order.Date)
+	issuedDate, err := time.Parse("02-01-2006", order.UpdatedAt)
 	if err != nil {
 		return err
 	}

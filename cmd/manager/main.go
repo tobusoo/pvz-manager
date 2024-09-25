@@ -2,22 +2,23 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
+	"log"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/postgres"
 )
 
 func init() {
 	_ = godotenv.Load()
 }
 
-func RunOnce(st *storage_json.Storage) {
+func RunOnce() {
 	if err := cmd.Execute(); err != nil {
 		fmt.Println(err)
 	}
@@ -43,34 +44,23 @@ func RunInteractive() {
 }
 
 func main() {
-	ordersHistoryRep := storage_json.NewOrdersHistory()
-	refundsRep := storage_json.NewRefunds()
-	usersRep := storage_json.NewUsers()
-	storagePath := "storage.json"
-	if envStoragePath, ok := os.LookupEnv("STORAGE_PATH"); ok {
-		storagePath = envStoragePath
-	}
+	const psqlDSN = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
 
-	storage, err := storage_json.NewStorage(ordersHistoryRep, refundsRep, usersRep, storagePath)
+	ctx := context.Background()
+	pool, err := pgxpool.Connect(ctx, psqlDSN)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
-	defer storage.Save()
+	defer pool.Close()
+
+	txManager := postgres.NewTxManager(pool)
+	pgPepo := postgres.NewRepoPG(txManager)
+	storage := postgres.NewStorageDB(ctx, txManager, pgPepo)
 
 	cmd.SetStorage(storage)
 
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		storage.Save()
-		fmt.Println()
-		os.Exit(0)
-	}()
-
 	if len(os.Args[1:]) > 0 {
-		RunOnce(storage)
+		RunOnce()
 	} else {
 		RunInteractive()
 	}

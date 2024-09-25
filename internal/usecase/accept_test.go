@@ -208,7 +208,7 @@ func TestAcceptUsecase_AcceptRefund(t *testing.T) {
 				Order: &domain.Order{
 					ExpirationDate: utils.CurrentDateString(),
 				},
-				Date: utils.CurrentDateString(),
+				UpdatedAt: utils.CurrentDateString(),
 			},
 		},
 		"WrongOrderStatus": {
@@ -237,9 +237,9 @@ func TestAcceptUsecase_AcceptRefund(t *testing.T) {
 				OrderID: 5,
 			},
 			order: &domain.OrderStatus{
-				Status: domain.StatusGiveClient,
-				UserID: 5,
-				Date:   "01-09-2024",
+				Status:    domain.StatusGiveClient,
+				UserID:    5,
+				UpdatedAt: "01-09-2024",
 			},
 		},
 	}

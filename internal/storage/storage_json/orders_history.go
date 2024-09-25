@@ -22,10 +22,10 @@ func (s *OrdersHistory) AddOrderStatus(orderID, userID uint64, status string, or
 	}
 
 	s.Stat[orderID] = &domain.OrderStatus{
-		Order:  order,
-		Status: status,
-		Date:   utils.CurrentDateString(),
-		UserID: userID,
+		Order:     order,
+		Status:    status,
+		UpdatedAt: utils.CurrentDateString(),
+		UserID:    userID,
 	}
 
 	return nil
