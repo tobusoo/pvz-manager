@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
@@ -10,14 +11,16 @@ import (
 func (pg *PgRepository) AddRefund(ctx context.Context, userID, orderID uint64, order *domain.Order) error {
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	_, err := tx.Exec(ctx, `
+	if _, err := tx.Exec(ctx, `
 		insert into refunds(
-		order_id)
-		values $1`,
+			order_id)
+		values ($1)`,
 		orderID,
-	)
+	); err != nil {
+		return fmt.Errorf("AddRefund: %w", err)
+	}
 
-	return err
+	return nil
 }
 
 func (pg *PgRepository) RemoveRefund(ctx context.Context, orderID uint64) error {

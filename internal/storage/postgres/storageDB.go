@@ -26,9 +26,8 @@ type (
 		GetOrder(ctx context.Context, userID, orderID uint64) (*domain.Order, error)
 		GetExpirationDate(ctx context.Context, userID, orderID uint64) (time.Time, error)
 		GetOrdersByUserID(ctx context.Context, userID, firstOrderID, limit uint64) ([]domain.OrderView, error)
-		CanRemoveOrder(ctx context.Context, orderID uint64) error
-		RemoveOrder(ctx context.Context, orderID uint64, status string) error
-		RemoveOrders(ctx context.Context, ordersID []uint64, status string) error
+		CanRemoveOrder(ctx context.Context, userID, orderID uint64) error
+		RemoveOrder(ctx context.Context, userID, orderID uint64) error
 	}
 
 	RepositoryDB interface {
@@ -107,19 +106,43 @@ func (s *StorageDB) CanRemoveOrder(orderID uint64) error {
 	}
 
 	return s.txManager.RunReadOnlyCommitted(s.ctx, func(ctxTx context.Context) error {
-		return s.db.CanRemoveOrder(ctxTx, orderID)
+		return s.db.CanRemoveOrder(ctxTx, stat.UserID, orderID)
 	})
 }
 
 func (s *StorageDB) RemoveOrder(orderID uint64, status string) error {
 	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
-		return s.db.RemoveOrder(ctxTx, orderID, status)
+		stat, err := s.db.GetOrderStatus(s.ctx, orderID)
+		if err != nil {
+			return err
+		}
+
+		return s.db.RemoveOrder(ctxTx, stat.UserID, orderID)
 	})
+}
+
+func (s *StorageDB) removeOrder(ctxTx context.Context, orderID uint64, status string) error {
+	stat, err := s.db.GetOrderStatus(s.ctx, orderID)
+	if err != nil {
+		return err
+	}
+
+	if err = s.db.RemoveOrder(ctxTx, stat.UserID, orderID); err != nil {
+		return nil
+	}
+
+	return s.db.SetOrderStatus(ctxTx, orderID, status)
 }
 
 func (s *StorageDB) RemoveOrders(ordersID []uint64, status string) error {
 	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
-		return s.db.RemoveOrders(ctxTx, ordersID, status)
+		for _, order := range ordersID {
+			if err := s.removeOrder(s.ctx, order, status); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
 }
 

@@ -9,3 +9,7 @@ func CurrentDate() time.Time {
 func CurrentDateString() string {
 	return CurrentDate().Format("02-01-2006")
 }
+
+func StringToTime(date_str string) (time.Time, error) {
+	return time.Parse("02-01-2006", date_str)
+}

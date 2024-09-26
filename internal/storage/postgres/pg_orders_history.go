@@ -42,7 +42,7 @@ func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*do
 	var orders []*domain.OrderStatus
 
 	tx := pg.txManager.GetQueryEngine(ctx)
-	err := pgxscan.Select(ctx, tx, &orders,
+	if err := pgxscan.Select(ctx, tx, &orders,
 		`select 
 		 user_id,
 		 expiration_date,
@@ -55,9 +55,12 @@ func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*do
 		 from orders_history
 		 where order_id = $1`,
 		orderID,
-	)
-	if len(orders) == 0 || err != nil {
-		return nil, fmt.Errorf("not found order %d: %w", orderID, err)
+	); err != nil {
+		return nil, fmt.Errorf("SetOrderStatus: %w", err)
+	}
+
+	if len(orders) == 0 {
+		return nil, fmt.Errorf("not found order %d", orderID)
 	}
 
 	return orders[0], nil
@@ -73,7 +76,7 @@ func (pg *PgRepository) SetOrderStatus(ctx context.Context, orderID uint64, stat
 		status,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("SetOrderStatus: %w", err)
 	}
 
 	if result.RowsAffected() == 0 {
