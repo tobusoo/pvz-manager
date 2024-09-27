@@ -126,7 +126,14 @@ goose-down:
 goose-status:
 	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) status
 
+squawk-install:
+	npm install -g squawk-cli
+
+squawk:
+	squawk ./migrations/* --exclude=ban-drop-table
+
 .PHONY: depgraph compose-up compose-down compose-stop compose-start goose-install goose-add goose-up goose-status goose-down
+.PHONY: squawk-install squawk
 
 clean:
 	rm -rf $(BIN_DIR) godepgraph.png
