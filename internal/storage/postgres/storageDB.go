@@ -128,7 +128,7 @@ func (s *StorageDB) removeOrder(ctxTx context.Context, orderID uint64, status st
 	}
 
 	if err = s.db.RemoveOrder(ctxTx, stat.UserID, orderID); err != nil {
-		return nil
+		return err
 	}
 
 	return s.db.SetOrderStatus(ctxTx, orderID, status)
@@ -189,10 +189,7 @@ func (s *StorageDB) RemoveRefund(orderID uint64) error {
 func (s *StorageDB) GetRefunds(pageID, ordersPerPage uint64) (orders []domain.OrderView, err error) {
 	err = s.txManager.RunReadOnlyCommitted(s.ctx, func(ctxTx context.Context) error {
 		orders, err = s.db.GetRefunds(ctxTx, pageID, ordersPerPage)
-		if err != nil {
-			return err
-		}
-		return nil
+		return err
 	})
 	return orders, err
 }

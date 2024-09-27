@@ -13,3 +13,7 @@ func CurrentDateString() string {
 func StringToTime(date_str string) (time.Time, error) {
 	return time.Parse("02-01-2006", date_str)
 }
+
+func TimeToString(date time.Time) string {
+	return date.Format("02-01-2006")
+}

@@ -45,7 +45,6 @@ func RunInteractive() {
 
 func main() {
 	const psqlDSN = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"
-
 	ctx := context.Background()
 	pool, err := pgxpool.Connect(ctx, psqlDSN)
 	if err != nil {

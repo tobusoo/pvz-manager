@@ -85,7 +85,8 @@ func (pg *PgRepository) GetOrdersByUserID(ctx context.Context, userID, firstOrde
 	tx := pg.txManager.GetQueryEngine(ctx)
 
 	err := pgxscan.Select(ctx, tx, &orders, `
-		select 
+		select
+			user_id, 
 			order_id,
 			expiration_date,
 			package_type,

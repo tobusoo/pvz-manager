@@ -38,6 +38,8 @@ func (pg *PgRepository) RemoveRefund(ctx context.Context, orderID uint64) error 
 func (pg *PgRepository) GetRefunds(ctx context.Context, pageID, ordersPerPage uint64) ([]domain.OrderView, error) {
 	var orders []domain.OrderView
 
+	limit := (pageID - 1) * ordersPerPage
+
 	tx := pg.txManager.GetQueryEngine(ctx)
 	err := pgxscan.Select(ctx, tx, &orders, `
 		select
@@ -54,9 +56,10 @@ func (pg *PgRepository) GetRefunds(ctx context.Context, pageID, ordersPerPage ui
 			from refunds
 			order by order_id
 			limit $1 offset $2
-		) r on oh.order_id = r.order_id`,
+		) r on oh.order_id = r.order_id
+		order by oh.order_id`,
 		ordersPerPage,
-		(pageID-1)*ordersPerPage,
+		limit,
 	)
 
 	return orders, err

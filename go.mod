@@ -3,6 +3,7 @@ module gitlab.ozon.dev/chppppr/homework
 go 1.23.0
 
 require (
+	github.com/brianvoe/gofakeit/v7 v7.0.4
 	github.com/georgysavva/scany v1.2.2
 	github.com/gojuno/minimock/v3 v3.4.0
 	github.com/jackc/pgconn v1.14.3
