@@ -135,7 +135,7 @@ func (s *StorageDB) removeOrder(ctxTx context.Context, orderID uint64, status st
 }
 
 func (s *StorageDB) RemoveOrders(ordersID []uint64, status string) error {
-	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
+	return s.txManager.RunSerializable(s.ctx, func(ctxTx context.Context) error {
 		for _, order := range ordersID {
 			if err := s.removeOrder(s.ctx, order, status); err != nil {
 				return err
@@ -161,7 +161,7 @@ func (s *StorageDB) GetOrderStatus(orderID uint64) (order *domain.OrderStatus, e
 }
 
 func (s *StorageDB) SetOrderStatus(orderID uint64, status string) error {
-	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
+	return s.txManager.RunSerializable(s.ctx, func(ctxTx context.Context) error {
 		return s.db.SetOrderStatus(ctxTx, orderID, status)
 	})
 }
@@ -177,7 +177,7 @@ func (s *StorageDB) AddRefund(userID, orderID uint64, order *domain.Order) error
 }
 
 func (s *StorageDB) RemoveRefund(orderID uint64) error {
-	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
+	return s.txManager.RunSerializable(s.ctx, func(ctxTx context.Context) error {
 		err := s.db.RemoveRefund(ctxTx, orderID)
 		if err != nil {
 			return err
