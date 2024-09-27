@@ -156,7 +156,7 @@ func (s *StorageDBSuite) generateFakeData() {
 
 func (s *StorageDBSuite) TestOrderAlreadyExist() {
 	userID := uint64(12345678)
-	orderID := uint64(80400151176721079)
+	orderID := uint64(221482238527448200)
 	cost := uint64(100)
 	weight := uint64(80)
 	cs := strategy.ContainerTypeMap[""]

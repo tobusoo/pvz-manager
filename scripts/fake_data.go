@@ -1,6 +1,8 @@
 package scripts
 
 import (
+	"time"
+
 	"github.com/brianvoe/gofakeit/v7"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
@@ -16,8 +18,8 @@ func init() {
 		Category: "custom",
 		Output:   "string",
 		Generate: func(f *gofakeit.Faker, m *gofakeit.MapParams, info *gofakeit.Info) (any, error) {
-			currentDate := utils.CurrentDate()
-			randDate := f.DateRange(currentDate.AddDate(0, 6, 0), currentDate.AddDate(0, 12, 0))
+			startDate := time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC)
+			randDate := f.DateRange(startDate.AddDate(0, 6, 0), startDate.AddDate(0, 12, 0))
 			return utils.TimeToString(randDate), nil
 		},
 	})
