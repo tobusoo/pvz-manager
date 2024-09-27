@@ -11,8 +11,6 @@ services:
     ports:
       - "5432:5432"
     restart: always
-    networks:
-      - postgres
 
   postgres_test:
     image: postgres:15-alpine
@@ -24,11 +22,3 @@ services:
     ports:
       - "5433:5432"
     restart: always
-    networks:
-      - postgres_test
-
-networks:
-  postgres:
-    name: postgres
-  postgres_test:
-    name: postgres_test
