@@ -17,7 +17,7 @@ func init() {
 		Output:   "string",
 		Generate: func(f *gofakeit.Faker, m *gofakeit.MapParams, info *gofakeit.Info) (any, error) {
 			currentDate := utils.CurrentDate()
-			randDate := f.DateRange(currentDate, currentDate.AddDate(0, 6, 0))
+			randDate := f.DateRange(currentDate.AddDate(0, 6, 0), currentDate.AddDate(0, 12, 0))
 			return utils.TimeToString(randDate), nil
 		},
 	})

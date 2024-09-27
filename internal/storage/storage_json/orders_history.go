@@ -31,6 +31,15 @@ func (s *OrdersHistory) AddOrderStatus(orderID, userID uint64, status string, or
 	return nil
 }
 
+func (s *OrdersHistory) GetOrderOnlyStatus(orderID uint64) (stat string, err error) {
+	status, ok := s.Stat[orderID]
+	if !ok {
+		return "", fmt.Errorf("order %d not found", orderID)
+	}
+
+	return status.Status, nil
+}
+
 func (s *OrdersHistory) GetOrderStatus(orderID uint64) (*domain.OrderStatus, error) {
 	status, ok := s.Stat[orderID]
 	if !ok {

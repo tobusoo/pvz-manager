@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	TotalAddRequests    = 1000
-	TotalGiveRequests   = 500
-	TotalRefundRequsts  = 250
-	TotalReturnRequests = 125
+	TotalAddRequests    = 10000
+	TotalGiveRequests   = 5000
+	TotalRefundRequsts  = 2500
+	TotalReturnRequests = 1250
 )
 
 func init() {
@@ -63,6 +63,12 @@ func (s *StorageDBSuite) execAddRequests() []*dto.AddOrderRequest {
 	addRequests := scripts.GenerateAddRequests(TotalAddRequests - 50)
 	for _, req := range addRequests {
 		cs := strategy.ContainerTypeMap[req.ContainerType]
+		if req.UseTape && req.ContainerType != "tape" {
+			cs.UseTape()
+		} else {
+			req.UseTape = false
+		}
+
 		order, _ := domain.NewOrder(req.Cost, req.Weight, req.ExpirationDate, cs)
 
 		if err := s.st.AddOrder(req.UserID, req.OrderID, order); err != nil {
@@ -73,6 +79,12 @@ func (s *StorageDBSuite) execAddRequests() []*dto.AddOrderRequest {
 	addRequestsUserID := scripts.GenerateAddRequestsWithUserID(12345678, 50)
 	for _, req := range addRequestsUserID {
 		cs := strategy.ContainerTypeMap[req.ContainerType]
+		if req.UseTape && req.ContainerType != "tape" {
+			cs.UseTape()
+		} else {
+			req.UseTape = false
+		}
+
 		order, _ := domain.NewOrder(req.Cost, req.Weight, req.ExpirationDate, cs)
 
 		if err := s.st.AddOrder(req.UserID, req.OrderID, order); err != nil {
@@ -143,8 +155,8 @@ func (s *StorageDBSuite) generateFakeData() {
 }
 
 func (s *StorageDBSuite) TestOrderAlreadyExist() {
-	userID := uint64(2313106065112510374)
-	orderID := uint64(6353912012252055774)
+	userID := uint64(12345678)
+	orderID := uint64(80400151176721079)
 	cost := uint64(100)
 	weight := uint64(80)
 	cs := strategy.ContainerTypeMap[""]

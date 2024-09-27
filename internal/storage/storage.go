@@ -16,6 +16,7 @@ type (
 	OrdersHistoryRepository interface {
 		AddOrderStatus(orderID, userID uint64, status string, order *domain.Order) error
 		GetOrderStatus(orderID uint64) (*domain.OrderStatus, error)
+		GetOrderOnlyStatus(orderID uint64) (stat string, err error)
 		SetOrderStatus(orderID uint64, status string) error
 	}
 

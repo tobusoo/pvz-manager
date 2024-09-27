@@ -26,22 +26,29 @@ func (pg *PgRepository) AddRefund(ctx context.Context, userID, orderID uint64, o
 func (pg *PgRepository) RemoveRefund(ctx context.Context, orderID uint64) error {
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	_, err := tx.Exec(ctx, `
+	result, err := tx.Exec(ctx, `
 		delete from refunds
 		where order_id = $1`,
 		orderID,
 	)
+
+	if err != nil {
+		return fmt.Errorf("RemoveRefund: %w", err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return fmt.Errorf("not found order %d", orderID)
+	}
 
 	return err
 }
 
 func (pg *PgRepository) GetRefunds(ctx context.Context, pageID, ordersPerPage uint64) ([]domain.OrderView, error) {
 	var orders []domain.OrderView
-
 	limit := (pageID - 1) * ordersPerPage
 
 	tx := pg.txManager.GetQueryEngine(ctx)
-	err := pgxscan.Select(ctx, tx, &orders, `
+	if err := pgxscan.Select(ctx, tx, &orders, `
 		select
 			oh.user_id,
 			oh.order_id,
@@ -60,7 +67,9 @@ func (pg *PgRepository) GetRefunds(ctx context.Context, pageID, ordersPerPage ui
 		order by oh.order_id`,
 		ordersPerPage,
 		limit,
-	)
+	); err != nil {
+		return nil, fmt.Errorf("GetRefunds: %w", err)
+	}
 
-	return orders, err
+	return orders, nil
 }

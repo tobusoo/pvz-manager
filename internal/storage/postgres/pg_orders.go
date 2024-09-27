@@ -10,49 +10,43 @@ import (
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
-func (pg *PgRepository) AddOrder(ctx context.Context, userID, orderID uint64, order *domain.Order) error {
+func (pg *PgRepository) AddOrder(ctx context.Context, userID, orderID uint64) error {
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	_, err := tx.Exec(ctx, `insert into orders(
+	if _, err := tx.Exec(ctx, `insert into orders(
 		user_id,
-		order_id,
-		expiration_date,
-		package_type,
-		weight,
-		cost,
-		use_tape)
-		values ($1, $2, $3, $4, $5, $6, $7)
-	`, userID,
+		order_id)
+		values ($1, $2)`,
+		userID,
 		orderID,
-		order.ExpirationDate,
-		order.PackageType,
-		order.Weight,
-		order.Cost,
-		order.UseTape,
-	)
+	); err != nil {
+		return fmt.Errorf("AddOrder: %w", err)
+	}
 
-	return err
+	return nil
 }
 
 func (pg *PgRepository) GetOrder(ctx context.Context, userID, orderID uint64) (*domain.Order, error) {
 	var order []*domain.Order
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	err := pgxscan.Select(ctx, tx, &order, `
+	if err := pgxscan.Select(ctx, tx, &order, `
 		select 
 			expiration_date,
 			package_type,
 			cost,
 			weight,
 			use_tape,
-		from orders
-		where user_id = $1 and order_id = $2`,
-		userID,
+		from orders_history
+		where order_id = $1 and user_id = $2`,
 		orderID,
-	)
+		userID,
+	); err != nil {
+		return nil, fmt.Errorf("GetOrder: %w", err)
+	}
 
-	if len(order) == 0 || err != nil {
-		return nil, fmt.Errorf("not found user %d order's %d: %w", userID, orderID, err)
+	if len(order) == 0 {
+		return nil, fmt.Errorf("not found user %d order's %d", userID, orderID)
 	}
 
 	return order[0], nil
@@ -65,10 +59,10 @@ func (pg *PgRepository) GetExpirationDate(ctx context.Context, userID, orderID u
 	if err := pgxscan.Select(ctx, tx, &expDate, `
 		select 
 			expiration_date
-		from orders
-		where user_id = $1 and order_id = $2`,
-		userID,
+		from orders_history
+		where user_id = $2 and order_id = $1`,
 		orderID,
+		userID,
 	); err != nil {
 		return time.Time{}, fmt.Errorf("GetExpitarionDate: %w", err)
 	}
@@ -84,7 +78,7 @@ func (pg *PgRepository) GetOrdersByUserID(ctx context.Context, userID, firstOrde
 	var orders []domain.OrderView
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	err := pgxscan.Select(ctx, tx, &orders, `
+	if err := pgxscan.Select(ctx, tx, &orders, `
 		select
 			user_id, 
 			order_id,
@@ -93,14 +87,16 @@ func (pg *PgRepository) GetOrdersByUserID(ctx context.Context, userID, firstOrde
 			cost,
 			weight,
 			use_tape
-		from orders
+		from orders_history
 		where user_id = $1 and order_id >= $2 order by order_id limit $3`,
 		userID,
 		firstOrderID,
 		limit,
-	)
+	); err != nil {
+		return nil, fmt.Errorf("GetOrdersByUserID: %w", err)
+	}
 
-	return orders, err
+	return orders, nil
 }
 
 func (pg *PgRepository) CanRemoveOrder(ctx context.Context, userID, orderID uint64) error {

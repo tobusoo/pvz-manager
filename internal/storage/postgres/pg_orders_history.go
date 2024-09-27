@@ -12,7 +12,7 @@ import (
 func (pg *PgRepository) AddOrderStatus(ctx context.Context, orderID, userID uint64, status string, order *domain.Order) error {
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	_, err := tx.Exec(ctx,
+	if _, err := tx.Exec(ctx,
 		`insert into orders_history(
 		order_id,
 		user_id,
@@ -33,9 +33,33 @@ func (pg *PgRepository) AddOrderStatus(ctx context.Context, orderID, userID uint
 		order.UseTape,
 		status,
 		utils.CurrentDateString(),
-	)
+	); err != nil {
+		return fmt.Errorf("AddOrderStatus: %w", err)
+	}
 
-	return err
+	return nil
+}
+
+func (pg *PgRepository) GetOrderOnlyStatus(ctx context.Context, orderID uint64) (string, error) {
+	var statuses []string
+
+	tx := pg.txManager.GetQueryEngine(ctx)
+	if err := pgxscan.Select(ctx, tx, &statuses,
+		`select 
+		 status,
+		 from orders_history
+		 where order_id = $1`,
+		orderID,
+	); err != nil {
+		return "", fmt.Errorf("GetOrderOnlyStatus: %w", err)
+	}
+
+	if len(statuses) == 0 {
+		return "", fmt.Errorf("not found order %d", orderID)
+	}
+
+	return statuses[0], nil
+
 }
 
 func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*domain.OrderStatus, error) {
@@ -56,7 +80,7 @@ func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*do
 		 where order_id = $1`,
 		orderID,
 	); err != nil {
-		return nil, fmt.Errorf("SetOrderStatus: %w", err)
+		return nil, fmt.Errorf("GetOrderStatus: %w", err)
 	}
 
 	if len(orders) == 0 {

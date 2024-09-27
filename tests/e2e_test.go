@@ -22,7 +22,7 @@ func TestAddOrder(t *testing.T) {
 	cmdName := "../bin/manager"
 	cmd := exec.Command(cmdName, args...)
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err)
@@ -42,7 +42,7 @@ func TestAddOrderWrongPackageType(t *testing.T) {
 	cmdName := "../bin/manager"
 	cmd := exec.Command(cmdName, args...)
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err)
@@ -60,7 +60,7 @@ func TestGiveOrder(t *testing.T) {
 	cmdName := "../bin/manager"
 	cmd := exec.Command(cmdName, "accept", "order", "-u", "1312", "-o", "10", "-c", "3420", "-w", "3234", "-p", "package", "-s", "-t", expDate)
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err)
@@ -68,7 +68,7 @@ func TestGiveOrder(t *testing.T) {
 
 	cmd = exec.Command(cmdName, "give", "-o=10")
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)
@@ -87,7 +87,7 @@ func TestOrderFullCircle(t *testing.T) {
 	cmdName := "../bin/manager"
 	cmd := exec.Command(cmdName, "accept", "order", "-u", "103", "-o", "724", "-c", "9132", "-w", "15433", "-p", "box", "-s", "-t", expDate)
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
 	output, err := cmd.CombinedOutput()
 	require.NoError(t, err)
@@ -96,7 +96,7 @@ func TestOrderFullCircle(t *testing.T) {
 	// Заказ забрали
 	cmd = exec.Command(cmdName, "give", "-o=724")
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)
@@ -105,7 +105,7 @@ func TestOrderFullCircle(t *testing.T) {
 	// Заказ вернули на ПВЗ
 	cmd = exec.Command(cmdName, "accept", "refund", "-u", "103", "-o", "724")
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)
@@ -114,7 +114,7 @@ func TestOrderFullCircle(t *testing.T) {
 	// Заказ вернули курьеру
 	cmd = exec.Command(cmdName, "return", "-o", "724")
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH)
+	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)

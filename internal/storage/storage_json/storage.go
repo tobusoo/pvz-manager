@@ -78,6 +78,10 @@ func (s *Storage) AddOrderStatus(orderID, userID uint64, status string, order *d
 	return s.Ohp.AddOrderStatus(orderID, userID, status, order)
 }
 
+func (s *Storage) GetOrderOnlyStatus(orderID uint64) (stat string, err error) {
+	return s.Ohp.GetOrderOnlyStatus(orderID)
+}
+
 func (s *Storage) GetOrderStatus(orderID uint64) (*domain.OrderStatus, error) {
 	return s.Ohp.GetOrderStatus(orderID)
 }

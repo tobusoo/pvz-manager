@@ -18,11 +18,12 @@ type (
 	OrdersHistoryRepositoryDB interface {
 		AddOrderStatus(ctx context.Context, orderID, userID uint64, status string, order *domain.Order) error
 		GetOrderStatus(ctx context.Context, orderID uint64) (*domain.OrderStatus, error)
+		GetOrderOnlyStatus(ctx context.Context, orderID uint64) (string, error)
 		SetOrderStatus(ctx context.Context, orderID uint64, status string) error
 	}
 
 	UsersRepositoryDB interface {
-		AddOrder(ctx context.Context, userID, orderID uint64, order *domain.Order) error
+		AddOrder(ctx context.Context, userID, orderID uint64) error
 		GetOrder(ctx context.Context, userID, orderID uint64) (*domain.Order, error)
 		GetExpirationDate(ctx context.Context, userID, orderID uint64) (time.Time, error)
 		GetOrdersByUserID(ctx context.Context, userID, firstOrderID, limit uint64) ([]domain.OrderView, error)
@@ -52,12 +53,12 @@ func NewStorageDB(ctx context.Context, tx TransactionManager, db RepositoryDB) *
 }
 
 func (s *StorageDB) AddOrder(userID, orderID uint64, order *domain.Order) (err error) {
-	if stat, err := s.GetOrderStatus(orderID); err == nil {
-		return fmt.Errorf("order %d has already been %s", orderID, stat.Status)
-	}
-
 	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
-		if err = s.db.AddOrder(ctxTx, userID, orderID, order); err != nil {
+		if stat, err := s.db.GetOrderOnlyStatus(s.ctx, orderID); err == nil {
+			return fmt.Errorf("order %d has already been %s", orderID, stat)
+		}
+
+		if err = s.db.AddOrder(ctxTx, userID, orderID); err != nil {
 			return err
 		}
 		return s.db.AddOrderStatus(ctxTx, orderID, userID, domain.StatusAccepted, order)
@@ -96,16 +97,16 @@ func canRemoveOrderCheckStatus(status string, orderID uint64) error {
 }
 
 func (s *StorageDB) CanRemoveOrder(orderID uint64) error {
-	stat, err := s.GetOrderStatus(orderID)
-	if err != nil {
-		return err
-	}
-
-	if err = canRemoveOrderCheckStatus(stat.Status, orderID); err != nil {
-		return err
-	}
-
 	return s.txManager.RunReadOnlyCommitted(s.ctx, func(ctxTx context.Context) error {
+		stat, err := s.GetOrderStatus(orderID)
+		if err != nil {
+			return err
+		}
+
+		if err = canRemoveOrderCheckStatus(stat.Status, orderID); err != nil {
+			return err
+		}
+
 		return s.db.CanRemoveOrder(ctxTx, stat.UserID, orderID)
 	})
 }
@@ -150,6 +151,14 @@ func (s *StorageDB) AddOrderStatus(orderID, userID uint64, status string, order 
 	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
 		return s.db.AddOrderStatus(ctxTx, orderID, userID, status, order)
 	})
+}
+
+func (s *StorageDB) GetOrderOnlyStatus(orderID uint64) (stat string, err error) {
+	err = s.txManager.RunReadOnlyCommitted(s.ctx, func(ctxTx context.Context) error {
+		stat, err = s.db.GetOrderOnlyStatus(s.ctx, orderID)
+		return err
+	})
+	return
 }
 
 func (s *StorageDB) GetOrderStatus(orderID uint64) (order *domain.OrderStatus, err error) {
