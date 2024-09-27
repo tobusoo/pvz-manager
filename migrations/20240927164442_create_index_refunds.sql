@@ -1,5 +1,5 @@
 -- +goose NO TRANSACTION
 -- +goose Up
-create index concurrently refunds_order_id_idx on refunds using btree(order_id);
+create index concurrently if not exists refunds_order_id_idx on refunds using btree(order_id);
 -- +goose Down
-drop index concurrently refunds_order_id_idx;
+drop index concurrently if exists refunds_order_id_idx;
