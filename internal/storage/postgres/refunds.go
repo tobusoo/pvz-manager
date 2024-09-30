@@ -60,7 +60,7 @@ func (pg *PgRepository) GetRefunds(ctx context.Context, pageID, ordersPerPage ui
 		select
 			oh.user_id,
 			oh.order_id,
-			oh.expiration_date,
+			to_char(oh.expiration_date, 'DD-MM-YYYY') as expiration_date,
 			oh.package_type,
 			oh.weight,
 			oh.cost,

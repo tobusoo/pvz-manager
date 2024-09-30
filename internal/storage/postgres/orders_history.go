@@ -14,8 +14,12 @@ import (
 
 func (pg *PgRepository) AddOrderStatus(ctx context.Context, orderID, userID uint64, status string, order *domain.Order) error {
 	tx := pg.txManager.GetQueryEngine(ctx)
+	expDate, err := utils.StringToTime(order.ExpirationDate)
+	if err != nil {
+		return fmt.Errorf("AddOrderStatus: %w", err)
+	}
 
-	_, err := tx.Exec(ctx,
+	_, err = tx.Exec(ctx,
 		`insert into orders_history(
 		order_id,
 		user_id,
@@ -29,13 +33,13 @@ func (pg *PgRepository) AddOrderStatus(ctx context.Context, orderID, userID uint
 		values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 		orderID,
 		userID,
-		order.ExpirationDate,
+		expDate,
 		order.PackageType,
 		order.Weight,
 		order.Cost,
 		order.UseTape,
 		status,
-		utils.CurrentDateString(),
+		utils.CurrentDate(),
 	)
 
 	if err != nil {
@@ -77,13 +81,13 @@ func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*do
 	err := pgxscan.Get(ctx, tx, &order,
 		`select 
 		 user_id,
-		 expiration_date,
+		 to_char(expiration_date, 'DD-MM-YYYY') as expiration_date,
 		 package_type,
 		 weight,
 		 cost,
 		 use_tape,
 		 status,
-		 updated_at
+		 to_char(updated_at, 'DD-MM-YYYY') as updated_at
 		 from orders_history
 		 where order_id = $1`,
 		orderID,

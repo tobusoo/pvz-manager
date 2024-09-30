@@ -41,7 +41,7 @@ func (pg *PgRepository) GetOrder(ctx context.Context, userID, orderID uint64) (*
 
 	err := pgxscan.Get(ctx, tx, &order, `
 		select 
-			expiration_date,
+			to_char(expiration_date, 'DD-MM-YYYY') as expiration_date,
 			package_type,
 			cost,
 			weight,
@@ -67,7 +67,7 @@ func (pg *PgRepository) GetExpirationDate(ctx context.Context, userID, orderID u
 
 	err := pgxscan.Get(ctx, tx, &expDate, `
 		select 
-			expiration_date
+			to_char(expiration_date, 'DD-MM-YYYY') as expiration_date
 		from orders_history
 		where user_id = $2 and order_id = $1`,
 		orderID,
@@ -91,7 +91,7 @@ func (pg *PgRepository) GetOrdersByUserID(ctx context.Context, userID, firstOrde
 		select
 			user_id, 
 			order_id,
-			expiration_date,
+			to_char(expiration_date, 'DD-MM-YYYY') as expiration_date,
 			package_type,
 			cost,
 			weight,
