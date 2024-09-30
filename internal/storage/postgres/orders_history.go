@@ -2,9 +2,12 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
@@ -12,7 +15,7 @@ import (
 func (pg *PgRepository) AddOrderStatus(ctx context.Context, orderID, userID uint64, status string, order *domain.Order) error {
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	if _, err := tx.Exec(ctx,
+	_, err := tx.Exec(ctx,
 		`insert into orders_history(
 		order_id,
 		user_id,
@@ -33,40 +36,45 @@ func (pg *PgRepository) AddOrderStatus(ctx context.Context, orderID, userID uint
 		order.UseTape,
 		status,
 		utils.CurrentDateString(),
-	); err != nil {
+	)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return fmt.Errorf("order %d already exists", orderID)
+		}
 		return fmt.Errorf("AddOrderStatus: %w", err)
 	}
 
-	return nil
+	return err
 }
 
 func (pg *PgRepository) GetOrderOnlyStatus(ctx context.Context, orderID uint64) (string, error) {
-	var statuses []string
+	var status string
 
 	tx := pg.txManager.GetQueryEngine(ctx)
-	if err := pgxscan.Select(ctx, tx, &statuses,
+	err := pgxscan.Get(ctx, tx, &status,
 		`select 
-		 status,
+		 	status
 		 from orders_history
 		 where order_id = $1`,
 		orderID,
-	); err != nil {
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", fmt.Errorf("order %d not found", orderID)
+	} else if err != nil {
 		return "", fmt.Errorf("GetOrderOnlyStatus: %w", err)
 	}
 
-	if len(statuses) == 0 {
-		return "", fmt.Errorf("not found order %d", orderID)
-	}
-
-	return statuses[0], nil
-
+	return status, nil
 }
 
 func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*domain.OrderStatus, error) {
-	var orders []*domain.OrderStatus
+	var order *domain.OrderStatus
 
 	tx := pg.txManager.GetQueryEngine(ctx)
-	if err := pgxscan.Select(ctx, tx, &orders,
+	err := pgxscan.Get(ctx, tx, &order,
 		`select 
 		 user_id,
 		 expiration_date,
@@ -79,15 +87,15 @@ func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*do
 		 from orders_history
 		 where order_id = $1`,
 		orderID,
-	); err != nil {
-		return nil, fmt.Errorf("GetOrderStatus: %w", err)
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("order %d not found", orderID)
+	} else if err != nil {
+		return nil, fmt.Errorf("GetOrderOnlyStatus: %w", err)
 	}
 
-	if len(orders) == 0 {
-		return nil, fmt.Errorf("not found order %d", orderID)
-	}
-
-	return orders[0], nil
+	return order, nil
 }
 
 func (pg *PgRepository) SetOrderStatus(ctx context.Context, orderID uint64, status string) error {
@@ -99,6 +107,7 @@ func (pg *PgRepository) SetOrderStatus(ctx context.Context, orderID uint64, stat
 		orderID,
 		status,
 	)
+
 	if err != nil {
 		return fmt.Errorf("SetOrderStatus: %w", err)
 	}

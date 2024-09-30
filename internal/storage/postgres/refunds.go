@@ -2,21 +2,29 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 )
 
 func (pg *PgRepository) AddRefund(ctx context.Context, userID, orderID uint64, order *domain.Order) error {
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	if _, err := tx.Exec(ctx, `
+	_, err := tx.Exec(ctx, `
 		insert into refunds(
 			order_id)
 		values ($1)`,
 		orderID,
-	); err != nil {
+	)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return fmt.Errorf("order %d already refunded", orderID)
+		}
 		return fmt.Errorf("AddRefund: %w", err)
 	}
 

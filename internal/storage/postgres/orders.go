@@ -2,10 +2,13 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
@@ -13,13 +16,19 @@ import (
 func (pg *PgRepository) AddOrder(ctx context.Context, userID, orderID uint64) error {
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	if _, err := tx.Exec(ctx, `insert into orders(
+	_, err := tx.Exec(ctx, `insert into orders(
 		user_id,
 		order_id)
 		values ($1, $2)`,
 		userID,
 		orderID,
-	); err != nil {
+	)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return fmt.Errorf("order %d already exists", orderID)
+		}
 		return fmt.Errorf("AddOrder: %w", err)
 	}
 
@@ -27,51 +36,51 @@ func (pg *PgRepository) AddOrder(ctx context.Context, userID, orderID uint64) er
 }
 
 func (pg *PgRepository) GetOrder(ctx context.Context, userID, orderID uint64) (*domain.Order, error) {
-	var order []*domain.Order
+	var order *domain.Order
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	if err := pgxscan.Select(ctx, tx, &order, `
+	err := pgxscan.Get(ctx, tx, &order, `
 		select 
 			expiration_date,
 			package_type,
 			cost,
 			weight,
-			use_tape,
+			use_tape
 		from orders_history
 		where order_id = $1 and user_id = $2`,
 		orderID,
 		userID,
-	); err != nil {
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("order %d for user %d not found", orderID, userID)
+	} else if err != nil {
 		return nil, fmt.Errorf("GetOrder: %w", err)
 	}
 
-	if len(order) == 0 {
-		return nil, fmt.Errorf("not found user %d order's %d", userID, orderID)
-	}
-
-	return order[0], nil
+	return order, nil
 }
 
 func (pg *PgRepository) GetExpirationDate(ctx context.Context, userID, orderID uint64) (time.Time, error) {
-	var expDate []string
+	var expDate string
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	if err := pgxscan.Select(ctx, tx, &expDate, `
+	err := pgxscan.Get(ctx, tx, &expDate, `
 		select 
 			expiration_date
 		from orders_history
 		where user_id = $2 and order_id = $1`,
 		orderID,
 		userID,
-	); err != nil {
-		return time.Time{}, fmt.Errorf("GetExpitarionDate: %w", err)
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return time.Time{}, fmt.Errorf("order %d for user %d not found", orderID, userID)
+	} else if err != nil {
+		return time.Time{}, fmt.Errorf("GetExpirationDate: %w", err)
 	}
 
-	if len(expDate) == 0 {
-		return time.Time{}, fmt.Errorf("not found expiration date for user %d order %d", userID, orderID)
-	}
-
-	return utils.StringToTime(expDate[0])
+	return utils.StringToTime(expDate)
 }
 
 func (pg *PgRepository) GetOrdersByUserID(ctx context.Context, userID, firstOrderID, limit uint64) ([]domain.OrderView, error) {
