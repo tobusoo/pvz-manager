@@ -71,7 +71,7 @@ func (pg *PgRepository) GetOrderOnlyStatus(ctx context.Context, orderID uint64) 
 }
 
 func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*domain.OrderStatus, error) {
-	var order *domain.OrderStatus
+	var order domain.OrderStatus
 
 	tx := pg.txManager.GetQueryEngine(ctx)
 	err := pgxscan.Get(ctx, tx, &order,
@@ -92,10 +92,10 @@ func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*do
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("order %d not found", orderID)
 	} else if err != nil {
-		return nil, fmt.Errorf("GetOrderOnlyStatus: %w", err)
+		return nil, fmt.Errorf("GetOrderStatus: %w", err)
 	}
 
-	return order, nil
+	return &order, nil
 }
 
 func (pg *PgRepository) SetOrderStatus(ctx context.Context, orderID uint64, status string) error {

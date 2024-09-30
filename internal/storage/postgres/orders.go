@@ -36,7 +36,7 @@ func (pg *PgRepository) AddOrder(ctx context.Context, userID, orderID uint64) er
 }
 
 func (pg *PgRepository) GetOrder(ctx context.Context, userID, orderID uint64) (*domain.Order, error) {
-	var order *domain.Order
+	var order domain.Order
 	tx := pg.txManager.GetQueryEngine(ctx)
 
 	err := pgxscan.Get(ctx, tx, &order, `
@@ -58,7 +58,7 @@ func (pg *PgRepository) GetOrder(ctx context.Context, userID, orderID uint64) (*
 		return nil, fmt.Errorf("GetOrder: %w", err)
 	}
 
-	return order, nil
+	return &order, nil
 }
 
 func (pg *PgRepository) GetExpirationDate(ctx context.Context, userID, orderID uint64) (time.Time, error) {
@@ -109,10 +109,10 @@ func (pg *PgRepository) GetOrdersByUserID(ctx context.Context, userID, firstOrde
 }
 
 func (pg *PgRepository) CanRemoveOrder(ctx context.Context, userID, orderID uint64) error {
-	var exist []bool
+	var exist bool
 	tx := pg.txManager.GetQueryEngine(ctx)
 
-	if err := pgxscan.Select(ctx, tx, &exist, `
+	if err := pgxscan.Get(ctx, tx, &exist, `
 		select exists (
 			select 1
 			from orders
@@ -124,7 +124,7 @@ func (pg *PgRepository) CanRemoveOrder(ctx context.Context, userID, orderID uint
 		return fmt.Errorf("CanRemoveOrder: %w", err)
 	}
 
-	if !exist[0] {
+	if !exist {
 		return fmt.Errorf("not found user %d order's %d", userID, orderID)
 	}
 
