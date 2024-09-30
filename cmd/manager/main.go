@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
@@ -50,7 +50,8 @@ func main() {
 
 	if yes, ok := os.LookupEnv("USE_POSTGRESQL"); ok && yes == "yes" {
 		ctx := context.Background()
-		pool, err := pgxpool.Connect(ctx, os.Getenv("POSTGRESQL_DSN"))
+
+		pool, err := pgxpool.New(ctx, os.Getenv("POSTGRESQL_DSN"))
 		if err != nil {
 			log.Fatal(err)
 		}

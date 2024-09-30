@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/suite"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
@@ -42,7 +42,7 @@ func (s *StorageDBSuite) SetupSuite() {
 	}
 
 	ctx := context.Background()
-	s.pool, err = pgxpool.Connect(ctx, psqlDSN)
+	s.pool, err = pgxpool.New(ctx, psqlDSN)
 	s.Require().NoError(err)
 
 	txManager := postgres.NewTxManager(s.pool)

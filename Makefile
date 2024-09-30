@@ -34,13 +34,13 @@ integration-test-db:
 	@$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_TEST_DSN) up
 	@POSTGRESQL_TEST_DSN=${POSTGRESQL_TEST_DSN} go test -v -coverpkg=./internal/storage/postgres \
 		-coverprofile=coverage_storage_postgres.out \
-		./tests/integration/storageDB/integration_test.go
+		./tests/integration/storage_db/integration_test.go
 	docker-compose down postgres_test
 
 integration-test:
 	@echo "Integration Tests:"
 	@go test -coverpkg=./internal/storage/storage_json -coverprofile=coverage_storage.out \
-		./tests/integration/storageJSON/integration_test.go
+		./tests/integration/storage_json/integration_test.go
 
 e2e-test: build
 	@echo "E2E Tests:"
