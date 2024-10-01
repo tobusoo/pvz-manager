@@ -54,7 +54,7 @@ func NewStorageDB(ctx context.Context, tx TransactionManager, db RepositoryDB) *
 
 func (s *StorageDB) AddOrder(userID, orderID uint64, order *domain.Order) (err error) {
 	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
-		if stat, err := s.db.GetOrderOnlyStatus(s.ctx, orderID); err == nil {
+		if stat, err := s.db.GetOrderOnlyStatus(ctxTx, orderID); err == nil {
 			return fmt.Errorf("order %d has already been %s", orderID, stat)
 		}
 
@@ -113,7 +113,7 @@ func (s *StorageDB) CanRemoveOrder(orderID uint64) error {
 
 func (s *StorageDB) RemoveOrder(orderID uint64, status string) error {
 	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
-		stat, err := s.db.GetOrderStatus(s.ctx, orderID)
+		stat, err := s.db.GetOrderStatus(ctxTx, orderID)
 		if err != nil {
 			return err
 		}
@@ -123,7 +123,7 @@ func (s *StorageDB) RemoveOrder(orderID uint64, status string) error {
 }
 
 func (s *StorageDB) removeOrder(ctxTx context.Context, orderID uint64, status string) error {
-	stat, err := s.db.GetOrderStatus(s.ctx, orderID)
+	stat, err := s.db.GetOrderStatus(ctxTx, orderID)
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func (s *StorageDB) removeOrder(ctxTx context.Context, orderID uint64, status st
 func (s *StorageDB) RemoveOrders(ordersID []uint64, status string) error {
 	return s.txManager.RunSerializable(s.ctx, func(ctxTx context.Context) error {
 		for _, order := range ordersID {
-			if err := s.removeOrder(s.ctx, order, status); err != nil {
+			if err := s.removeOrder(ctxTx, order, status); err != nil {
 				return err
 			}
 		}
@@ -155,7 +155,7 @@ func (s *StorageDB) AddOrderStatus(orderID, userID uint64, status string, order 
 
 func (s *StorageDB) GetOrderOnlyStatus(orderID uint64) (stat string, err error) {
 	err = s.txManager.RunReadOnlyCommitted(s.ctx, func(ctxTx context.Context) error {
-		stat, err = s.db.GetOrderOnlyStatus(s.ctx, orderID)
+		stat, err = s.db.GetOrderOnlyStatus(ctxTx, orderID)
 		return err
 	})
 	return
