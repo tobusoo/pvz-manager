@@ -6,14 +6,18 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
+	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage/postgres"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
+	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
+	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 )
 
 func init() {
@@ -77,12 +81,49 @@ func main() {
 
 		st = storage
 	}
-
 	cmd.SetStorage(st)
 
-	if len(os.Args[1:]) > 0 {
-		RunOnce()
-	} else {
-		RunInteractive()
+	wk := workers.NewWorkers(2)
+	cmd.SetWorkers(wk)
+	acceptUsecase := usecase.NewAcceptUsecase(st)
+
+	result_handler := func(wk *workers.Workers) {
+		for res := range wk.Results {
+			fmt.Println(res)
+		}
 	}
+
+	go result_handler(wk)
+	for i := 0; i < 50; i++ {
+		req := &dto.AddOrderRequest{
+			ExpirationDate: "10-10-2024",
+			ContainerType:  "",
+			UseTape:        false,
+			Cost:           100,
+			Weight:         100,
+			OrderID:        uint64(1 + i),
+			UserID:         1,
+		}
+		if i == 25 {
+			fmt.Println("Set new workers")
+			wk.Close()
+			wk.Wait()
+			wk = workers.NewWorkers(5)
+			go result_handler(wk)
+		}
+		task := workers.TaskRequest{Func: func() error {
+			return acceptUsecase.AcceptOrder(req)
+		}, Request: strconv.Itoa(i)}
+
+		wk.AddTask(task)
+		fmt.Println("add", i)
+	}
+	wk.Close()
+	wk.Wait()
+
+	// if len(os.Args[1:]) > 0 {
+	// 	RunOnce()
+	// } else {
+	// 	RunInteractive()
+	// }
 }

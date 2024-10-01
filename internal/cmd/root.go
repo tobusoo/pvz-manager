@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
 	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
+	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 )
 
 func init() {
@@ -24,6 +25,7 @@ func init() {
 }
 
 var (
+	wk *workers.Workers
 	st storage.Storage
 
 	acceptUsecase *usecase.AcceptUsecase
@@ -57,6 +59,10 @@ func SetStorage(s storage.Storage) {
 	giveUsecase = usecase.NewGiveUsecase(st)
 	returnUsecase = usecase.NewReturnUsecase(st)
 	viewUsecase = usecase.NewViewUsecase(st)
+}
+
+func SetWorkers(workers *workers.Workers) {
+	wk = workers
 }
 
 func SetArgs(args []string) {
