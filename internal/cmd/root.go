@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/spf13/cobra"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
@@ -15,6 +16,7 @@ func init() {
 	rootCmd.AddCommand(giveCmd)
 	rootCmd.AddCommand(returnCmd)
 	rootCmd.AddCommand(viewCmd)
+	rootCmd.AddCommand(workersCmd)
 
 	rootCmd.DisableSuggestions = false
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
@@ -25,8 +27,11 @@ func init() {
 }
 
 var (
-	wk *workers.Workers
-	st storage.Storage
+	inoutMtx    sync.Mutex
+	numWorkers  uint
+	workersChan chan *workers.Workers
+	wk          *workers.Workers
+	st          storage.Storage
 
 	acceptUsecase *usecase.AcceptUsecase
 	giveUsecase   *usecase.GiveUsecase
@@ -61,8 +66,36 @@ func SetStorage(s storage.Storage) {
 	viewUsecase = usecase.NewViewUsecase(st)
 }
 
-func SetWorkers(workers *workers.Workers) {
-	wk = workers
+func initWorkersChan() {
+	if workersChan == nil {
+		workersChan = make(chan *workers.Workers, 1)
+	}
+}
+
+func SetWorkers(num uint) {
+	wk = workers.NewWorkers(num)
+	initWorkersChan()
+
+	workersChan <- wk
+}
+
+func GetWorkersChan() <-chan *workers.Workers {
+	initWorkersChan()
+
+	return workersChan
+}
+
+func InOutLock() {
+	inoutMtx.Lock()
+}
+
+func InOutUnlock() {
+	inoutMtx.Unlock()
+}
+
+func CloseAndWaitWorkers() {
+	wk.CloseJobs()
+	wk.Wait()
 }
 
 func SetArgs(args []string) {

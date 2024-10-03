@@ -85,10 +85,14 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 		UserID:         userID,
 	}
 
-	task := workers.TaskRequest{Func: func() error {
-		return acceptUsecase.AcceptOrder(req)
-	}}
+	task := &workers.TaskRequest{
+		Request: fmt.Sprintf("accept order -u=%d -o=%d ...", userID, orderID),
+		Func: func() error {
+			return acceptUsecase.AcceptOrder(req)
+		},
+	}
 
+	fmt.Printf("\n\n")
 	wk.AddTask(task)
 }
 
@@ -100,7 +104,13 @@ func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 		OrderID: orderID,
 	}
 
-	if err := acceptUsecase.AcceptRefund(req); err != nil {
-		fmt.Println(err)
+	task := &workers.TaskRequest{
+		Request: fmt.Sprintf("accept refund -u=%d -o=%d", userID, orderID),
+		Func: func() error {
+			return acceptUsecase.AcceptRefund(req)
+		},
 	}
+
+	fmt.Printf("\n\n")
+	wk.AddTask(task)
 }
