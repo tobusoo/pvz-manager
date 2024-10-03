@@ -1,7 +1,6 @@
 package workers
 
 import (
-	"strconv"
 	"sync"
 )
 
@@ -16,46 +15,60 @@ type TaskResponse struct {
 }
 
 type Workers struct {
-	numWorkers int
+	numWorkers   uint
+	closedJobs   bool
+	closedResult bool
 
-	jobs    chan TaskRequest
-	Results chan TaskResponse
+	jobs    chan *TaskRequest
+	Results chan *TaskResponse
 	wg      sync.WaitGroup
 }
 
-func NewWorkers(workers int) *Workers {
+func NewWorkers(workers uint) *Workers {
 	w := &Workers{
-		numWorkers: workers,
-		wg:         sync.WaitGroup{},
-		jobs:       make(chan TaskRequest, workers),
-		Results:    make(chan TaskResponse, workers),
+		numWorkers:   workers,
+		closedJobs:   false,
+		closedResult: false,
+		wg:           sync.WaitGroup{},
+		jobs:         make(chan *TaskRequest, workers),
+		Results:      make(chan *TaskResponse, workers),
 	}
 
-	w.wg.Add(workers)
-	for i := 0; i < workers; i++ {
-		go w.work(i)
+	w.wg.Add(int(workers))
+	for i := uint(0); i < workers; i++ {
+		go w.work()
 	}
 
 	return w
 }
 
-func (w *Workers) AddTask(task TaskRequest) {
+func (w *Workers) GetSize() uint {
+	return w.numWorkers
+}
+
+func (w *Workers) AddTask(task *TaskRequest) {
 	w.jobs <- task
 }
 
-func (w *Workers) Close() {
-	close(w.jobs)
+func (w *Workers) CloseJobs() {
+	if !w.closedJobs {
+		close(w.jobs)
+	}
+	w.closedJobs = true
 }
 
 func (w *Workers) Wait() {
 	w.wg.Wait()
-	close(w.Results)
+	if !w.closedResult {
+		close(w.Results)
+	}
+	w.closedResult = true
 }
 
-func (w *Workers) work(id int) {
+func (w *Workers) work() {
 	defer w.wg.Done()
 
 	for task := range w.jobs {
-		w.Results <- TaskResponse{Err: task.Func(), Response: "worker: " + strconv.Itoa(id) + " " + task.Request}
+		w.Results <- &TaskResponse{Err: task.Func(), Response: task.Request}
 	}
 }
