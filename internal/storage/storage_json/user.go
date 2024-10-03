@@ -2,6 +2,7 @@ package storage_json
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
@@ -14,6 +15,8 @@ type User struct {
 	OrdersIDatArray map[uint64]int     `json:"ordersIDatArray"`
 
 	UserID uint64 `json:"userID"`
+
+	mtx sync.Mutex
 }
 
 func NewUser(userID uint64) *User {
@@ -26,6 +29,9 @@ func NewUser(userID uint64) *User {
 }
 
 func (u *User) Add(orderID uint64, order *domain.Order) error {
+	u.mtx.Lock()
+	defer u.mtx.Unlock()
+
 	if _, ok := u.Orders[orderID]; ok {
 		return fmt.Errorf("order %d has already accepted", orderID)
 	}
@@ -43,6 +49,9 @@ func (u *User) Add(orderID uint64, order *domain.Order) error {
 }
 
 func (u *User) Get(orderID uint64) (*domain.Order, error) {
+	u.mtx.Lock()
+	defer u.mtx.Unlock()
+
 	order, ok := u.Orders[orderID]
 	if !ok {
 		return nil, fmt.Errorf("not found order %d", orderID)
@@ -52,6 +61,9 @@ func (u *User) Get(orderID uint64) (*domain.Order, error) {
 }
 
 func (u *User) CanRemove(orderID uint64) error {
+	u.mtx.Lock()
+	defer u.mtx.Unlock()
+
 	_, ok := u.OrdersIDatArray[orderID]
 	if !ok {
 		return fmt.Errorf("not found order %d at orders array of user %d", orderID, u.UserID)
@@ -61,6 +73,9 @@ func (u *User) CanRemove(orderID uint64) error {
 }
 
 func (u *User) Remove(orderId uint64) error {
+	u.mtx.Lock()
+	defer u.mtx.Unlock()
+
 	id, ok := u.OrdersIDatArray[orderId]
 	if !ok {
 		return fmt.Errorf("not found order %d at orders array of user %d", orderId, u.UserID)
@@ -73,6 +88,9 @@ func (u *User) Remove(orderId uint64) error {
 }
 
 func (u *User) GetExpirationDate(orderID uint64) (time.Time, error) {
+	u.mtx.Lock()
+	defer u.mtx.Unlock()
+
 	order, ok := u.Orders[orderID]
 	if !ok {
 		return time.Time{}, fmt.Errorf("user %d doesn't have order %d", u.UserID, orderID)
@@ -87,6 +105,9 @@ func (u *User) GetExpirationDate(orderID uint64) (time.Time, error) {
 }
 
 func (u *User) findID(firstOrderID uint64) (int, error) {
+	u.mtx.Lock()
+	defer u.mtx.Unlock()
+
 	var ok bool
 
 	id := 0
@@ -109,6 +130,9 @@ func (u *User) calcLimit(limit, arrayLen uint64) uint64 {
 }
 
 func (u *User) GetOrders(firstOrderID, limit uint64) ([]domain.OrderView, error) {
+	u.mtx.Lock()
+	defer u.mtx.Unlock()
+
 	id, err := u.findID(firstOrderID)
 	if err != nil {
 		return nil, err

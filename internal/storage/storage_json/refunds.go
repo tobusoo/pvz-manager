@@ -2,6 +2,7 @@ package storage_json
 
 import (
 	"fmt"
+	"sync"
 
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 )
@@ -9,6 +10,8 @@ import (
 type Refunds struct {
 	Orders          []domain.OrderView `json:"orders"`
 	OrdersIDatArray map[uint64]int     `json:"ordersIDatArray"`
+
+	mtx sync.Mutex
 }
 
 func NewRefunds() *Refunds {
@@ -19,6 +22,9 @@ func NewRefunds() *Refunds {
 }
 
 func (r *Refunds) AddRefund(userID, orderID uint64, order *domain.Order) (err error) {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
+
 	r.Orders = append(r.Orders, domain.OrderView{
 		Order:   order,
 		UserID:  userID,
@@ -31,6 +37,9 @@ func (r *Refunds) AddRefund(userID, orderID uint64, order *domain.Order) (err er
 }
 
 func (r *Refunds) RemoveRefund(orderID uint64) error {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
+
 	id, ok := r.OrdersIDatArray[orderID]
 	if !ok {
 		return fmt.Errorf("not found order %d at refunded", orderID)
@@ -41,6 +50,9 @@ func (r *Refunds) RemoveRefund(orderID uint64) error {
 }
 
 func (r *Refunds) GetRefunds(pageID, ordersPerPage uint64) (res []domain.OrderView, err error) {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
+
 	if err := r.getRefundsCheckErr(pageID, ordersPerPage); err != nil {
 		return nil, err
 	}
@@ -50,6 +62,9 @@ func (r *Refunds) GetRefunds(pageID, ordersPerPage uint64) (res []domain.OrderVi
 }
 
 func (r *Refunds) getRefundsSlice(firstOrderID int, ordersPerPage uint64) []domain.OrderView {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
+
 	res := make([]domain.OrderView, 0)
 	ordersCount := 0
 
