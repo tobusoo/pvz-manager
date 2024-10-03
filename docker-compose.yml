@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    container_name: postgres_db
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+
+  postgres_test:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=postgres_test
+      - POSTGRES_USER=postgres_test
+      - POSTGRES_PASSWORD=postgres_test
+    container_name: postgres_test_db
+    ports:
+      - "5433:5432"
+    restart: always

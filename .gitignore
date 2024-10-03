@@ -1,7 +1,9 @@
 .vscode/
 bin/
+pgdata/
 godepgraph.png
 coverage_usecase.out
 coverage_storage.out
+coverage_storage_postgres.out
 coverage.out
 coverage.html

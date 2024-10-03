@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage/mock"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json/mock"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
@@ -28,10 +28,10 @@ func newMocks(ctrl *minimock.Controller) *mocks {
 }
 
 func newAcceptUsecase(mocks *mocks) *AcceptUsecase {
-	st := &storage.Storage{
-		OrdersHistoryRepository: mocks.ohp,
-		RefundsRepository:       mocks.rp,
-		Users:                   mocks.up,
+	st := &storage_json.Storage{
+		Ohp:   mocks.ohp,
+		Rp:    mocks.rp,
+		Users: mocks.up,
 	}
 	return NewAcceptUsecase(st)
 }
@@ -208,7 +208,7 @@ func TestAcceptUsecase_AcceptRefund(t *testing.T) {
 				Order: &domain.Order{
 					ExpirationDate: utils.CurrentDateString(),
 				},
-				Date: utils.CurrentDateString(),
+				UpdatedAt: utils.CurrentDateString(),
 			},
 		},
 		"WrongOrderStatus": {
@@ -237,9 +237,9 @@ func TestAcceptUsecase_AcceptRefund(t *testing.T) {
 				OrderID: 5,
 			},
 			order: &domain.OrderStatus{
-				Status: domain.StatusGiveClient,
-				UserID: 5,
-				Date:   "01-09-2024",
+				Status:    domain.StatusGiveClient,
+				UserID:    5,
+				UpdatedAt: "01-09-2024",
 			},
 		},
 	}

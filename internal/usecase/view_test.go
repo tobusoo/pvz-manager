@@ -8,14 +8,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
 )
 
 func newViewUsecase(mocks *mocks) *ViewUsecase {
-	st := &storage.Storage{
-		OrdersHistoryRepository: mocks.ohp,
-		RefundsRepository:       mocks.rp,
-		Users:                   mocks.up,
+	st := &storage_json.Storage{
+		Ohp:   mocks.ohp,
+		Rp:    mocks.rp,
+		Users: mocks.up,
 	}
 	return NewViewUsecase(st)
 }

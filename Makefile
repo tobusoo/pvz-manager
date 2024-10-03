@@ -1,6 +1,11 @@
+include .env
+
 GOCYCLO_PATH=$(shell go env GOPATH)/bin/gocyclo
 GOCOGNIT_PATH=$(shell go env GOPATH)/bin/gocognit
 GODEPGRAPH_PATH=$(shell go env GOPATH)/bin/godepgraph
+GOOSEE_PATH=$(shell go env GOPATH)/bin/goose
+
+MIGRATIONS_PATH=./migrations
 
 THRESHOLD=5
 
@@ -11,7 +16,7 @@ APP_PATH_SRC=cmd/$(APP_NAME)/main.go
 APP_PATH_BIN=$(BIN_DIR)/$(APP_NAME)
 
 .PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
-.PHONY: unit-test integration-test e2e-test benchmark
+.PHONY: unit-test integration-test integration-test-db e2e-test benchmark
 
 all: build
 
@@ -22,19 +27,31 @@ unit-test:
 	@echo "Unit Tests:"
 	@go test ./internal/usecase/ -coverprofile=coverage_usecase.out
 
+integration-test-db:
+	docker-compose up -d postgres_test
+	@echo "Sleeping 4 seconds for postgreSQL preparation"
+	@sleep 4
+	@$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_TEST_DSN) up
+	@POSTGRESQL_TEST_DSN=${POSTGRESQL_TEST_DSN} go test -v -coverpkg=./internal/storage/postgres \
+		-coverprofile=coverage_storage_postgres.out \
+		./tests/integration/storage_db/integration_test.go
+	docker-compose down postgres_test
+
 integration-test:
 	@echo "Integration Tests:"
-	@go test -coverpkg=./internal/storage -coverprofile=coverage_storage.out ./tests/integration_test.go
+	@go test -coverpkg=./internal/storage/storage_json -coverprofile=coverage_storage.out \
+		./tests/integration/storage_json/integration_test.go
 
 e2e-test: build
 	@echo "E2E Tests:"
 	@go test tests/e2e_test.go
 
-test: unit-test integration-test e2e-test
+test: unit-test integration-test integration-test-db e2e-test
 	@echo "mode: set" > coverage.out
 	@tail -n +2 coverage_usecase.out >> coverage.out
 	@tail -n +2 coverage_storage.out >> coverage.out
-	@rm coverage_usecase.out coverage_storage.out
+	@tail -n +2 coverage_storage_postgres.out >> coverage.out
+	@rm coverage_usecase.out coverage_storage.out coverage_storage_postgres.out
 
 coverage: test
 	go tool cover -html=coverage.out -o coverage.html 
@@ -54,7 +71,7 @@ dependancy-update:
 	@go get -u
 
 dependancy-install:
-	@go get ./...
+	@go get ./internal/... ./benchmark/... ./tests/... ./scripts/... 
 
 tidy:
 	@go mod tidy
@@ -66,10 +83,10 @@ gocognit-install:
 	@go install github.com/uudashr/gocognit/cmd/gocognit@latest
 
 gocyclo: gocyclo-install
-	$(GOCYCLO_PATH) -over $(THRESHOLD) -ignore "_mock|_test" .
+	$(GOCYCLO_PATH) -over $(THRESHOLD) -ignore "_mock|_test" internal
 
 gocognit: gocognit-install
-	$(GOCOGNIT_PATH) -over $(THRESHOLD) -ignore "_mock|_test" .
+	$(GOCOGNIT_PATH) -over $(THRESHOLD) -ignore "_mock|_test" internal
 
 depgraph-install:
 	@go install github.com/kisielk/godepgraph@latest
@@ -79,7 +96,44 @@ depgraph-build:
 
 depgraph: depgraph-install depgraph-build
 
-.PHONY: depgraph
+compose-up:
+	docker-compose up -d postgres
+
+compose-down:
+	docker-compose down postgres
+
+compose-stop:
+	docker-compose stop postgres
+
+compose-start:
+	docker-compose start postgres
+
+compose-ps:
+	docker-compose ps postgres
+
+goose-install:
+	go install github.com/pressly/goose/v3/cmd/goose@latest
+
+goose-add:
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) create rename_me sql
+
+goose-up:
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) up
+
+goose-down:
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) down
+
+goose-status:
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) status
+
+squawk-install:
+	npm install -g squawk-cli
+
+squawk:
+	squawk ./migrations/* --exclude=ban-drop-table
+
+.PHONY: depgraph compose-up compose-down compose-stop compose-start goose-install goose-add goose-up goose-status goose-down
+.PHONY: squawk-install squawk
 
 clean:
 	rm -rf $(BIN_DIR) godepgraph.png

@@ -1,0 +1,102 @@
+[
+    {
+        "expirationDate": "22-08-2025",
+        "packageType": "default",
+        "cost": 14485,
+        "weight": 15968,
+        "useTape": false,
+        "userID": 6343387928508394221,
+        "orderID": 636999143273882,
+        "exist": false
+    },
+    {
+        "expirationDate": "29-05-2025",
+        "packageType": "default",
+        "cost": 86542,
+        "weight": 21985,
+        "useTape": false,
+        "userID": 1995747062805058390,
+        "orderID": 3584809703544395,
+        "exist": false
+    },
+    {
+        "expirationDate": "13-05-2025",
+        "packageType": "taped package",
+        "cost": 26781,
+        "weight": 1695,
+        "useTape": true,
+        "userID": 6560905053971490160,
+        "orderID": 6607280213241138,
+        "exist": false
+    },
+    {
+        "expirationDate": "26-06-2025",
+        "packageType": "default",
+        "cost": 180920,
+        "weight": 21670,
+        "useTape": false,
+        "userID": 6794099367613416659,
+        "orderID": 12918817422073615,
+        "exist": false
+    },
+    {
+        "expirationDate": "25-07-2025",
+        "packageType": "taped box",
+        "cost": 77398,
+        "weight": 26412,
+        "useTape": true,
+        "userID": 8080971398458126317,
+        "orderID": 24301227542853643,
+        "exist": false
+    },
+    {
+        "expirationDate": "19-08-2025",
+        "packageType": "default",
+        "cost": 167867,
+        "weight": 20379,
+        "useTape": false,
+        "userID": 3790081433169947959,
+        "orderID": 28632559000480740,
+        "exist": false
+    },
+    {
+        "expirationDate": "27-07-2025",
+        "packageType": "tape",
+        "cost": 82348,
+        "weight": 35699,
+        "useTape": true,
+        "userID": 699511507736300221,
+        "orderID": 47156887750257662,
+        "exist": false
+    },
+    {
+        "expirationDate": "03-07-2025",
+        "packageType": "taped package",
+        "cost": 37424,
+        "weight": 7776,
+        "useTape": true,
+        "userID": 3355998611021480766,
+        "orderID": 54299556777737294,
+        "exist": false
+    },
+    {
+        "expirationDate": "16-04-2025",
+        "packageType": "default",
+        "cost": 175766,
+        "weight": 4374,
+        "useTape": false,
+        "userID": 2080848968892915411,
+        "orderID": 73622412971690254,
+        "exist": false
+    },
+    {
+        "expirationDate": "18-08-2025",
+        "packageType": "default",
+        "cost": 242076,
+        "weight": 17373,
+        "useTape": false,
+        "userID": 2295761653608974938,
+        "orderID": 92565839463456965,
+        "exist": false
+    }
+]

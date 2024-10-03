@@ -7,18 +7,18 @@ import (
 	"github.com/stretchr/testify/require"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 )
 
 const StoragePath = "storage_bench.json"
 
-func newStorage() (*storage.Storage, error) {
-	ohp := storage.NewOrdersHistory()
-	rp := storage.NewRefunds()
-	up := storage.NewUsers()
+func newStorage() (*storage_json.Storage, error) {
+	ohp := storage_json.NewOrdersHistory()
+	rp := storage_json.NewRefunds()
+	up := storage_json.NewUsers()
 
-	return storage.NewStorage(ohp, rp, up, StoragePath)
+	return storage_json.NewStorage(ohp, rp, up, StoragePath)
 }
 
 func BenchmarkAddOrder(b *testing.B) {

@@ -25,6 +25,13 @@ type OrdersHistoryRepositoryMock struct {
 	beforeAddOrderStatusCounter uint64
 	AddOrderStatusMock          mOrdersHistoryRepositoryMockAddOrderStatus
 
+	funcGetOrderOnlyStatus          func(orderID uint64) (stat string, err error)
+	funcGetOrderOnlyStatusOrigin    string
+	inspectFuncGetOrderOnlyStatus   func(orderID uint64)
+	afterGetOrderOnlyStatusCounter  uint64
+	beforeGetOrderOnlyStatusCounter uint64
+	GetOrderOnlyStatusMock          mOrdersHistoryRepositoryMockGetOrderOnlyStatus
+
 	funcGetOrderStatus          func(orderID uint64) (op1 *domain.OrderStatus, err error)
 	funcGetOrderStatusOrigin    string
 	inspectFuncGetOrderStatus   func(orderID uint64)
@@ -50,6 +57,9 @@ func NewOrdersHistoryRepositoryMock(t minimock.Tester) *OrdersHistoryRepositoryM
 
 	m.AddOrderStatusMock = mOrdersHistoryRepositoryMockAddOrderStatus{mock: m}
 	m.AddOrderStatusMock.callArgs = []*OrdersHistoryRepositoryMockAddOrderStatusParams{}
+
+	m.GetOrderOnlyStatusMock = mOrdersHistoryRepositoryMockGetOrderOnlyStatus{mock: m}
+	m.GetOrderOnlyStatusMock.callArgs = []*OrdersHistoryRepositoryMockGetOrderOnlyStatusParams{}
 
 	m.GetOrderStatusMock = mOrdersHistoryRepositoryMockGetOrderStatus{mock: m}
 	m.GetOrderStatusMock.callArgs = []*OrdersHistoryRepositoryMockGetOrderStatusParams{}
@@ -463,6 +473,318 @@ func (m *OrdersHistoryRepositoryMock) MinimockAddOrderStatusInspect() {
 	if !m.AddOrderStatusMock.invocationsDone() && afterAddOrderStatusCounter > 0 {
 		m.t.Errorf("Expected %d calls to OrdersHistoryRepositoryMock.AddOrderStatus at\n%s but found %d calls",
 			mm_atomic.LoadUint64(&m.AddOrderStatusMock.expectedInvocations), m.AddOrderStatusMock.expectedInvocationsOrigin, afterAddOrderStatusCounter)
+	}
+}
+
+type mOrdersHistoryRepositoryMockGetOrderOnlyStatus struct {
+	optional           bool
+	mock               *OrdersHistoryRepositoryMock
+	defaultExpectation *OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation
+	expectations       []*OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation
+
+	callArgs []*OrdersHistoryRepositoryMockGetOrderOnlyStatusParams
+	mutex    sync.RWMutex
+
+	expectedInvocations       uint64
+	expectedInvocationsOrigin string
+}
+
+// OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation specifies expectation struct of the OrdersHistoryRepository.GetOrderOnlyStatus
+type OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation struct {
+	mock               *OrdersHistoryRepositoryMock
+	params             *OrdersHistoryRepositoryMockGetOrderOnlyStatusParams
+	paramPtrs          *OrdersHistoryRepositoryMockGetOrderOnlyStatusParamPtrs
+	expectationOrigins OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectationOrigins
+	results            *OrdersHistoryRepositoryMockGetOrderOnlyStatusResults
+	returnOrigin       string
+	Counter            uint64
+}
+
+// OrdersHistoryRepositoryMockGetOrderOnlyStatusParams contains parameters of the OrdersHistoryRepository.GetOrderOnlyStatus
+type OrdersHistoryRepositoryMockGetOrderOnlyStatusParams struct {
+	orderID uint64
+}
+
+// OrdersHistoryRepositoryMockGetOrderOnlyStatusParamPtrs contains pointers to parameters of the OrdersHistoryRepository.GetOrderOnlyStatus
+type OrdersHistoryRepositoryMockGetOrderOnlyStatusParamPtrs struct {
+	orderID *uint64
+}
+
+// OrdersHistoryRepositoryMockGetOrderOnlyStatusResults contains results of the OrdersHistoryRepository.GetOrderOnlyStatus
+type OrdersHistoryRepositoryMockGetOrderOnlyStatusResults struct {
+	stat string
+	err  error
+}
+
+// OrdersHistoryRepositoryMockGetOrderOnlyStatusOrigins contains origins of expectations of the OrdersHistoryRepository.GetOrderOnlyStatus
+type OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectationOrigins struct {
+	origin        string
+	originOrderID string
+}
+
+// Marks this method to be optional. The default behavior of any method with Return() is '1 or more', meaning
+// the test will fail minimock's automatic final call check if the mocked method was not called at least once.
+// Optional() makes method check to work in '0 or more' mode.
+// It is NOT RECOMMENDED to use this option unless you really need it, as default behaviour helps to
+// catch the problems when the expected method call is totally skipped during test run.
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) Optional() *mOrdersHistoryRepositoryMockGetOrderOnlyStatus {
+	mmGetOrderOnlyStatus.optional = true
+	return mmGetOrderOnlyStatus
+}
+
+// Expect sets up expected params for OrdersHistoryRepository.GetOrderOnlyStatus
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) Expect(orderID uint64) *mOrdersHistoryRepositoryMockGetOrderOnlyStatus {
+	if mmGetOrderOnlyStatus.mock.funcGetOrderOnlyStatus != nil {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("OrdersHistoryRepositoryMock.GetOrderOnlyStatus mock is already set by Set")
+	}
+
+	if mmGetOrderOnlyStatus.defaultExpectation == nil {
+		mmGetOrderOnlyStatus.defaultExpectation = &OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation{}
+	}
+
+	if mmGetOrderOnlyStatus.defaultExpectation.paramPtrs != nil {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("OrdersHistoryRepositoryMock.GetOrderOnlyStatus mock is already set by ExpectParams functions")
+	}
+
+	mmGetOrderOnlyStatus.defaultExpectation.params = &OrdersHistoryRepositoryMockGetOrderOnlyStatusParams{orderID}
+	mmGetOrderOnlyStatus.defaultExpectation.expectationOrigins.origin = minimock.CallerInfo(1)
+	for _, e := range mmGetOrderOnlyStatus.expectations {
+		if minimock.Equal(e.params, mmGetOrderOnlyStatus.defaultExpectation.params) {
+			mmGetOrderOnlyStatus.mock.t.Fatalf("Expectation set by When has same params: %#v", *mmGetOrderOnlyStatus.defaultExpectation.params)
+		}
+	}
+
+	return mmGetOrderOnlyStatus
+}
+
+// ExpectOrderIDParam1 sets up expected param orderID for OrdersHistoryRepository.GetOrderOnlyStatus
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) ExpectOrderIDParam1(orderID uint64) *mOrdersHistoryRepositoryMockGetOrderOnlyStatus {
+	if mmGetOrderOnlyStatus.mock.funcGetOrderOnlyStatus != nil {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("OrdersHistoryRepositoryMock.GetOrderOnlyStatus mock is already set by Set")
+	}
+
+	if mmGetOrderOnlyStatus.defaultExpectation == nil {
+		mmGetOrderOnlyStatus.defaultExpectation = &OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation{}
+	}
+
+	if mmGetOrderOnlyStatus.defaultExpectation.params != nil {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("OrdersHistoryRepositoryMock.GetOrderOnlyStatus mock is already set by Expect")
+	}
+
+	if mmGetOrderOnlyStatus.defaultExpectation.paramPtrs == nil {
+		mmGetOrderOnlyStatus.defaultExpectation.paramPtrs = &OrdersHistoryRepositoryMockGetOrderOnlyStatusParamPtrs{}
+	}
+	mmGetOrderOnlyStatus.defaultExpectation.paramPtrs.orderID = &orderID
+	mmGetOrderOnlyStatus.defaultExpectation.expectationOrigins.originOrderID = minimock.CallerInfo(1)
+
+	return mmGetOrderOnlyStatus
+}
+
+// Inspect accepts an inspector function that has same arguments as the OrdersHistoryRepository.GetOrderOnlyStatus
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) Inspect(f func(orderID uint64)) *mOrdersHistoryRepositoryMockGetOrderOnlyStatus {
+	if mmGetOrderOnlyStatus.mock.inspectFuncGetOrderOnlyStatus != nil {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("Inspect function is already set for OrdersHistoryRepositoryMock.GetOrderOnlyStatus")
+	}
+
+	mmGetOrderOnlyStatus.mock.inspectFuncGetOrderOnlyStatus = f
+
+	return mmGetOrderOnlyStatus
+}
+
+// Return sets up results that will be returned by OrdersHistoryRepository.GetOrderOnlyStatus
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) Return(stat string, err error) *OrdersHistoryRepositoryMock {
+	if mmGetOrderOnlyStatus.mock.funcGetOrderOnlyStatus != nil {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("OrdersHistoryRepositoryMock.GetOrderOnlyStatus mock is already set by Set")
+	}
+
+	if mmGetOrderOnlyStatus.defaultExpectation == nil {
+		mmGetOrderOnlyStatus.defaultExpectation = &OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation{mock: mmGetOrderOnlyStatus.mock}
+	}
+	mmGetOrderOnlyStatus.defaultExpectation.results = &OrdersHistoryRepositoryMockGetOrderOnlyStatusResults{stat, err}
+	mmGetOrderOnlyStatus.defaultExpectation.returnOrigin = minimock.CallerInfo(1)
+	return mmGetOrderOnlyStatus.mock
+}
+
+// Set uses given function f to mock the OrdersHistoryRepository.GetOrderOnlyStatus method
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) Set(f func(orderID uint64) (stat string, err error)) *OrdersHistoryRepositoryMock {
+	if mmGetOrderOnlyStatus.defaultExpectation != nil {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("Default expectation is already set for the OrdersHistoryRepository.GetOrderOnlyStatus method")
+	}
+
+	if len(mmGetOrderOnlyStatus.expectations) > 0 {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("Some expectations are already set for the OrdersHistoryRepository.GetOrderOnlyStatus method")
+	}
+
+	mmGetOrderOnlyStatus.mock.funcGetOrderOnlyStatus = f
+	mmGetOrderOnlyStatus.mock.funcGetOrderOnlyStatusOrigin = minimock.CallerInfo(1)
+	return mmGetOrderOnlyStatus.mock
+}
+
+// When sets expectation for the OrdersHistoryRepository.GetOrderOnlyStatus which will trigger the result defined by the following
+// Then helper
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) When(orderID uint64) *OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation {
+	if mmGetOrderOnlyStatus.mock.funcGetOrderOnlyStatus != nil {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("OrdersHistoryRepositoryMock.GetOrderOnlyStatus mock is already set by Set")
+	}
+
+	expectation := &OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation{
+		mock:               mmGetOrderOnlyStatus.mock,
+		params:             &OrdersHistoryRepositoryMockGetOrderOnlyStatusParams{orderID},
+		expectationOrigins: OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectationOrigins{origin: minimock.CallerInfo(1)},
+	}
+	mmGetOrderOnlyStatus.expectations = append(mmGetOrderOnlyStatus.expectations, expectation)
+	return expectation
+}
+
+// Then sets up OrdersHistoryRepository.GetOrderOnlyStatus return parameters for the expectation previously defined by the When method
+func (e *OrdersHistoryRepositoryMockGetOrderOnlyStatusExpectation) Then(stat string, err error) *OrdersHistoryRepositoryMock {
+	e.results = &OrdersHistoryRepositoryMockGetOrderOnlyStatusResults{stat, err}
+	return e.mock
+}
+
+// Times sets number of times OrdersHistoryRepository.GetOrderOnlyStatus should be invoked
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) Times(n uint64) *mOrdersHistoryRepositoryMockGetOrderOnlyStatus {
+	if n == 0 {
+		mmGetOrderOnlyStatus.mock.t.Fatalf("Times of OrdersHistoryRepositoryMock.GetOrderOnlyStatus mock can not be zero")
+	}
+	mm_atomic.StoreUint64(&mmGetOrderOnlyStatus.expectedInvocations, n)
+	mmGetOrderOnlyStatus.expectedInvocationsOrigin = minimock.CallerInfo(1)
+	return mmGetOrderOnlyStatus
+}
+
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) invocationsDone() bool {
+	if len(mmGetOrderOnlyStatus.expectations) == 0 && mmGetOrderOnlyStatus.defaultExpectation == nil && mmGetOrderOnlyStatus.mock.funcGetOrderOnlyStatus == nil {
+		return true
+	}
+
+	totalInvocations := mm_atomic.LoadUint64(&mmGetOrderOnlyStatus.mock.afterGetOrderOnlyStatusCounter)
+	expectedInvocations := mm_atomic.LoadUint64(&mmGetOrderOnlyStatus.expectedInvocations)
+
+	return totalInvocations > 0 && (expectedInvocations == 0 || expectedInvocations == totalInvocations)
+}
+
+// GetOrderOnlyStatus implements mm_storage.OrdersHistoryRepository
+func (mmGetOrderOnlyStatus *OrdersHistoryRepositoryMock) GetOrderOnlyStatus(orderID uint64) (stat string, err error) {
+	mm_atomic.AddUint64(&mmGetOrderOnlyStatus.beforeGetOrderOnlyStatusCounter, 1)
+	defer mm_atomic.AddUint64(&mmGetOrderOnlyStatus.afterGetOrderOnlyStatusCounter, 1)
+
+	mmGetOrderOnlyStatus.t.Helper()
+
+	if mmGetOrderOnlyStatus.inspectFuncGetOrderOnlyStatus != nil {
+		mmGetOrderOnlyStatus.inspectFuncGetOrderOnlyStatus(orderID)
+	}
+
+	mm_params := OrdersHistoryRepositoryMockGetOrderOnlyStatusParams{orderID}
+
+	// Record call args
+	mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.mutex.Lock()
+	mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.callArgs = append(mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.callArgs, &mm_params)
+	mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.mutex.Unlock()
+
+	for _, e := range mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.expectations {
+		if minimock.Equal(*e.params, mm_params) {
+			mm_atomic.AddUint64(&e.Counter, 1)
+			return e.results.stat, e.results.err
+		}
+	}
+
+	if mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.defaultExpectation != nil {
+		mm_atomic.AddUint64(&mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.defaultExpectation.Counter, 1)
+		mm_want := mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.defaultExpectation.params
+		mm_want_ptrs := mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.defaultExpectation.paramPtrs
+
+		mm_got := OrdersHistoryRepositoryMockGetOrderOnlyStatusParams{orderID}
+
+		if mm_want_ptrs != nil {
+
+			if mm_want_ptrs.orderID != nil && !minimock.Equal(*mm_want_ptrs.orderID, mm_got.orderID) {
+				mmGetOrderOnlyStatus.t.Errorf("OrdersHistoryRepositoryMock.GetOrderOnlyStatus got unexpected parameter orderID, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+					mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.defaultExpectation.expectationOrigins.originOrderID, *mm_want_ptrs.orderID, mm_got.orderID, minimock.Diff(*mm_want_ptrs.orderID, mm_got.orderID))
+			}
+
+		} else if mm_want != nil && !minimock.Equal(*mm_want, mm_got) {
+			mmGetOrderOnlyStatus.t.Errorf("OrdersHistoryRepositoryMock.GetOrderOnlyStatus got unexpected parameters, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
+				mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.defaultExpectation.expectationOrigins.origin, *mm_want, mm_got, minimock.Diff(*mm_want, mm_got))
+		}
+
+		mm_results := mmGetOrderOnlyStatus.GetOrderOnlyStatusMock.defaultExpectation.results
+		if mm_results == nil {
+			mmGetOrderOnlyStatus.t.Fatal("No results are set for the OrdersHistoryRepositoryMock.GetOrderOnlyStatus")
+		}
+		return (*mm_results).stat, (*mm_results).err
+	}
+	if mmGetOrderOnlyStatus.funcGetOrderOnlyStatus != nil {
+		return mmGetOrderOnlyStatus.funcGetOrderOnlyStatus(orderID)
+	}
+	mmGetOrderOnlyStatus.t.Fatalf("Unexpected call to OrdersHistoryRepositoryMock.GetOrderOnlyStatus. %v", orderID)
+	return
+}
+
+// GetOrderOnlyStatusAfterCounter returns a count of finished OrdersHistoryRepositoryMock.GetOrderOnlyStatus invocations
+func (mmGetOrderOnlyStatus *OrdersHistoryRepositoryMock) GetOrderOnlyStatusAfterCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetOrderOnlyStatus.afterGetOrderOnlyStatusCounter)
+}
+
+// GetOrderOnlyStatusBeforeCounter returns a count of OrdersHistoryRepositoryMock.GetOrderOnlyStatus invocations
+func (mmGetOrderOnlyStatus *OrdersHistoryRepositoryMock) GetOrderOnlyStatusBeforeCounter() uint64 {
+	return mm_atomic.LoadUint64(&mmGetOrderOnlyStatus.beforeGetOrderOnlyStatusCounter)
+}
+
+// Calls returns a list of arguments used in each call to OrdersHistoryRepositoryMock.GetOrderOnlyStatus.
+// The list is in the same order as the calls were made (i.e. recent calls have a higher index)
+func (mmGetOrderOnlyStatus *mOrdersHistoryRepositoryMockGetOrderOnlyStatus) Calls() []*OrdersHistoryRepositoryMockGetOrderOnlyStatusParams {
+	mmGetOrderOnlyStatus.mutex.RLock()
+
+	argCopy := make([]*OrdersHistoryRepositoryMockGetOrderOnlyStatusParams, len(mmGetOrderOnlyStatus.callArgs))
+	copy(argCopy, mmGetOrderOnlyStatus.callArgs)
+
+	mmGetOrderOnlyStatus.mutex.RUnlock()
+
+	return argCopy
+}
+
+// MinimockGetOrderOnlyStatusDone returns true if the count of the GetOrderOnlyStatus invocations corresponds
+// the number of defined expectations
+func (m *OrdersHistoryRepositoryMock) MinimockGetOrderOnlyStatusDone() bool {
+	if m.GetOrderOnlyStatusMock.optional {
+		// Optional methods provide '0 or more' call count restriction.
+		return true
+	}
+
+	for _, e := range m.GetOrderOnlyStatusMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			return false
+		}
+	}
+
+	return m.GetOrderOnlyStatusMock.invocationsDone()
+}
+
+// MinimockGetOrderOnlyStatusInspect logs each unmet expectation
+func (m *OrdersHistoryRepositoryMock) MinimockGetOrderOnlyStatusInspect() {
+	for _, e := range m.GetOrderOnlyStatusMock.expectations {
+		if mm_atomic.LoadUint64(&e.Counter) < 1 {
+			m.t.Errorf("Expected call to OrdersHistoryRepositoryMock.GetOrderOnlyStatus at\n%s with params: %#v", e.expectationOrigins.origin, *e.params)
+		}
+	}
+
+	afterGetOrderOnlyStatusCounter := mm_atomic.LoadUint64(&m.afterGetOrderOnlyStatusCounter)
+	// if default expectation was set then invocations count should be greater than zero
+	if m.GetOrderOnlyStatusMock.defaultExpectation != nil && afterGetOrderOnlyStatusCounter < 1 {
+		if m.GetOrderOnlyStatusMock.defaultExpectation.params == nil {
+			m.t.Errorf("Expected call to OrdersHistoryRepositoryMock.GetOrderOnlyStatus at\n%s", m.GetOrderOnlyStatusMock.defaultExpectation.returnOrigin)
+		} else {
+			m.t.Errorf("Expected call to OrdersHistoryRepositoryMock.GetOrderOnlyStatus at\n%s with params: %#v", m.GetOrderOnlyStatusMock.defaultExpectation.expectationOrigins.origin, *m.GetOrderOnlyStatusMock.defaultExpectation.params)
+		}
+	}
+	// if func was set then invocations count should be greater than zero
+	if m.funcGetOrderOnlyStatus != nil && afterGetOrderOnlyStatusCounter < 1 {
+		m.t.Errorf("Expected call to OrdersHistoryRepositoryMock.GetOrderOnlyStatus at\n%s", m.funcGetOrderOnlyStatusOrigin)
+	}
+
+	if !m.GetOrderOnlyStatusMock.invocationsDone() && afterGetOrderOnlyStatusCounter > 0 {
+		m.t.Errorf("Expected %d calls to OrdersHistoryRepositoryMock.GetOrderOnlyStatus at\n%s but found %d calls",
+			mm_atomic.LoadUint64(&m.GetOrderOnlyStatusMock.expectedInvocations), m.GetOrderOnlyStatusMock.expectedInvocationsOrigin, afterGetOrderOnlyStatusCounter)
 	}
 }
 
@@ -1126,6 +1448,8 @@ func (m *OrdersHistoryRepositoryMock) MinimockFinish() {
 		if !m.minimockDone() {
 			m.MinimockAddOrderStatusInspect()
 
+			m.MinimockGetOrderOnlyStatusInspect()
+
 			m.MinimockGetOrderStatusInspect()
 
 			m.MinimockSetOrderStatusInspect()
@@ -1153,6 +1477,7 @@ func (m *OrdersHistoryRepositoryMock) minimockDone() bool {
 	done := true
 	return done &&
 		m.MinimockAddOrderStatusDone() &&
+		m.MinimockGetOrderOnlyStatusDone() &&
 		m.MinimockGetOrderStatusDone() &&
 		m.MinimockSetOrderStatusDone()
 }

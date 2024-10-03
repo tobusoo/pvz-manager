@@ -8,25 +8,25 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
+	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 	storage_suite "gitlab.ozon.dev/chppppr/homework/tests/suite"
 )
 
 func TestSuite(t *testing.T) {
-	suite.Run(t, &storage_suite.StorageSuite{})
+	suite.Run(t, &storage_suite.StorageJSONSuite{})
 }
 
 func TestStorageSuccessAddOrder(t *testing.T) {
 	t.Parallel()
 
-	ohp := storage.NewOrdersHistory()
-	rp := storage.NewRefunds()
-	up := storage.NewUsers()
+	ohp := storage_json.NewOrdersHistory()
+	rp := storage_json.NewRefunds()
+	up := storage_json.NewUsers()
 	path := "storage_TestStorageSuccessAdd.json"
 	defer os.Remove(path)
 
-	st, err := storage.NewStorage(ohp, rp, up, path)
+	st, err := storage_json.NewStorage(ohp, rp, up, path)
 	require.NoError(t, err)
 
 	userID := uint64(1)
@@ -60,42 +60,16 @@ func TestStorageSuccessAddOrder(t *testing.T) {
 	require.Equal(t, utils.CurrentDate(), expDate)
 }
 
-func TestStorageSuccessAddRefund(t *testing.T) {
-	t.Parallel()
-
-	ohp := storage.NewOrdersHistory()
-	rp := storage.NewRefunds()
-	up := storage.NewUsers()
-	path := "storage_TestStorageSuccessAddRefund.json"
-	defer os.Remove(path)
-
-	st, err := storage.NewStorage(ohp, rp, up, path)
-	require.NoError(t, err)
-
-	userID := uint64(1)
-	orderID := uint64(1)
-	order := &domain.Order{
-		ExpirationDate: utils.CurrentDateString(),
-		Cost:           123,
-		Weight:         80,
-		PackageType:    "default",
-		UseTape:        false,
-	}
-
-	err = st.AddRefund(userID, orderID, order)
-	require.NoError(t, err)
-}
-
 func TestStorageSuccessRemoveOrder(t *testing.T) {
 	t.Parallel()
 
-	ohp := storage.NewOrdersHistory()
-	rp := storage.NewRefunds()
-	up := storage.NewUsers()
+	ohp := storage_json.NewOrdersHistory()
+	rp := storage_json.NewRefunds()
+	up := storage_json.NewUsers()
 	path := "storage_TestStorageSuccessRemoveOrder.json"
 	defer os.Remove(path)
 
-	st, err := storage.NewStorage(ohp, rp, up, path)
+	st, err := storage_json.NewStorage(ohp, rp, up, path)
 	require.NoError(t, err)
 
 	userID := uint64(1)
@@ -127,13 +101,13 @@ func TestStorageSuccessRemoveOrder(t *testing.T) {
 func TestStorageSuccessReturn(t *testing.T) {
 	t.Parallel()
 
-	ohp := storage.NewOrdersHistory()
-	rp := storage.NewRefunds()
-	up := storage.NewUsers()
+	ohp := storage_json.NewOrdersHistory()
+	rp := storage_json.NewRefunds()
+	up := storage_json.NewUsers()
 	path := "storage_TestStorageSuccessReturn.json"
 	defer os.Remove(path)
 
-	st, err := storage.NewStorage(ohp, rp, up, path)
+	st, err := storage_json.NewStorage(ohp, rp, up, path)
 	require.NoError(t, err)
 
 	userID := uint64(1)

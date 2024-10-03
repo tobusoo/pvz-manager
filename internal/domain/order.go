@@ -1,6 +1,8 @@
 package domain
 
-import "gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
+import (
+	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
+)
 
 const (
 	StatusAccepted    = "accepted"
@@ -11,25 +13,25 @@ const (
 
 type (
 	Order struct {
-		ExpirationDate string `json:"expirationDate"`
-		PackageType    string `json:"packageType"`
-		Cost           uint64 `json:"cost"`
-		Weight         uint64 `json:"weight"`
-		UseTape        bool   `json:"useTape"`
+		ExpirationDate string `json:"expirationDate" db:"expiration_date"`
+		PackageType    string `json:"packageType" db:"package_type"`
+		Cost           uint64 `json:"cost" db:"cost"`
+		Weight         uint64 `json:"weight" db:"weight"`
+		UseTape        bool   `json:"useTape" db:"use_tape"`
 	}
 
 	OrderStatus struct {
 		*Order
-		Status string `json:"status"`
-		Date   string `json:"date"`
-		UserID uint64 `json:"userID"`
+		Status    string `json:"status" db:"status"`
+		UpdatedAt string `json:"updatedAt" db:"updated_at"`
+		UserID    uint64 `json:"userID" db:"user_id"`
 	}
 
 	OrderView struct {
 		*Order
-		UserID  uint64 `json:"userID"`
-		OrderID uint64 `json:"orderID"`
-		Exist   bool   `json:"exist"`
+		UserID  uint64 `json:"userID" db:"user_id"`
+		OrderID uint64 `json:"orderID" db:"order_id"`
+		Exist   bool   `json:"exist" db:"-"`
 	}
 )
 

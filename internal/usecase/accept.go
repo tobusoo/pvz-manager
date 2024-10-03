@@ -12,10 +12,10 @@ import (
 )
 
 type AcceptUsecase struct {
-	st *storage.Storage
+	st storage.Storage
 }
 
-func NewAcceptUsecase(st *storage.Storage) *AcceptUsecase {
+func NewAcceptUsecase(st storage.Storage) *AcceptUsecase {
 	return &AcceptUsecase{st}
 }
 
@@ -73,7 +73,7 @@ func acceptRefundCheckErr(req *dto.RefundRequest, order *domain.OrderStatus) err
 		return fmt.Errorf("can not refund order %d: wrong userID", req.OrderID)
 	}
 
-	issuedDate, err := time.Parse("02-01-2006", order.Date)
+	issuedDate, err := time.Parse("02-01-2006", order.UpdatedAt)
 	if err != nil {
 		return err
 	}
@@ -98,9 +98,5 @@ func (u *AcceptUsecase) AcceptRefund(req *dto.RefundRequest) error {
 		return err
 	}
 
-	if err = u.st.AddRefund(req.UserID, req.OrderID, order.Order); err != nil {
-		return err
-	}
-
-	return u.st.SetOrderStatus(req.OrderID, domain.StatusReturned)
+	return u.st.AddRefund(req.UserID, req.OrderID, order.Order)
 }

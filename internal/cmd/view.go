@@ -59,7 +59,7 @@ func resetViewOrderFlags(cmd *cobra.Command) {
 	cmd.ResetFlags()
 	cmd.PersistentFlags().Uint64VarP(&userID, "userID", "u", 0, "userID (required)")
 	cmd.PersistentFlags().Uint64VarP(&orderID, "orderID", "o", 0, "first orderID which should be output")
-	cmd.PersistentFlags().Uint64VarP(&ordersLimit, "n", "n", 0, "limit of returned orders")
+	cmd.PersistentFlags().Uint64VarP(&ordersLimit, "n", "n", 25, "limit of returned orders (defalut 25)")
 	cmd.MarkPersistentFlagRequired("userID")
 }
 
