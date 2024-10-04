@@ -50,9 +50,8 @@ func (u *User) Add(orderID uint64, order *domain.Order) error {
 
 func (u *User) Get(orderID uint64) (*domain.Order, error) {
 	u.mtx.Lock()
-	defer u.mtx.Unlock()
-
 	order, ok := u.Orders[orderID]
+	u.mtx.Unlock()
 	if !ok {
 		return nil, fmt.Errorf("not found order %d", orderID)
 	}
@@ -62,9 +61,8 @@ func (u *User) Get(orderID uint64) (*domain.Order, error) {
 
 func (u *User) CanRemove(orderID uint64) error {
 	u.mtx.Lock()
-	defer u.mtx.Unlock()
-
 	_, ok := u.OrdersIDatArray[orderID]
+	u.mtx.Unlock()
 	if !ok {
 		return fmt.Errorf("not found order %d at orders array of user %d", orderID, u.UserID)
 	}
@@ -74,8 +72,6 @@ func (u *User) CanRemove(orderID uint64) error {
 
 func (u *User) Remove(orderId uint64) error {
 	u.mtx.Lock()
-	defer u.mtx.Unlock()
-
 	id, ok := u.OrdersIDatArray[orderId]
 	if !ok {
 		return fmt.Errorf("not found order %d at orders array of user %d", orderId, u.UserID)
@@ -83,15 +79,15 @@ func (u *User) Remove(orderId uint64) error {
 
 	u.OrdersArray[id].Exist = false
 	delete(u.Orders, orderId)
+	u.mtx.Unlock()
 
 	return nil
 }
 
 func (u *User) GetExpirationDate(orderID uint64) (time.Time, error) {
 	u.mtx.Lock()
-	defer u.mtx.Unlock()
-
 	order, ok := u.Orders[orderID]
+	u.mtx.Unlock()
 	if !ok {
 		return time.Time{}, fmt.Errorf("user %d doesn't have order %d", u.UserID, orderID)
 	}
@@ -105,14 +101,13 @@ func (u *User) GetExpirationDate(orderID uint64) (time.Time, error) {
 }
 
 func (u *User) findID(firstOrderID uint64) (int, error) {
-	u.mtx.Lock()
-	defer u.mtx.Unlock()
-
 	var ok bool
 
 	id := 0
 	if firstOrderID != 0 {
+		u.mtx.Lock()
 		id, ok = u.OrdersIDatArray[firstOrderID]
+		u.mtx.Unlock()
 		if !ok {
 			return 0, fmt.Errorf("not found order %d", firstOrderID)
 		}
@@ -130,9 +125,6 @@ func (u *User) calcLimit(limit, arrayLen uint64) uint64 {
 }
 
 func (u *User) GetOrders(firstOrderID, limit uint64) ([]domain.OrderView, error) {
-	u.mtx.Lock()
-	defer u.mtx.Unlock()
-
 	id, err := u.findID(firstOrderID)
 	if err != nil {
 		return nil, err

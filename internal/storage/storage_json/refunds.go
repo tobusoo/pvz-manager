@@ -50,9 +50,6 @@ func (r *Refunds) RemoveRefund(orderID uint64) error {
 }
 
 func (r *Refunds) GetRefunds(pageID, ordersPerPage uint64) (res []domain.OrderView, err error) {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
 	if err := r.getRefundsCheckErr(pageID, ordersPerPage); err != nil {
 		return nil, err
 	}
@@ -62,9 +59,6 @@ func (r *Refunds) GetRefunds(pageID, ordersPerPage uint64) (res []domain.OrderVi
 }
 
 func (r *Refunds) getRefundsSlice(firstOrderID int, ordersPerPage uint64) []domain.OrderView {
-	r.mtx.Lock()
-	defer r.mtx.Unlock()
-
 	res := make([]domain.OrderView, 0)
 	ordersCount := 0
 
