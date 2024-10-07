@@ -181,7 +181,7 @@ func (s *StorageDBSuite) execReturnRequests(refundRequests []*dto.RefundRequest)
 	returnRequests := scripts.GenerateReturnRequests(refundRequests, TotalReturnRequests)
 	for _, req := range returnRequests {
 		if err := s.st.RemoveRefund(req.OrderID); err != nil {
-			bad_requests += 1
+			bad_requests++
 		}
 	}
 
