@@ -73,10 +73,7 @@ func workersSetCmdRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	InOutLock()
-	CloseAndWaitWorkers()
-	SetWorkers(numWorkers)
-	InOutUnlock()
+	SetWorkersNum(numWorkers)
 }
 
 func workersViewCmdRun(cmd *cobra.Command, args []string) {

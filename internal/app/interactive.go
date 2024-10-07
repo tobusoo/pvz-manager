@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
+	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 )
 
 func readInput(exit *bool, inputCh chan string) {
@@ -45,11 +46,14 @@ func processInput(exit *bool, input string) {
 }
 
 func RunInteractive(ctx context.Context) {
+	wk := workers.NewWorkers(1)
+	cmd.SetWorker(wk)
+
 	wg := &sync.WaitGroup{}
 	defer wg.Wait()
-	go getWorkersAndShowResult(wg)
 
-	cmd.SetWorkers(1)
+	wg.Add(1)
+	go ShowResult(wg, wk)
 	defer cmd.CloseAndWaitWorkers()
 
 	exit := false

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
 	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 )
 
@@ -25,13 +24,4 @@ func ShowResult(wg *sync.WaitGroup, wk *workers.Workers) {
 		}
 		fmt.Print("\0338")
 	}
-}
-
-func getWorkersAndShowResult(wg *sync.WaitGroup) {
-	go func() {
-		for wk := range cmd.GetWorkersChan() {
-			wg.Add(1)
-			go ShowResult(wg, wk)
-		}
-	}()
 }

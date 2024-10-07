@@ -27,11 +27,11 @@ func init() {
 }
 
 var (
-	inoutMtx    sync.Mutex
-	numWorkers  uint
-	workersChan chan *workers.Workers
-	wk          *workers.Workers
-	st          storage.Storage
+	inoutMtx       sync.Mutex
+	numWorkers     uint
+	prevNumWorkers uint
+	wk             *workers.Workers
+	st             storage.Storage
 
 	acceptUsecase *usecase.AcceptUsecase
 	giveUsecase   *usecase.GiveUsecase
@@ -66,23 +66,22 @@ func SetStorage(s storage.Storage) {
 	viewUsecase = usecase.NewViewUsecase(st)
 }
 
-func initWorkersChan() {
-	if workersChan == nil {
-		workersChan = make(chan *workers.Workers, 1)
+func SetWorker(workers *workers.Workers) {
+	wk = workers
+	prevNumWorkers = wk.GetSize()
+}
+
+func SetWorkersNum(num uint) {
+	if prevNumWorkers < numWorkers {
+		wk.AddWorkers(numWorkers - prevNumWorkers)
+	} else if prevNumWorkers > numWorkers {
+		wk.CloseNworkers(prevNumWorkers - numWorkers)
 	}
+	prevNumWorkers = numWorkers
 }
 
-func SetWorkers(num uint) {
-	wk = workers.NewWorkers(num)
-	initWorkersChan()
-
-	workersChan <- wk
-}
-
-func GetWorkersChan() <-chan *workers.Workers {
-	initWorkersChan()
-
-	return workersChan
+func GetWorker() *workers.Workers {
+	return wk
 }
 
 func InOutLock() {

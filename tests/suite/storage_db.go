@@ -135,7 +135,7 @@ func (s *StorageDBSuite) execGiveRequests(addRequests []*dto.AddOrderRequest) ([
 			orders = append(orders, uint64(v))
 		}
 		if err := s.st.RemoveOrders(orders, domain.StatusGiveClient); err != nil {
-			bad_requests += 1
+			bad_requests++
 		}
 	}
 
