@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
+	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 )
 
 func init() {
@@ -35,7 +36,13 @@ func returnCmdRun(cmd *cobra.Command, args []string) {
 		OrderID: orderID,
 	}
 
-	if err := returnUsecase.Return(req); err != nil {
-		fmt.Println(err)
+	task := &workers.TaskRequest{
+		Request: fmt.Sprintf("return -o=%d", orderID),
+		Func: func() error {
+			return returnUsecase.Return(req)
+		},
 	}
+
+	fmt.Printf("\n\n")
+	wk.AddTask(task)
 }

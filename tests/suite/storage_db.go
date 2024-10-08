@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"runtime"
+	"sync/atomic"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -14,6 +16,7 @@ import (
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage/postgres"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
+	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 	"gitlab.ozon.dev/chppppr/homework/scripts"
 )
 
@@ -57,7 +60,16 @@ func (s *StorageDBSuite) TearDownSuite() {
 }
 
 func (s *StorageDBSuite) execAddRequests() []*dto.AddOrderRequest {
-	bad_requests := 0
+	wk := workers.NewWorkers(uint(runtime.NumCPU()))
+	defer wk.Wait()
+	defer wk.CloseJobs()
+	go func() {
+		for range wk.Results {
+		}
+	}()
+
+	bad_requests := atomic.Int32{}
+	bad_requests.Store(0)
 
 	log.Printf("Generating %d AddRequests\n", TotalAddRequests)
 	addRequests := scripts.GenerateAddRequests(TotalAddRequests - 50)
@@ -71,9 +83,16 @@ func (s *StorageDBSuite) execAddRequests() []*dto.AddOrderRequest {
 
 		order, _ := domain.NewOrder(req.Cost, req.Weight, req.ExpirationDate, cs)
 
-		if err := s.st.AddOrder(req.UserID, req.OrderID, order); err != nil {
-			bad_requests++
+		task := &workers.TaskRequest{
+			Func: func() error {
+				if err := s.st.AddOrder(req.UserID, req.OrderID, order); err != nil {
+					bad_requests.Add(1)
+				}
+				return nil
+			},
 		}
+
+		wk.AddTask(task)
 	}
 
 	addRequestsUserID := scripts.GenerateAddRequestsWithUserID(12345678, 50)
@@ -87,12 +106,19 @@ func (s *StorageDBSuite) execAddRequests() []*dto.AddOrderRequest {
 
 		order, _ := domain.NewOrder(req.Cost, req.Weight, req.ExpirationDate, cs)
 
-		if err := s.st.AddOrder(req.UserID, req.OrderID, order); err != nil {
-			bad_requests++
+		task := &workers.TaskRequest{
+			Func: func() error {
+				if err := s.st.AddOrder(req.UserID, req.OrderID, order); err != nil {
+					bad_requests.Add(1)
+				}
+				return nil
+			},
 		}
+
+		wk.AddTask(task)
 	}
 
-	log.Printf("Generated and exec %d AddRequests: %d bad requests\n", TotalAddRequests, bad_requests)
+	log.Printf("Generated and exec %d AddRequests: %d bad requests\n", TotalAddRequests, bad_requests.Load())
 	return addRequests
 }
 
@@ -108,7 +134,6 @@ func (s *StorageDBSuite) execGiveRequests(addRequests []*dto.AddOrderRequest) ([
 		for _, v := range giveRequests[i].Orders {
 			orders = append(orders, uint64(v))
 		}
-
 		if err := s.st.RemoveOrders(orders, domain.StatusGiveClient); err != nil {
 			bad_requests++
 		}
@@ -119,17 +144,33 @@ func (s *StorageDBSuite) execGiveRequests(addRequests []*dto.AddOrderRequest) ([
 }
 
 func (s *StorageDBSuite) execRefundRequests(giveRequests []*dto.GiveOrdersRequest, userIDs []uint64) []*dto.RefundRequest {
-	bad_requests := 0
+	wk := workers.NewWorkers(uint(runtime.NumCPU()))
+	defer wk.Wait()
+	defer wk.CloseJobs()
+	go func() {
+		for range wk.Results {
+		}
+	}()
+
+	bad_requests := atomic.Int32{}
+	bad_requests.Store(0)
 
 	log.Printf("Generating %d RefundRequests\n", TotalRefundRequsts)
 	refundRequests := scripts.GenerateRefundRequests(giveRequests, userIDs, TotalRefundRequsts)
 	for _, req := range refundRequests {
-		if err := s.st.AddRefund(req.UserID, req.OrderID, nil); err != nil {
-			bad_requests++
+		task := &workers.TaskRequest{
+			Func: func() error {
+				if err := s.st.AddRefund(req.UserID, req.OrderID, nil); err != nil {
+					bad_requests.Add(1)
+				}
+				return nil
+			},
 		}
+
+		wk.AddTask(task)
 	}
 
-	log.Printf("Generated and exec %d RefundRequests: %d bad requests\n", TotalRefundRequsts, bad_requests)
+	log.Printf("Generated and exec %d RefundRequests: %d bad requests\n", TotalRefundRequsts, bad_requests.Load())
 	return refundRequests
 }
 

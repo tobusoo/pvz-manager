@@ -12,7 +12,7 @@ import (
 func TestAddOrder(t *testing.T) {
 	t.Parallel()
 
-	expected_output := ""
+	expected_output := "\n\n\x1b7\r\n\n\x1b[4F\x1b[K\rOK Response: accept order -u=432 -o=31 ...\n\x1b[K\n\x1b8"
 	storagePATH := "storage_e2e_add_order.json"
 	defer os.Remove(storagePATH)
 
@@ -32,7 +32,7 @@ func TestAddOrder(t *testing.T) {
 func TestAddOrderWrongPackageType(t *testing.T) {
 	t.Parallel()
 
-	expected_output := "wrong isn't container type\n"
+	expected_output := "\n\n\x1b7\r\n\n\x1b[4F\x1b[K\rError for response: accept order -u=432 -o=31 ...\n\x1b[Kwrong isn't container type\n\x1b8"
 	storagePATH := "storage_e2e_add_order_wrong_package_type.json"
 	defer os.Remove(storagePATH)
 
@@ -52,7 +52,7 @@ func TestAddOrderWrongPackageType(t *testing.T) {
 func TestGiveOrder(t *testing.T) {
 	t.Parallel()
 
-	expected_output := ""
+	expected_output := "\n\n\x1b7\r\n\n\x1b[4F\x1b[K\rOK Response: accept order -u=1312 -o=10 ...\n\x1b[K\n\x1b8"
 	storagePATH := "storage_e2e_give_order.json"
 	defer os.Remove(storagePATH)
 
@@ -69,6 +69,7 @@ func TestGiveOrder(t *testing.T) {
 	cmd = exec.Command(cmdName, "give", "-o=10")
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
+	expected_output = "\n\n\x1b7\r\n\n\x1b[4F\x1b[K\rOK Response: give -o=...\n\x1b[K\n\x1b8"
 
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)
@@ -78,7 +79,7 @@ func TestGiveOrder(t *testing.T) {
 func TestOrderFullCircle(t *testing.T) {
 	t.Parallel()
 
-	expected_output := ""
+	expected_output := "\n\n\x1b7\r\n\n\x1b[4F\x1b[K\rOK Response: accept order -u=103 -o=724 ...\n\x1b[K\n\x1b8"
 	storagePATH := "storage_e2e_order_full_circle.json"
 	defer os.Remove(storagePATH)
 
@@ -98,6 +99,7 @@ func TestOrderFullCircle(t *testing.T) {
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
+	expected_output = "\n\n\x1b7\r\n\n\x1b[4F\x1b[K\rOK Response: give -o=...\n\x1b[K\n\x1b8"
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)
 	require.Equal(t, expected_output, string(output))
@@ -107,6 +109,7 @@ func TestOrderFullCircle(t *testing.T) {
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
+	expected_output = "\n\n\x1b7\r\n\n\x1b[4F\x1b[K\rOK Response: accept refund -u=103 -o=724\n\x1b[K\n\x1b8"
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)
 	require.Equal(t, expected_output, string(output))
@@ -116,6 +119,7 @@ func TestOrderFullCircle(t *testing.T) {
 	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "STORAGE_PATH="+storagePATH, "USE_POSTGRESQL=no")
 
+	expected_output = "\n\n\x1b7\r\n\n\x1b[4F\x1b[K\rOK Response: return -o=724\n\x1b[K\n\x1b8"
 	output, err = cmd.CombinedOutput()
 	require.NoError(t, err)
 	require.Equal(t, expected_output, string(output))

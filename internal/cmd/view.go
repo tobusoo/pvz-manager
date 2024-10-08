@@ -99,11 +99,12 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 		Templates: templates,
 	}
 
+	InOutLock()
 	_, _, err = promt.Run()
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
 	}
+	InOutUnlock()
 }
 
 func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
@@ -137,9 +138,11 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 		Templates: templates,
 	}
 
+	InOutLock()
 	_, _, err = promt.Run()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	InOutUnlock()
 }

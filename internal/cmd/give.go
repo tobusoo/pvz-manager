@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
+	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 )
 
 func init() {
@@ -39,10 +41,14 @@ func giveCmdRun(cmd *cobra.Command, args []string) {
 		Orders: orders,
 	}
 
-	if errors := giveUsecase.Give(req); errors != nil {
-		fmt.Println("request was not done because:")
-		for _, err := range errors {
-			fmt.Println(err)
-		}
+	task := &workers.TaskRequest{
+		Request: "give -o=...",
+		Func: func() error {
+			errs := giveUsecase.Give(req)
+			return errors.Join(errs...)
+		},
 	}
+
+	fmt.Printf("\n\n")
+	wk.AddTask(task)
 }

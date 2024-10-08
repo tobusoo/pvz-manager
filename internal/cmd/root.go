@@ -3,10 +3,12 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/spf13/cobra"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
 	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
+	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 )
 
 func init() {
@@ -14,6 +16,7 @@ func init() {
 	rootCmd.AddCommand(giveCmd)
 	rootCmd.AddCommand(returnCmd)
 	rootCmd.AddCommand(viewCmd)
+	rootCmd.AddCommand(workersCmd)
 
 	rootCmd.DisableSuggestions = false
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
@@ -24,7 +27,11 @@ func init() {
 }
 
 var (
-	st storage.Storage
+	inoutMtx       sync.Mutex
+	numWorkers     uint
+	prevNumWorkers uint
+	wk             *workers.Workers
+	st             storage.Storage
 
 	acceptUsecase *usecase.AcceptUsecase
 	giveUsecase   *usecase.GiveUsecase
@@ -57,6 +64,37 @@ func SetStorage(s storage.Storage) {
 	giveUsecase = usecase.NewGiveUsecase(st)
 	returnUsecase = usecase.NewReturnUsecase(st)
 	viewUsecase = usecase.NewViewUsecase(st)
+}
+
+func SetWorker(workers *workers.Workers) {
+	wk = workers
+	prevNumWorkers = wk.GetSize()
+}
+
+func SetWorkersNum(num uint) {
+	if prevNumWorkers < numWorkers {
+		wk.AddWorkers(numWorkers - prevNumWorkers)
+	} else if prevNumWorkers > numWorkers {
+		wk.CloseNworkers(prevNumWorkers - numWorkers)
+	}
+	prevNumWorkers = numWorkers
+}
+
+func GetWorker() *workers.Workers {
+	return wk
+}
+
+func InOutLock() {
+	inoutMtx.Lock()
+}
+
+func InOutUnlock() {
+	inoutMtx.Unlock()
+}
+
+func CloseAndWaitWorkers() {
+	wk.CloseJobs()
+	wk.Wait()
 }
 
 func SetArgs(args []string) {
