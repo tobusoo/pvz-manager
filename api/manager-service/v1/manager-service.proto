@@ -1,0 +1,159 @@
+syntax = "proto3";
+
+package manager;
+
+option go_package = "gitlab.ozon.dev/chppppr/homework/pkg/manager-service;manager_service";
+
+import "google/protobuf/timestamp.proto";
+import "google/api/field_behavior.proto";
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+service ManagerService {
+  rpc AddOrderV1(AddOrderRequestV1) returns (AddOrderResponseV1) {
+    option (google.api.http) = {
+      post: "/AddOrderV1"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "Добавление заказа";
+  description:
+    "Принимает идентификатор клиента, идентификатор заказа и сам заказ";
+  };
+}
+
+rpc RefundV1(RefundRequestV1) returns (RefundResponseV1) {
+  option (google.api.http) = {
+    post: "/RefundV1"
+    body: "*"
+  };
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+    summary: "Возвращение заказа от клиента обратно на ПВЗ";
+description:
+  "Принимает идентификатор клиента и идентификатор заказа";
+};
+}
+
+rpc GiveOrdersV1(GiveOrdersRequestV1) returns (GiveOrdersResponseV1) {
+  option (google.api.http) = {
+    get: "/GiveOrdersV1"
+  };
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+    summary: "Выдача заказов клиенту";
+description:
+  "Принимает массив номеров заказов для выдачи";
+};
+}
+
+rpc ReturnV1(ReturnRequestV1) returns (ReturnResponseV1) {
+  option (google.api.http) = {
+    post: "/ReturnV1"
+    body: "*"
+  };
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+    summary: "Возвращение заказа от ПВЗ курьеру";
+description:
+  "Принимает идентификатор заказа";
+};
+}
+
+rpc ViewOrdersV1(ViewOrdersRequestV1) returns (ViewOrdersResponseV1) {
+  option (google.api.http) = {
+    get: "/ViewOrdersV1"
+  };
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+    summary: "Получение заказов определенного пользователя";
+description:
+  "Принимает идентификатор клиента, минимальный номер первого заказа, который должен быть возвращён и лимит заказов";
+};
+}
+
+rpc ViewRefundsV1(ViewRefundsRequestV1) returns (ViewOrdersResponseV1) {
+  option (google.api.http) = {
+    get: "/ViewRefundsV1"
+  };
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+    summary: "Получение заказов, находящихся в статусе returned";
+description:
+  "Принимает номер страницы и количество заказов на одной странице";
+};
+}
+}
+
+message Order {
+  google.protobuf.Timestamp expiration_date = 1;
+  string package_type = 2;
+  uint64 cost = 3;
+  uint64 weight = 4;
+  bool use_tape = 5;
+}
+
+message OrderStatus {
+  Order order = 1;
+  string status = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  uint64 user_id = 4;
+}
+
+message OrderView {
+  Order order = 1;
+  uint64 user_id = 2;
+  uint64 order_id = 3;
+}
+
+message AddOrderRequestV1 {
+  uint64 user_id = 1
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+  uint64 order_id = 2
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+  Order order = 3 [(google.api.field_behavior) = REQUIRED];
+}
+
+message AddOrderResponseV1 {}
+
+message RefundRequestV1 {
+  uint64 user_id = 1
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+  uint64 order_id = 2
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+}
+
+message RefundResponseV1 {}
+
+message GiveOrdersRequestV1 {
+  repeated uint64 orders = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message GiveOrdersResponseV1 {}
+
+message ReturnRequestV1 {
+  uint64 order_id = 1
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+}
+
+message ReturnResponseV1 {}
+
+message ViewRefundsRequestV1 {
+  uint64 page_id = 1
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+  uint64 orders_per_page = 2
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+}
+
+message ViewRefundsResponseV1 {
+  repeated OrderView orders = 1;
+}
+
+message ViewOrdersRequestV1 {
+  uint64 user_id = 1
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+  uint64 first_order_id = 2
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+  uint64 limit = 3
+      [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
+}
+
+message ViewOrdersResponseV1 {
+  repeated OrderView orders = 1;
+}

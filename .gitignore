@@ -7,3 +7,4 @@ coverage_storage.out
 coverage_storage_postgres.out
 coverage.out
 coverage.html
+vendor.protogen

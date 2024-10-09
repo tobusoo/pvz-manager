@@ -1,5 +1,7 @@
 include .env
 
+PROTO_GENERATE_PATH=$(CURDIR)/pkg
+
 GOCYCLO_PATH=$(shell go env GOPATH)/bin/gocyclo
 GOCOGNIT_PATH=$(shell go env GOPATH)/bin/gocognit
 GODEPGRAPH_PATH=$(shell go env GOPATH)/bin/godepgraph
@@ -9,7 +11,7 @@ MIGRATIONS_PATH=./migrations
 
 THRESHOLD=5
 
-BIN_DIR=bin
+BIN_DIR=$(CURDIR)/bin
 APP_NAME=manager
 
 APP_PATH_SRC=cmd/$(APP_NAME)/main.go
@@ -18,10 +20,10 @@ APP_PATH_BIN=$(BIN_DIR)/$(APP_NAME)
 .PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
 .PHONY: unit-test integration-test integration-test-db e2e-test benchmark
 
-all: build
+all: bin-deps generate build run
 
 run: build
-	./$(APP_PATH_BIN)
+	$(APP_PATH_BIN)
 
 unit-test:
 	@echo "Unit Tests:"
@@ -134,6 +136,66 @@ squawk:
 
 .PHONY: depgraph compose-up compose-down compose-stop compose-start goose-install goose-add goose-up goose-status goose-down
 .PHONY: squawk-install squawk
+
+bin-deps: .vendor.protogen
+	GOBIN=$(BIN_DIR) go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	GOBIN=$(BIN_DIR) go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	GOBIN=$(BIN_DIR) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+	GOBIN=$(BIN_DIR) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
+	GOBIN=$(BIN_DIR) go install github.com/envoyproxy/protoc-gen-validate@latest
+	GOBIN=$(BIN_DIR) go install github.com/rakyll/statik@latest
+
+generate:
+	mkdir -p ${PROTO_GENERATE_PATH}
+	protoc --proto_path api --proto_path vendor.protogen \
+		--plugin=protoc-gen-go=$(BIN_DIR)/protoc-gen-go --go_out=${PROTO_GENERATE_PATH} --go_opt=paths=source_relative \
+		--plugin=protoc-gen-go-grpc=$(BIN_DIR)/protoc-gen-go-grpc --go-grpc_out=${PROTO_GENERATE_PATH} --go-grpc_opt=paths=source_relative \
+		--plugin=protoc-gen-grpc-gateway=$(BIN_DIR)/protoc-gen-grpc-gateway --grpc-gateway_out ${PROTO_GENERATE_PATH} --grpc-gateway_opt paths=source_relative \
+		--plugin=protoc-gen-openapiv2=$(BIN_DIR)/protoc-gen-openapiv2 --openapiv2_out=${PROTO_GENERATE_PATH} \
+		--plugin=protoc-gen-validate=$(BIN_DIR)/protoc-gen-validate --validate_out="lang=go,paths=source_relative:${PROTO_GENERATE_PATH}" \
+		./api/manager-service/v1/manager-service.proto
+
+.vendor.protogen: .vendor.protogen/google/protobuf .vendor.protogen/google/api .vendor.protogen/protoc-gen-openapiv2/options .vendor.protogen/validate
+
+.vendor.protogen/protoc-gen-openapiv2/options:
+	git clone -b main --single-branch -n --depth=1 --filter=tree:0 \
+ 		https://github.com/grpc-ecosystem/grpc-gateway vendor.protogen/grpc-ecosystem && \
+ 		cd vendor.protogen/grpc-ecosystem && \
+		git sparse-checkout set --no-cone protoc-gen-openapiv2/options && \
+		git checkout
+		mkdir -p vendor.protogen/protoc-gen-openapiv2
+		mv vendor.protogen/grpc-ecosystem/protoc-gen-openapiv2/options vendor.protogen/protoc-gen-openapiv2
+		rm -rf vendor.protogen/grpc-ecosystem
+
+.vendor.protogen/google/protobuf:
+	git clone -b main --single-branch -n --depth=1 --filter=tree:0 \
+		https://github.com/protocolbuffers/protobuf vendor.protogen/protobuf &&\
+		cd vendor.protogen/protobuf &&\
+		git sparse-checkout set --no-cone src/google/protobuf &&\
+		git checkout
+		mkdir -p vendor.protogen/google
+		mv vendor.protogen/protobuf/src/google/protobuf vendor.protogen/google
+		rm -rf vendor.protogen/protobuf
+
+.vendor.protogen/google/api:
+	git clone -b master --single-branch -n --depth=1 --filter=tree:0 \
+ 		https://github.com/googleapis/googleapis vendor.protogen/googleapis && \
+ 		cd vendor.protogen/googleapis && \
+		git sparse-checkout set --no-cone google/api && \
+		git checkout
+		mkdir -p  vendor.protogen/google
+		mv vendor.protogen/googleapis/google/api vendor.protogen/google
+		rm -rf vendor.protogen/googleapis
+
+.vendor.protogen/validate:
+	git clone -b main --single-branch --depth=2 --filter=tree:0 \
+		https://github.com/bufbuild/protoc-gen-validate vendor.protogen/tmp && \
+		cd vendor.protogen/tmp && \
+		git sparse-checkout set --no-cone validate &&\
+		git checkout
+		mkdir -p vendor.protogen/validate
+		mv vendor.protogen/tmp/validate vendor.protogen/
+		rm -rf vendor.protogen/tmp
 
 clean:
 	rm -rf $(BIN_DIR) godepgraph.png
