@@ -88,7 +88,7 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	order := &manager_service.Order{
+	order := &manager_service.OrderV1{
 		ExpirationDate: timestamppb.New(exp_date),
 		PackageType:    containerType,
 		UseTape:        useTape,

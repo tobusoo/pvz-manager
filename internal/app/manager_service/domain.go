@@ -7,14 +7,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func OrderViewToProto(in []domain.OrderView) []*desc.OrderView {
-	out := make([]*desc.OrderView, 0, len(in))
+func OrderViewToProto(in []domain.OrderView) []*desc.OrderViewV1 {
+	out := make([]*desc.OrderViewV1, 0, len(in))
 
 	for _, order := range in {
 		date, _ := utils.StringToTime(order.ExpirationDate)
 		exp_date := timestamppb.New(date)
 
-		proto_order := &desc.Order{
+		proto_order := &desc.OrderV1{
 			ExpirationDate: exp_date,
 			PackageType:    order.PackageType,
 			Cost:           order.Cost,
@@ -22,7 +22,7 @@ func OrderViewToProto(in []domain.OrderView) []*desc.OrderView {
 			UseTape:        order.UseTape,
 		}
 
-		res := &desc.OrderView{
+		res := &desc.OrderViewV1{
 			UserId:  order.UserID,
 			OrderId: order.OrderID,
 			Order:   proto_order,

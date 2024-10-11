@@ -261,7 +261,7 @@
           "format": "uint64"
         },
         "order": {
-          "$ref": "#/definitions/managerOrder"
+          "$ref": "#/definitions/managerOrderV1"
         }
       },
       "required": [
@@ -276,7 +276,7 @@
     "managerGiveOrdersResponseV1": {
       "type": "object"
     },
-    "managerOrder": {
+    "managerOrderV1": {
       "type": "object",
       "properties": {
         "expirationDate": {
@@ -299,11 +299,11 @@
         }
       }
     },
-    "managerOrderView": {
+    "managerOrderViewV1": {
       "type": "object",
       "properties": {
         "order": {
-          "$ref": "#/definitions/managerOrder"
+          "$ref": "#/definitions/managerOrderV1"
         },
         "userId": {
           "type": "string",
@@ -357,7 +357,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/managerOrderView"
+            "$ref": "#/definitions/managerOrderViewV1"
           }
         }
       }
@@ -369,7 +369,7 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/managerOrderView"
+            "$ref": "#/definitions/managerOrderViewV1"
           }
         }
       }

@@ -35,21 +35,21 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on Order with the rules defined in the
+// Validate checks the field values on OrderV1 with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *Order) Validate() error {
+func (m *OrderV1) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Order with the rules defined in the
+// ValidateAll checks the field values on OrderV1 with the rules defined in the
 // proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in OrderMultiError, or nil if none found.
-func (m *Order) ValidateAll() error {
+// a list of violation errors wrapped in OrderV1MultiError, or nil if none found.
+func (m *OrderV1) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *Order) validate(all bool) error {
+func (m *OrderV1) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -60,7 +60,7 @@ func (m *Order) validate(all bool) error {
 		switch v := interface{}(m.GetExpirationDate()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, OrderValidationError{
+				errors = append(errors, OrderV1ValidationError{
 					field:  "ExpirationDate",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -68,7 +68,7 @@ func (m *Order) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, OrderValidationError{
+				errors = append(errors, OrderV1ValidationError{
 					field:  "ExpirationDate",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -77,7 +77,7 @@ func (m *Order) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetExpirationDate()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return OrderValidationError{
+			return OrderV1ValidationError{
 				field:  "ExpirationDate",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -94,18 +94,18 @@ func (m *Order) validate(all bool) error {
 	// no validation rules for UseTape
 
 	if len(errors) > 0 {
-		return OrderMultiError(errors)
+		return OrderV1MultiError(errors)
 	}
 
 	return nil
 }
 
-// OrderMultiError is an error wrapping multiple validation errors returned by
-// Order.ValidateAll() if the designated constraints aren't met.
-type OrderMultiError []error
+// OrderV1MultiError is an error wrapping multiple validation errors returned
+// by OrderV1.ValidateAll() if the designated constraints aren't met.
+type OrderV1MultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m OrderMultiError) Error() string {
+func (m OrderV1MultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -114,11 +114,11 @@ func (m OrderMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m OrderMultiError) AllErrors() []error { return m }
+func (m OrderV1MultiError) AllErrors() []error { return m }
 
-// OrderValidationError is the validation error returned by Order.Validate if
-// the designated constraints aren't met.
-type OrderValidationError struct {
+// OrderV1ValidationError is the validation error returned by OrderV1.Validate
+// if the designated constraints aren't met.
+type OrderV1ValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -126,22 +126,22 @@ type OrderValidationError struct {
 }
 
 // Field function returns field value.
-func (e OrderValidationError) Field() string { return e.field }
+func (e OrderV1ValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e OrderValidationError) Reason() string { return e.reason }
+func (e OrderV1ValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e OrderValidationError) Cause() error { return e.cause }
+func (e OrderV1ValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e OrderValidationError) Key() bool { return e.key }
+func (e OrderV1ValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e OrderValidationError) ErrorName() string { return "OrderValidationError" }
+func (e OrderV1ValidationError) ErrorName() string { return "OrderV1ValidationError" }
 
 // Error satisfies the builtin error interface
-func (e OrderValidationError) Error() string {
+func (e OrderV1ValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -153,14 +153,14 @@ func (e OrderValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sOrder.%s: %s%s",
+		"invalid %sOrderV1.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = OrderValidationError{}
+var _ error = OrderV1ValidationError{}
 
 var _ interface {
 	Field() string
@@ -168,24 +168,24 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = OrderValidationError{}
+} = OrderV1ValidationError{}
 
-// Validate checks the field values on OrderStatus with the rules defined in
+// Validate checks the field values on OrderViewV1 with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *OrderStatus) Validate() error {
+func (m *OrderViewV1) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on OrderStatus with the rules defined in
+// ValidateAll checks the field values on OrderViewV1 with the rules defined in
 // the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in OrderStatusMultiError, or
+// result is a list of violation errors wrapped in OrderViewV1MultiError, or
 // nil if none found.
-func (m *OrderStatus) ValidateAll() error {
+func (m *OrderViewV1) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *OrderStatus) validate(all bool) error {
+func (m *OrderViewV1) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -196,7 +196,7 @@ func (m *OrderStatus) validate(all bool) error {
 		switch v := interface{}(m.GetOrder()).(type) {
 		case interface{ ValidateAll() error }:
 			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, OrderStatusValidationError{
+				errors = append(errors, OrderViewV1ValidationError{
 					field:  "Order",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -204,7 +204,7 @@ func (m *OrderStatus) validate(all bool) error {
 			}
 		case interface{ Validate() error }:
 			if err := v.Validate(); err != nil {
-				errors = append(errors, OrderStatusValidationError{
+				errors = append(errors, OrderViewV1ValidationError{
 					field:  "Order",
 					reason: "embedded message failed validation",
 					cause:  err,
@@ -213,168 +213,7 @@ func (m *OrderStatus) validate(all bool) error {
 		}
 	} else if v, ok := interface{}(m.GetOrder()).(interface{ Validate() error }); ok {
 		if err := v.Validate(); err != nil {
-			return OrderStatusValidationError{
-				field:  "Order",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	// no validation rules for Status
-
-	if all {
-		switch v := interface{}(m.GetUpdatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, OrderStatusValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, OrderStatusValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return OrderStatusValidationError{
-				field:  "UpdatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
-
-	// no validation rules for UserId
-
-	if len(errors) > 0 {
-		return OrderStatusMultiError(errors)
-	}
-
-	return nil
-}
-
-// OrderStatusMultiError is an error wrapping multiple validation errors
-// returned by OrderStatus.ValidateAll() if the designated constraints aren't met.
-type OrderStatusMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m OrderStatusMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m OrderStatusMultiError) AllErrors() []error { return m }
-
-// OrderStatusValidationError is the validation error returned by
-// OrderStatus.Validate if the designated constraints aren't met.
-type OrderStatusValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e OrderStatusValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e OrderStatusValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e OrderStatusValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e OrderStatusValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e OrderStatusValidationError) ErrorName() string { return "OrderStatusValidationError" }
-
-// Error satisfies the builtin error interface
-func (e OrderStatusValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sOrderStatus.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = OrderStatusValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = OrderStatusValidationError{}
-
-// Validate checks the field values on OrderView with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *OrderView) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on OrderView with the rules defined in
-// the proto definition for this message. If any rules are violated, the
-// result is a list of violation errors wrapped in OrderViewMultiError, or nil
-// if none found.
-func (m *OrderView) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *OrderView) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	if all {
-		switch v := interface{}(m.GetOrder()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, OrderViewValidationError{
-					field:  "Order",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, OrderViewValidationError{
-					field:  "Order",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetOrder()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return OrderViewValidationError{
+			return OrderViewV1ValidationError{
 				field:  "Order",
 				reason: "embedded message failed validation",
 				cause:  err,
@@ -387,18 +226,18 @@ func (m *OrderView) validate(all bool) error {
 	// no validation rules for OrderId
 
 	if len(errors) > 0 {
-		return OrderViewMultiError(errors)
+		return OrderViewV1MultiError(errors)
 	}
 
 	return nil
 }
 
-// OrderViewMultiError is an error wrapping multiple validation errors returned
-// by OrderView.ValidateAll() if the designated constraints aren't met.
-type OrderViewMultiError []error
+// OrderViewV1MultiError is an error wrapping multiple validation errors
+// returned by OrderViewV1.ValidateAll() if the designated constraints aren't met.
+type OrderViewV1MultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m OrderViewMultiError) Error() string {
+func (m OrderViewV1MultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -407,11 +246,11 @@ func (m OrderViewMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m OrderViewMultiError) AllErrors() []error { return m }
+func (m OrderViewV1MultiError) AllErrors() []error { return m }
 
-// OrderViewValidationError is the validation error returned by
-// OrderView.Validate if the designated constraints aren't met.
-type OrderViewValidationError struct {
+// OrderViewV1ValidationError is the validation error returned by
+// OrderViewV1.Validate if the designated constraints aren't met.
+type OrderViewV1ValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -419,22 +258,22 @@ type OrderViewValidationError struct {
 }
 
 // Field function returns field value.
-func (e OrderViewValidationError) Field() string { return e.field }
+func (e OrderViewV1ValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e OrderViewValidationError) Reason() string { return e.reason }
+func (e OrderViewV1ValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e OrderViewValidationError) Cause() error { return e.cause }
+func (e OrderViewV1ValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e OrderViewValidationError) Key() bool { return e.key }
+func (e OrderViewV1ValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e OrderViewValidationError) ErrorName() string { return "OrderViewValidationError" }
+func (e OrderViewV1ValidationError) ErrorName() string { return "OrderViewV1ValidationError" }
 
 // Error satisfies the builtin error interface
-func (e OrderViewValidationError) Error() string {
+func (e OrderViewV1ValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -446,14 +285,14 @@ func (e OrderViewValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sOrderView.%s: %s%s",
+		"invalid %sOrderViewV1.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = OrderViewValidationError{}
+var _ error = OrderViewV1ValidationError{}
 
 var _ interface {
 	Field() string
@@ -461,7 +300,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = OrderViewValidationError{}
+} = OrderViewV1ValidationError{}
 
 // Validate checks the field values on AddOrderRequestV1 with the rules defined
 // in the proto definition for this message. If any rules are violated, the

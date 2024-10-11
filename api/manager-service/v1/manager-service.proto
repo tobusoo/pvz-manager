@@ -93,7 +93,7 @@ description:
 }
 }
 
-message Order {
+message OrderV1 {
   google.protobuf.Timestamp expiration_date = 1;
   string package_type = 2;
   uint64 cost = 3;
@@ -101,15 +101,8 @@ message Order {
   bool use_tape = 5;
 }
 
-message OrderStatus {
-  Order order = 1;
-  string status = 2;
-  google.protobuf.Timestamp updated_at = 3;
-  uint64 user_id = 4;
-}
-
-message OrderView {
-  Order order = 1;
+message OrderViewV1 {
+  OrderV1 order = 1;
   uint64 user_id = 2;
   uint64 order_id = 3;
 }
@@ -119,7 +112,7 @@ message AddOrderRequestV1 {
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
   uint64 order_id = 2
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
-  Order order = 3 [(google.api.field_behavior) = REQUIRED];
+  OrderV1 order = 3 [(google.api.field_behavior) = REQUIRED];
 }
 
 message AddOrderResponseV1 {}
@@ -154,7 +147,7 @@ message ViewRefundsRequestV1 {
 }
 
 message ViewRefundsResponseV1 {
-  repeated OrderView orders = 1;
+  repeated OrderViewV1 orders = 1;
 }
 
 message ViewOrdersRequestV1 {
@@ -167,5 +160,5 @@ message ViewOrdersRequestV1 {
 }
 
 message ViewOrdersResponseV1 {
-  repeated OrderView orders = 1;
+  repeated OrderViewV1 orders = 1;
 }
