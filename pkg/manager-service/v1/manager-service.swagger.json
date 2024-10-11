@@ -1,13 +1,18 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "manager-service/v1/manager-service.proto",
-    "version": "version not set"
+    "title": "Менеджер ПВЗ",
+    "description": "Сервис реализует взаимодействие менеджера ПВЗ с курьером и покупателями",
+    "version": "1.0.0"
   },
   "tags": [
     {
       "name": "ManagerService"
     }
+  ],
+  "host": "localhost:8080",
+  "schemes": [
+    "http"
   ],
   "consumes": [
     "application/json"
@@ -16,7 +21,7 @@
     "application/json"
   ],
   "paths": {
-    "/AddOrderV1": {
+    "/api/v1/AddOrderV1": {
       "post": {
         "summary": "Добавление заказа",
         "description": "Принимает идентификатор клиента, идентификатор заказа и сам заказ",
@@ -50,7 +55,7 @@
         ]
       }
     },
-    "/GiveOrdersV1": {
+    "/api/v1/GiveOrdersV1": {
       "get": {
         "summary": "Выдача заказов клиенту",
         "description": "Принимает массив номеров заказов для выдачи",
@@ -87,7 +92,7 @@
         ]
       }
     },
-    "/RefundV1": {
+    "/api/v1/RefundV1": {
       "post": {
         "summary": "Возвращение заказа от клиента обратно на ПВЗ",
         "description": "Принимает идентификатор клиента и идентификатор заказа",
@@ -121,7 +126,7 @@
         ]
       }
     },
-    "/ReturnV1": {
+    "/api/v1/ReturnV1": {
       "post": {
         "summary": "Возвращение заказа от ПВЗ курьеру",
         "description": "Принимает идентификатор заказа",
@@ -155,7 +160,7 @@
         ]
       }
     },
-    "/ViewOrdersV1": {
+    "/api/v1/ViewOrdersV1": {
       "get": {
         "summary": "Получение заказов определенного пользователя",
         "description": "Принимает идентификатор клиента, минимальный номер первого заказа, который должен быть возвращён и лимит заказов",
@@ -202,7 +207,7 @@
         ]
       }
     },
-    "/ViewRefundsV1": {
+    "/api/v1/ViewRefundsV1": {
       "get": {
         "summary": "Получение заказов, находящихся в статусе returned",
         "description": "Принимает номер страницы и количество заказов на одной странице",

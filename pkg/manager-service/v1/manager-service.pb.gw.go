@@ -232,7 +232,7 @@ func RegisterManagerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/AddOrderV1", runtime.WithHTTPPathPattern("/AddOrderV1"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/AddOrderV1", runtime.WithHTTPPathPattern("/api/v1/AddOrderV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -257,7 +257,7 @@ func RegisterManagerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/RefundV1", runtime.WithHTTPPathPattern("/RefundV1"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/RefundV1", runtime.WithHTTPPathPattern("/api/v1/RefundV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -282,7 +282,7 @@ func RegisterManagerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/GiveOrdersV1", runtime.WithHTTPPathPattern("/GiveOrdersV1"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/GiveOrdersV1", runtime.WithHTTPPathPattern("/api/v1/GiveOrdersV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -307,7 +307,7 @@ func RegisterManagerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/ReturnV1", runtime.WithHTTPPathPattern("/ReturnV1"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/ReturnV1", runtime.WithHTTPPathPattern("/api/v1/ReturnV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -332,7 +332,7 @@ func RegisterManagerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/ViewOrdersV1", runtime.WithHTTPPathPattern("/ViewOrdersV1"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/ViewOrdersV1", runtime.WithHTTPPathPattern("/api/v1/ViewOrdersV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -357,7 +357,7 @@ func RegisterManagerServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/ViewRefundsV1", runtime.WithHTTPPathPattern("/ViewRefundsV1"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/manager.ManagerService/ViewRefundsV1", runtime.WithHTTPPathPattern("/api/v1/ViewRefundsV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -421,7 +421,7 @@ func RegisterManagerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/AddOrderV1", runtime.WithHTTPPathPattern("/AddOrderV1"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/AddOrderV1", runtime.WithHTTPPathPattern("/api/v1/AddOrderV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -443,7 +443,7 @@ func RegisterManagerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/RefundV1", runtime.WithHTTPPathPattern("/RefundV1"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/RefundV1", runtime.WithHTTPPathPattern("/api/v1/RefundV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -465,7 +465,7 @@ func RegisterManagerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/GiveOrdersV1", runtime.WithHTTPPathPattern("/GiveOrdersV1"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/GiveOrdersV1", runtime.WithHTTPPathPattern("/api/v1/GiveOrdersV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -487,7 +487,7 @@ func RegisterManagerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/ReturnV1", runtime.WithHTTPPathPattern("/ReturnV1"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/ReturnV1", runtime.WithHTTPPathPattern("/api/v1/ReturnV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -509,7 +509,7 @@ func RegisterManagerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/ViewOrdersV1", runtime.WithHTTPPathPattern("/ViewOrdersV1"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/ViewOrdersV1", runtime.WithHTTPPathPattern("/api/v1/ViewOrdersV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -531,7 +531,7 @@ func RegisterManagerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/ViewRefundsV1", runtime.WithHTTPPathPattern("/ViewRefundsV1"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/manager.ManagerService/ViewRefundsV1", runtime.WithHTTPPathPattern("/api/v1/ViewRefundsV1"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -551,17 +551,17 @@ func RegisterManagerServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_ManagerService_AddOrderV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"AddOrderV1"}, ""))
+	pattern_ManagerService_AddOrderV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "AddOrderV1"}, ""))
 
-	pattern_ManagerService_RefundV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"RefundV1"}, ""))
+	pattern_ManagerService_RefundV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "RefundV1"}, ""))
 
-	pattern_ManagerService_GiveOrdersV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"GiveOrdersV1"}, ""))
+	pattern_ManagerService_GiveOrdersV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "GiveOrdersV1"}, ""))
 
-	pattern_ManagerService_ReturnV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"ReturnV1"}, ""))
+	pattern_ManagerService_ReturnV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "ReturnV1"}, ""))
 
-	pattern_ManagerService_ViewOrdersV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"ViewOrdersV1"}, ""))
+	pattern_ManagerService_ViewOrdersV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "ViewOrdersV1"}, ""))
 
-	pattern_ManagerService_ViewRefundsV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"ViewRefundsV1"}, ""))
+	pattern_ManagerService_ViewRefundsV1_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "ViewRefundsV1"}, ""))
 )
 
 var (

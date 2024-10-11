@@ -10,10 +10,22 @@ import "google/api/annotations.proto";
 import "validate/validate.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Менеджер ПВЗ";
+    version: "1.0.0";
+    description: "Сервис реализует взаимодействие менеджера ПВЗ с курьером и покупателями";
+  };
+  host: "localhost:8080";
+  schemes: HTTP;
+  consumes: "application/json";
+  produces: "application/json";
+};
+
 service ManagerService {
   rpc AddOrderV1(AddOrderRequestV1) returns (AddOrderResponseV1) {
     option (google.api.http) = {
-      post: "/AddOrderV1"
+      post: "/api/v1/AddOrderV1"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -25,7 +37,7 @@ service ManagerService {
 
 rpc RefundV1(RefundRequestV1) returns (RefundResponseV1) {
   option (google.api.http) = {
-    post: "/RefundV1"
+    post: "/api/v1/RefundV1"
     body: "*"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -37,7 +49,7 @@ description:
 
 rpc GiveOrdersV1(GiveOrdersRequestV1) returns (GiveOrdersResponseV1) {
   option (google.api.http) = {
-    get: "/GiveOrdersV1"
+    get: "/api/v1/GiveOrdersV1"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
     summary: "Выдача заказов клиенту";
@@ -48,7 +60,7 @@ description:
 
 rpc ReturnV1(ReturnRequestV1) returns (ReturnResponseV1) {
   option (google.api.http) = {
-    post: "/ReturnV1"
+    post: "/api/v1/ReturnV1"
     body: "*"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -60,7 +72,7 @@ description:
 
 rpc ViewOrdersV1(ViewOrdersRequestV1) returns (ViewOrdersResponseV1) {
   option (google.api.http) = {
-    get: "/ViewOrdersV1"
+    get: "/api/v1/ViewOrdersV1"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
     summary: "Получение заказов определенного пользователя";
@@ -71,7 +83,7 @@ description:
 
 rpc ViewRefundsV1(ViewRefundsRequestV1) returns (ViewRefundsResponseV1) {
   option (google.api.http) = {
-    get: "/ViewRefundsV1"
+    get: "/api/v1/ViewRefundsV1"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
     summary: "Получение заказов, находящихся в статусе returned";

@@ -10,9 +10,12 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"gitlab.ozon.dev/chppppr/homework/internal/app/manager_service"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage/postgres"
@@ -57,16 +60,9 @@ func main() {
 	err = desc.RegisterManagerServiceHandlerFromEndpoint(ctxWichCancel, mux, os.Getenv("GRPC_HOST"), []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	})
-
 	if err != nil {
 		log.Fatalf("failed to register manager service handler: %v", err)
 	}
-
-	go func() {
-		if err := http.ListenAndServe(os.Getenv("HTTP_HOST"), mux); err != nil {
-			log.Fatalf("failed to listen and serve manager service handler: %v", err)
-		}
-	}()
 
 	go func() {
 		if err := grpcServer.Serve(lis); err != nil {
@@ -74,10 +70,23 @@ func main() {
 		}
 	}()
 
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Mount("/api/v1/", mux)
+	r.Get("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "pkg/manager-service/v1/manager-service.swagger.json")
+	})
+	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://"+os.Getenv("HTTP_HOST")+"/swagger.json")))
+
+	httpServer := http.Server{Addr: os.Getenv("HTTP_HOST"), Handler: r}
+	go httpServer.ListenAndServe()
+
 	<-ctxWichCancel.Done()
 	fmt.Println()
 	log.Println("Receive os signal")
 	grpcServer.GracefulStop()
+	httpServer.Shutdown(context.Background())
 	log.Println("all done")
-	// TODO: http gateway graceful stop
 }
