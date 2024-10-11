@@ -78,10 +78,10 @@ func GenerateGiveRequests(reqs []*dto.AddOrderRequest, limit int) ([]*dto.GiveOr
 		}
 
 		if id < i {
-			res[id].Orders = append(res[id].Orders, uint(req.OrderID))
+			res[id].Orders = append(res[id].Orders, uint64(req.OrderID))
 		} else {
-			res = append(res, &dto.GiveOrdersRequest{Orders: make([]uint, 0)})
-			res[i].Orders = append(res[i].Orders, uint(req.OrderID))
+			res = append(res, &dto.GiveOrdersRequest{Orders: make([]uint64, 0)})
+			res[i].Orders = append(res[i].Orders, uint64(req.OrderID))
 			userIDs = append(userIDs, req.UserID)
 		}
 
