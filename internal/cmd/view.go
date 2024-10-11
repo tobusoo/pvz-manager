@@ -58,7 +58,7 @@ var (
 func resetViewOrderFlags(cmd *cobra.Command) {
 	cmd.ResetFlags()
 	cmd.PersistentFlags().Uint64VarP(&userID, "userID", "u", 0, "userID (required)")
-	cmd.PersistentFlags().Uint64VarP(&orderID, "orderID", "o", 0, "first orderID which should be output")
+	cmd.PersistentFlags().Uint64VarP(&orderID, "orderID", "o", 1, "first orderID which should be output")
 	cmd.PersistentFlags().Uint64VarP(&ordersLimit, "n", "n", 25, "limit of returned orders (defalut 25)")
 	cmd.MarkPersistentFlagRequired("userID")
 }
@@ -84,18 +84,18 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 
 	templates := &promptui.SelectTemplates{
 		Label:    "{{.}}",
-		Active:   "\U0001F336 {{.OrderID | cyan}}",
+		Active:   "\U0001F336 {{.OrderId | cyan}}",
 		Inactive: "  {{.OrderId | cyan}}",
 		Selected: " ",
 		Details: `-----Order-----
 {{ "OrderID:" | faint }}  {{ .OrderId }} {{ "UserID:" | faint }}  {{ .UserId }}
 {{"Cost:" | faint }} {{ .Order.Cost }}rub {{"Weight:" | faint }} {{ .Order.Weight }}gr
-{{ "Date of refund: " | faint }}  {{ .Order.ExpirationDate }} {{ "Package Type:" | faint }} {{ .Order.PackageType }}`,
+{{ "Package Type:" | faint }} {{ .Order.PackageType }}`,
 	}
 
 	promt := promptui.Select{
 		Label:     "OrderID:",
-		Items:     refunds,
+		Items:     refunds.Orders,
 		Templates: templates,
 	}
 
@@ -124,17 +124,17 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 
 	templates := &promptui.SelectTemplates{
 		Label:    "{{.}}",
-		Active:   "\U0001F336 {{.OrderID | cyan}}",
+		Active:   "\U0001F336 {{.OrderId | cyan}}",
 		Inactive: "  {{.OrderId | cyan}}",
 		Selected: " ",
 		Details: `-----Order-----
 {{ "OrderID:" | faint }}  {{ .OrderId }} {{"Cost:" | faint }} {{ .Order.Cost }}rub {{"Weight:" | faint }} {{ .Order.Weight }}gr
-{{ "Expiration date:" | faint }} {{ .Order.ExpirationDate }} {{ "Package Type:" | faint }} {{ .Order.PackageType }}`,
+{{ "Package Type:" | faint }} {{ .Order.PackageType }}`,
 	}
 
 	promt := promptui.Select{
 		Label:     fmt.Sprintf("Orders of User %d", userID),
-		Items:     orders,
+		Items:     orders.Orders,
 		Templates: templates,
 	}
 
