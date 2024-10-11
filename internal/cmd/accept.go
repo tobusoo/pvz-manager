@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"gitlab.ozon.dev/chppppr/homework/internal/dto"
+	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 	"gitlab.ozon.dev/chppppr/homework/internal/workers"
+	manager_service "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func init() {
@@ -75,20 +77,36 @@ func resetOrderFlags(cmd *cobra.Command) {
 func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 	defer resetOrderFlags(cmd)
 
-	req := &dto.AddOrderRequest{
-		ExpirationDate: expirationDate,
-		ContainerType:  containerType,
+	request_str := fmt.Sprintf("accept order -u=%d -o=%d ...", userID, orderID)
+
+	exp_date, err := utils.StringToTime(expirationDate)
+	if err != nil {
+		wk.Results <- &workers.TaskResponse{
+			Response: request_str,
+			Err:      err,
+		}
+		return
+	}
+
+	order := &manager_service.Order{
+		ExpirationDate: timestamppb.New(exp_date),
+		PackageType:    containerType,
 		UseTape:        useTape,
 		Cost:           cost,
 		Weight:         weight,
-		OrderID:        orderID,
-		UserID:         userID,
+	}
+
+	req := &manager_service.AddOrderRequestV1{
+		OrderId: orderID,
+		UserId:  userID,
+		Order:   order,
 	}
 
 	task := &workers.TaskRequest{
-		Request: fmt.Sprintf("accept order -u=%d -o=%d ...", userID, orderID),
+		Request: request_str,
 		Func: func() error {
-			return acceptUsecase.AcceptOrder(req)
+			_, err := mng_service.AddOrderV1(ctx, req)
+			return err
 		},
 	}
 
@@ -99,15 +117,16 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 	defer resetRefundFlags(cmd)
 
-	req := &dto.RefundRequest{
-		UserID:  userID,
-		OrderID: orderID,
+	req := &manager_service.RefundRequestV1{
+		UserId:  userID,
+		OrderId: orderID,
 	}
 
 	task := &workers.TaskRequest{
 		Request: fmt.Sprintf("accept refund -u=%d -o=%d", userID, orderID),
 		Func: func() error {
-			return acceptUsecase.AcceptRefund(req)
+			_, err := mng_service.RefundV1(ctx, req)
+			return err
 		},
 	}
 

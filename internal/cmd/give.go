@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	"gitlab.ozon.dev/chppppr/homework/internal/workers"
+	manager_service "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 )
 
 func init() {
@@ -37,15 +36,20 @@ func resetGiveCmd(cmd *cobra.Command) {
 func giveCmdRun(cmd *cobra.Command, args []string) {
 	defer resetGiveCmd(cmd)
 
-	req := &dto.GiveOrdersRequest{
-		Orders: orders,
+	ordrs := make([]uint64, 0, len(orders))
+	for _, v := range orders {
+		ordrs = append(ordrs, uint64(v))
+	}
+
+	req := &manager_service.GiveOrdersRequestV1{
+		Orders: ordrs,
 	}
 
 	task := &workers.TaskRequest{
 		Request: "give -o=...",
 		Func: func() error {
-			errs := giveUsecase.Give(req)
-			return errors.Join(errs...)
+			_, err := mng_service.GiveOrdersV1(ctx, req)
+			return err
 		},
 	}
 

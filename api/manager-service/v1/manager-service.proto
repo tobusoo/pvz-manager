@@ -69,7 +69,7 @@ description:
 };
 }
 
-rpc ViewRefundsV1(ViewRefundsRequestV1) returns (ViewOrdersResponseV1) {
+rpc ViewRefundsV1(ViewRefundsRequestV1) returns (ViewRefundsResponseV1) {
   option (google.api.http) = {
     get: "/ViewRefundsV1"
   };

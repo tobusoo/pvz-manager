@@ -36,7 +36,7 @@ type ManagerServiceClient interface {
 	GiveOrdersV1(ctx context.Context, in *GiveOrdersRequestV1, opts ...grpc.CallOption) (*GiveOrdersResponseV1, error)
 	ReturnV1(ctx context.Context, in *ReturnRequestV1, opts ...grpc.CallOption) (*ReturnResponseV1, error)
 	ViewOrdersV1(ctx context.Context, in *ViewOrdersRequestV1, opts ...grpc.CallOption) (*ViewOrdersResponseV1, error)
-	ViewRefundsV1(ctx context.Context, in *ViewRefundsRequestV1, opts ...grpc.CallOption) (*ViewOrdersResponseV1, error)
+	ViewRefundsV1(ctx context.Context, in *ViewRefundsRequestV1, opts ...grpc.CallOption) (*ViewRefundsResponseV1, error)
 }
 
 type managerServiceClient struct {
@@ -97,9 +97,9 @@ func (c *managerServiceClient) ViewOrdersV1(ctx context.Context, in *ViewOrdersR
 	return out, nil
 }
 
-func (c *managerServiceClient) ViewRefundsV1(ctx context.Context, in *ViewRefundsRequestV1, opts ...grpc.CallOption) (*ViewOrdersResponseV1, error) {
+func (c *managerServiceClient) ViewRefundsV1(ctx context.Context, in *ViewRefundsRequestV1, opts ...grpc.CallOption) (*ViewRefundsResponseV1, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ViewOrdersResponseV1)
+	out := new(ViewRefundsResponseV1)
 	err := c.cc.Invoke(ctx, ManagerService_ViewRefundsV1_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ type ManagerServiceServer interface {
 	GiveOrdersV1(context.Context, *GiveOrdersRequestV1) (*GiveOrdersResponseV1, error)
 	ReturnV1(context.Context, *ReturnRequestV1) (*ReturnResponseV1, error)
 	ViewOrdersV1(context.Context, *ViewOrdersRequestV1) (*ViewOrdersResponseV1, error)
-	ViewRefundsV1(context.Context, *ViewRefundsRequestV1) (*ViewOrdersResponseV1, error)
+	ViewRefundsV1(context.Context, *ViewRefundsRequestV1) (*ViewRefundsResponseV1, error)
 	mustEmbedUnimplementedManagerServiceServer()
 }
 
@@ -142,7 +142,7 @@ func (UnimplementedManagerServiceServer) ReturnV1(context.Context, *ReturnReques
 func (UnimplementedManagerServiceServer) ViewOrdersV1(context.Context, *ViewOrdersRequestV1) (*ViewOrdersResponseV1, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ViewOrdersV1 not implemented")
 }
-func (UnimplementedManagerServiceServer) ViewRefundsV1(context.Context, *ViewRefundsRequestV1) (*ViewOrdersResponseV1, error) {
+func (UnimplementedManagerServiceServer) ViewRefundsV1(context.Context, *ViewRefundsRequestV1) (*ViewRefundsResponseV1, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ViewRefundsV1 not implemented")
 }
 func (UnimplementedManagerServiceServer) mustEmbedUnimplementedManagerServiceServer() {}

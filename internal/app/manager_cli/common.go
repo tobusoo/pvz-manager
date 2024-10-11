@@ -1,4 +1,4 @@
-package app
+package manager_cli
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ func ShowResult(wg *sync.WaitGroup, wk *workers.Workers) {
 
 	for res := range wk.Results {
 		fmt.Printf("\0337")
-		fmt.Printf("\r\n\n\033[4F")
+		fmt.Printf("\r\033[2F")
 		fmt.Printf("\033[K")
 		if res.Err != nil {
 			fmt.Printf("\rError for response: %v\n", res.Response)

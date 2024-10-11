@@ -1,14 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"sync"
 
 	"github.com/spf13/cobra"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
-	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
 	"gitlab.ozon.dev/chppppr/homework/internal/workers"
+	manager_service "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 )
 
 func init() {
@@ -31,12 +31,9 @@ var (
 	numWorkers     uint
 	prevNumWorkers uint
 	wk             *workers.Workers
-	st             storage.Storage
 
-	acceptUsecase *usecase.AcceptUsecase
-	giveUsecase   *usecase.GiveUsecase
-	returnUsecase *usecase.ReturnUsecase
-	viewUsecase   *usecase.ViewUsecase
+	mng_service manager_service.ManagerServiceClient
+	ctx         context.Context
 
 	cost           uint64
 	weight         uint64
@@ -58,12 +55,12 @@ var (
 	}
 )
 
-func SetStorage(s storage.Storage) {
-	st = s
-	acceptUsecase = usecase.NewAcceptUsecase(st)
-	giveUsecase = usecase.NewGiveUsecase(st)
-	returnUsecase = usecase.NewReturnUsecase(st)
-	viewUsecase = usecase.NewViewUsecase(st)
+func SetManagerService(s manager_service.ManagerServiceClient) {
+	mng_service = s
+}
+
+func SetContext(context context.Context) {
+	ctx = context
 }
 
 func SetWorker(workers *workers.Workers) {
@@ -102,8 +99,8 @@ func SetArgs(args []string) {
 }
 
 func Execute() error {
-	if st == nil {
-		return fmt.Errorf("before Execute() need to set storage")
+	if mng_service == nil {
+		return fmt.Errorf("before Execute() need to set manager service")
 	}
 
 	return rootCmd.Execute()

@@ -211,7 +211,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/managerViewOrdersResponseV1"
+              "$ref": "#/definitions/managerViewRefundsResponseV1"
             }
           },
           "default": {
@@ -346,6 +346,18 @@
       "type": "object"
     },
     "managerViewOrdersResponseV1": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/managerOrderView"
+          }
+        }
+      }
+    },
+    "managerViewRefundsResponseV1": {
       "type": "object",
       "properties": {
         "orders": {

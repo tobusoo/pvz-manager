@@ -1,5 +1,5 @@
 package dto
 
 type GiveOrdersRequest struct {
-	Orders []uint `json:"orders"`
+	Orders []uint64 `json:"orders"`
 }
