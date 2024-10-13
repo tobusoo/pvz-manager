@@ -21,16 +21,17 @@
     "application/json"
   ],
   "paths": {
-    "/api/v1/AddOrderV1": {
+    "/api/v1/add_order": {
       "post": {
         "summary": "Добавление заказа",
         "description": "Принимает идентификатор клиента, идентификатор заказа и сам заказ",
-        "operationId": "ManagerService_AddOrderV1",
+        "operationId": "ManagerService_AddOrder",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/managerAddOrderResponseV1"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -46,7 +47,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/managerAddOrderRequestV1"
+              "$ref": "#/definitions/managerAddOrderRequest"
             }
           }
         ],
@@ -55,16 +56,17 @@
         ]
       }
     },
-    "/api/v1/GiveOrdersV1": {
+    "/api/v1/give_orders": {
       "get": {
         "summary": "Выдача заказов клиенту",
         "description": "Принимает массив номеров заказов для выдачи",
-        "operationId": "ManagerService_GiveOrdersV1",
+        "operationId": "ManagerService_GiveOrders",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/managerGiveOrdersResponseV1"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -92,16 +94,17 @@
         ]
       }
     },
-    "/api/v1/RefundV1": {
+    "/api/v1/refund": {
       "post": {
         "summary": "Возвращение заказа от клиента обратно на ПВЗ",
         "description": "Принимает идентификатор клиента и идентификатор заказа",
-        "operationId": "ManagerService_RefundV1",
+        "operationId": "ManagerService_Refund",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/managerRefundResponseV1"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -117,7 +120,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/managerRefundRequestV1"
+              "$ref": "#/definitions/managerRefundRequest"
             }
           }
         ],
@@ -126,16 +129,17 @@
         ]
       }
     },
-    "/api/v1/ReturnV1": {
+    "/api/v1/return": {
       "post": {
         "summary": "Возвращение заказа от ПВЗ курьеру",
         "description": "Принимает идентификатор заказа",
-        "operationId": "ManagerService_ReturnV1",
+        "operationId": "ManagerService_Return",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/managerReturnResponseV1"
+              "type": "object",
+              "properties": {}
             }
           },
           "default": {
@@ -151,7 +155,7 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/managerReturnRequestV1"
+              "$ref": "#/definitions/managerReturnRequest"
             }
           }
         ],
@@ -160,16 +164,16 @@
         ]
       }
     },
-    "/api/v1/ViewOrdersV1": {
+    "/api/v1/view_orders": {
       "get": {
         "summary": "Получение заказов определенного пользователя",
         "description": "Принимает идентификатор клиента, минимальный номер первого заказа, который должен быть возвращён и лимит заказов",
-        "operationId": "ManagerService_ViewOrdersV1",
+        "operationId": "ManagerService_ViewOrders",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/managerViewOrdersResponseV1"
+              "$ref": "#/definitions/managerViewOrdersResponse"
             }
           },
           "default": {
@@ -207,16 +211,16 @@
         ]
       }
     },
-    "/api/v1/ViewRefundsV1": {
+    "/api/v1/view_refunds": {
       "get": {
         "summary": "Получение заказов, находящихся в статусе returned",
         "description": "Принимает номер страницы и количество заказов на одной странице",
-        "operationId": "ManagerService_ViewRefundsV1",
+        "operationId": "ManagerService_ViewRefunds",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/managerViewRefundsResponseV1"
+              "$ref": "#/definitions/managerViewRefundsResponse"
             }
           },
           "default": {
@@ -249,7 +253,7 @@
     }
   },
   "definitions": {
-    "managerAddOrderRequestV1": {
+    "managerAddOrderRequest": {
       "type": "object",
       "properties": {
         "userId": {
@@ -261,7 +265,7 @@
           "format": "uint64"
         },
         "order": {
-          "$ref": "#/definitions/managerOrderV1"
+          "$ref": "#/definitions/managerOrder"
         }
       },
       "required": [
@@ -270,13 +274,7 @@
         "order"
       ]
     },
-    "managerAddOrderResponseV1": {
-      "type": "object"
-    },
-    "managerGiveOrdersResponseV1": {
-      "type": "object"
-    },
-    "managerOrderV1": {
+    "managerOrder": {
       "type": "object",
       "properties": {
         "expirationDate": {
@@ -299,11 +297,11 @@
         }
       }
     },
-    "managerOrderViewV1": {
+    "managerOrderView": {
       "type": "object",
       "properties": {
         "order": {
-          "$ref": "#/definitions/managerOrderV1"
+          "$ref": "#/definitions/managerOrder"
         },
         "userId": {
           "type": "string",
@@ -315,7 +313,7 @@
         }
       }
     },
-    "managerRefundRequestV1": {
+    "managerRefundRequest": {
       "type": "object",
       "properties": {
         "userId": {
@@ -332,10 +330,7 @@
         "orderId"
       ]
     },
-    "managerRefundResponseV1": {
-      "type": "object"
-    },
-    "managerReturnRequestV1": {
+    "managerReturnRequest": {
       "type": "object",
       "properties": {
         "orderId": {
@@ -347,29 +342,26 @@
         "orderId"
       ]
     },
-    "managerReturnResponseV1": {
-      "type": "object"
-    },
-    "managerViewOrdersResponseV1": {
+    "managerViewOrdersResponse": {
       "type": "object",
       "properties": {
         "orders": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/managerOrderViewV1"
+            "$ref": "#/definitions/managerOrderView"
           }
         }
       }
     },
-    "managerViewRefundsResponseV1": {
+    "managerViewRefundsResponse": {
       "type": "object",
       "properties": {
         "orders": {
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/managerOrderViewV1"
+            "$ref": "#/definitions/managerOrderView"
           }
         }
       }

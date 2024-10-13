@@ -41,14 +41,14 @@ func giveCmdRun(cmd *cobra.Command, args []string) {
 		ordrs = append(ordrs, uint64(v))
 	}
 
-	req := &manager_service.GiveOrdersRequestV1{
+	req := &manager_service.GiveOrdersRequest{
 		Orders: ordrs,
 	}
 
 	task := &workers.TaskRequest{
 		Request: "give -o=...",
 		Func: func() error {
-			_, err := mng_service.GiveOrdersV1(ctx, req)
+			_, err := mng_service.GiveOrders(ctx, req)
 			return err
 		},
 	}

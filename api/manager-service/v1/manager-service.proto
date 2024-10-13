@@ -5,6 +5,7 @@ package manager;
 option go_package = "gitlab.ozon.dev/chppppr/homework/pkg/manager-service;manager_service";
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 import "google/api/field_behavior.proto";
 import "google/api/annotations.proto";
 import "validate/validate.proto";
@@ -23,9 +24,9 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 };
 
 service ManagerService {
-  rpc AddOrderV1(AddOrderRequestV1) returns (AddOrderResponseV1) {
+  rpc AddOrder(AddOrderRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      post: "/api/v1/AddOrderV1"
+      post: "/api/v1/add_order"
       body: "*"
     };
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -35,9 +36,9 @@ service ManagerService {
   };
 }
 
-rpc RefundV1(RefundRequestV1) returns (RefundResponseV1) {
+rpc Refund(RefundRequest) returns (google.protobuf.Empty) {
   option (google.api.http) = {
-    post: "/api/v1/RefundV1"
+    post: "/api/v1/refund"
     body: "*"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -47,9 +48,9 @@ description:
 };
 }
 
-rpc GiveOrdersV1(GiveOrdersRequestV1) returns (GiveOrdersResponseV1) {
+rpc GiveOrders(GiveOrdersRequest) returns (google.protobuf.Empty) {
   option (google.api.http) = {
-    get: "/api/v1/GiveOrdersV1"
+    get: "/api/v1/give_orders"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
     summary: "Выдача заказов клиенту";
@@ -58,9 +59,9 @@ description:
 };
 }
 
-rpc ReturnV1(ReturnRequestV1) returns (ReturnResponseV1) {
+rpc Return(ReturnRequest) returns (google.protobuf.Empty) {
   option (google.api.http) = {
-    post: "/api/v1/ReturnV1"
+    post: "/api/v1/return"
     body: "*"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
@@ -70,9 +71,9 @@ description:
 };
 }
 
-rpc ViewOrdersV1(ViewOrdersRequestV1) returns (ViewOrdersResponseV1) {
+rpc ViewOrders(ViewOrdersRequest) returns (ViewOrdersResponse) {
   option (google.api.http) = {
-    get: "/api/v1/ViewOrdersV1"
+    get: "/api/v1/view_orders"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
     summary: "Получение заказов определенного пользователя";
@@ -81,9 +82,9 @@ description:
 };
 }
 
-rpc ViewRefundsV1(ViewRefundsRequestV1) returns (ViewRefundsResponseV1) {
+rpc ViewRefunds(ViewRefundsRequest) returns (ViewRefundsResponse) {
   option (google.api.http) = {
-    get: "/api/v1/ViewRefundsV1"
+    get: "/api/v1/view_refunds"
   };
   option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
     summary: "Получение заказов, находящихся в статусе returned";
@@ -93,7 +94,7 @@ description:
 }
 }
 
-message OrderV1 {
+message Order {
   google.protobuf.Timestamp expiration_date = 1;
   string package_type = 2;
   uint64 cost = 3;
@@ -101,56 +102,48 @@ message OrderV1 {
   bool use_tape = 5;
 }
 
-message OrderViewV1 {
-  OrderV1 order = 1;
+message OrderView {
+  Order order = 1;
   uint64 user_id = 2;
   uint64 order_id = 3;
 }
 
-message AddOrderRequestV1 {
+message AddOrderRequest {
   uint64 user_id = 1
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
   uint64 order_id = 2
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
-  OrderV1 order = 3 [(google.api.field_behavior) = REQUIRED];
+  Order order = 3 [(google.api.field_behavior) = REQUIRED];
 }
 
-message AddOrderResponseV1 {}
-
-message RefundRequestV1 {
+message RefundRequest {
   uint64 user_id = 1
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
   uint64 order_id = 2
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
 }
 
-message RefundResponseV1 {}
-
-message GiveOrdersRequestV1 {
+message GiveOrdersRequest {
   repeated uint64 orders = 1 [(google.api.field_behavior) = REQUIRED];
 }
 
-message GiveOrdersResponseV1 {}
-
-message ReturnRequestV1 {
+message ReturnRequest {
   uint64 order_id = 1
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
 }
 
-message ReturnResponseV1 {}
-
-message ViewRefundsRequestV1 {
+message ViewRefundsRequest {
   uint64 page_id = 1
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
   uint64 orders_per_page = 2
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
 }
 
-message ViewRefundsResponseV1 {
-  repeated OrderViewV1 orders = 1;
+message ViewRefundsResponse {
+  repeated OrderView orders = 1;
 }
 
-message ViewOrdersRequestV1 {
+message ViewOrdersRequest {
   uint64 user_id = 1
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
   uint64 first_order_id = 2
@@ -159,6 +152,6 @@ message ViewOrdersRequestV1 {
       [(validate.rules).uint64.gt = 0, (google.api.field_behavior) = REQUIRED];
 }
 
-message ViewOrdersResponseV1 {
-  repeated OrderViewV1 orders = 1;
+message ViewOrdersResponse {
+  repeated OrderView orders = 1;
 }

@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *ManagerService) ViewRefundsV1(ctx context.Context, req *desc.ViewRefundsRequestV1) (*desc.ViewRefundsResponseV1, error) {
+func (s *ManagerService) ViewRefunds(ctx context.Context, req *desc.ViewRefundsRequest) (*desc.ViewRefundsResponse, error) {
 	if err := req.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -25,5 +25,5 @@ func (s *ManagerService) ViewRefundsV1(ctx context.Context, req *desc.ViewRefund
 	}
 
 	res_orders := OrderViewToProto(orders)
-	return &desc.ViewRefundsResponseV1{Orders: res_orders}, nil
+	return &desc.ViewRefundsResponse{Orders: res_orders}, nil
 }

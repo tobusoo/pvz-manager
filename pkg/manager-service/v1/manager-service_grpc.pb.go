@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,24 +20,24 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ManagerService_AddOrderV1_FullMethodName    = "/manager.ManagerService/AddOrderV1"
-	ManagerService_RefundV1_FullMethodName      = "/manager.ManagerService/RefundV1"
-	ManagerService_GiveOrdersV1_FullMethodName  = "/manager.ManagerService/GiveOrdersV1"
-	ManagerService_ReturnV1_FullMethodName      = "/manager.ManagerService/ReturnV1"
-	ManagerService_ViewOrdersV1_FullMethodName  = "/manager.ManagerService/ViewOrdersV1"
-	ManagerService_ViewRefundsV1_FullMethodName = "/manager.ManagerService/ViewRefundsV1"
+	ManagerService_AddOrder_FullMethodName    = "/manager.ManagerService/AddOrder"
+	ManagerService_Refund_FullMethodName      = "/manager.ManagerService/Refund"
+	ManagerService_GiveOrders_FullMethodName  = "/manager.ManagerService/GiveOrders"
+	ManagerService_Return_FullMethodName      = "/manager.ManagerService/Return"
+	ManagerService_ViewOrders_FullMethodName  = "/manager.ManagerService/ViewOrders"
+	ManagerService_ViewRefunds_FullMethodName = "/manager.ManagerService/ViewRefunds"
 )
 
 // ManagerServiceClient is the client API for ManagerService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ManagerServiceClient interface {
-	AddOrderV1(ctx context.Context, in *AddOrderRequestV1, opts ...grpc.CallOption) (*AddOrderResponseV1, error)
-	RefundV1(ctx context.Context, in *RefundRequestV1, opts ...grpc.CallOption) (*RefundResponseV1, error)
-	GiveOrdersV1(ctx context.Context, in *GiveOrdersRequestV1, opts ...grpc.CallOption) (*GiveOrdersResponseV1, error)
-	ReturnV1(ctx context.Context, in *ReturnRequestV1, opts ...grpc.CallOption) (*ReturnResponseV1, error)
-	ViewOrdersV1(ctx context.Context, in *ViewOrdersRequestV1, opts ...grpc.CallOption) (*ViewOrdersResponseV1, error)
-	ViewRefundsV1(ctx context.Context, in *ViewRefundsRequestV1, opts ...grpc.CallOption) (*ViewRefundsResponseV1, error)
+	AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Refund(ctx context.Context, in *RefundRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GiveOrders(ctx context.Context, in *GiveOrdersRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Return(ctx context.Context, in *ReturnRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ViewOrders(ctx context.Context, in *ViewOrdersRequest, opts ...grpc.CallOption) (*ViewOrdersResponse, error)
+	ViewRefunds(ctx context.Context, in *ViewRefundsRequest, opts ...grpc.CallOption) (*ViewRefundsResponse, error)
 }
 
 type managerServiceClient struct {
@@ -47,60 +48,60 @@ func NewManagerServiceClient(cc grpc.ClientConnInterface) ManagerServiceClient {
 	return &managerServiceClient{cc}
 }
 
-func (c *managerServiceClient) AddOrderV1(ctx context.Context, in *AddOrderRequestV1, opts ...grpc.CallOption) (*AddOrderResponseV1, error) {
+func (c *managerServiceClient) AddOrder(ctx context.Context, in *AddOrderRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AddOrderResponseV1)
-	err := c.cc.Invoke(ctx, ManagerService_AddOrderV1_FullMethodName, in, out, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ManagerService_AddOrder_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *managerServiceClient) RefundV1(ctx context.Context, in *RefundRequestV1, opts ...grpc.CallOption) (*RefundResponseV1, error) {
+func (c *managerServiceClient) Refund(ctx context.Context, in *RefundRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RefundResponseV1)
-	err := c.cc.Invoke(ctx, ManagerService_RefundV1_FullMethodName, in, out, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ManagerService_Refund_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *managerServiceClient) GiveOrdersV1(ctx context.Context, in *GiveOrdersRequestV1, opts ...grpc.CallOption) (*GiveOrdersResponseV1, error) {
+func (c *managerServiceClient) GiveOrders(ctx context.Context, in *GiveOrdersRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GiveOrdersResponseV1)
-	err := c.cc.Invoke(ctx, ManagerService_GiveOrdersV1_FullMethodName, in, out, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ManagerService_GiveOrders_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *managerServiceClient) ReturnV1(ctx context.Context, in *ReturnRequestV1, opts ...grpc.CallOption) (*ReturnResponseV1, error) {
+func (c *managerServiceClient) Return(ctx context.Context, in *ReturnRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ReturnResponseV1)
-	err := c.cc.Invoke(ctx, ManagerService_ReturnV1_FullMethodName, in, out, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, ManagerService_Return_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *managerServiceClient) ViewOrdersV1(ctx context.Context, in *ViewOrdersRequestV1, opts ...grpc.CallOption) (*ViewOrdersResponseV1, error) {
+func (c *managerServiceClient) ViewOrders(ctx context.Context, in *ViewOrdersRequest, opts ...grpc.CallOption) (*ViewOrdersResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ViewOrdersResponseV1)
-	err := c.cc.Invoke(ctx, ManagerService_ViewOrdersV1_FullMethodName, in, out, cOpts...)
+	out := new(ViewOrdersResponse)
+	err := c.cc.Invoke(ctx, ManagerService_ViewOrders_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *managerServiceClient) ViewRefundsV1(ctx context.Context, in *ViewRefundsRequestV1, opts ...grpc.CallOption) (*ViewRefundsResponseV1, error) {
+func (c *managerServiceClient) ViewRefunds(ctx context.Context, in *ViewRefundsRequest, opts ...grpc.CallOption) (*ViewRefundsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ViewRefundsResponseV1)
-	err := c.cc.Invoke(ctx, ManagerService_ViewRefundsV1_FullMethodName, in, out, cOpts...)
+	out := new(ViewRefundsResponse)
+	err := c.cc.Invoke(ctx, ManagerService_ViewRefunds_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -111,12 +112,12 @@ func (c *managerServiceClient) ViewRefundsV1(ctx context.Context, in *ViewRefund
 // All implementations must embed UnimplementedManagerServiceServer
 // for forward compatibility.
 type ManagerServiceServer interface {
-	AddOrderV1(context.Context, *AddOrderRequestV1) (*AddOrderResponseV1, error)
-	RefundV1(context.Context, *RefundRequestV1) (*RefundResponseV1, error)
-	GiveOrdersV1(context.Context, *GiveOrdersRequestV1) (*GiveOrdersResponseV1, error)
-	ReturnV1(context.Context, *ReturnRequestV1) (*ReturnResponseV1, error)
-	ViewOrdersV1(context.Context, *ViewOrdersRequestV1) (*ViewOrdersResponseV1, error)
-	ViewRefundsV1(context.Context, *ViewRefundsRequestV1) (*ViewRefundsResponseV1, error)
+	AddOrder(context.Context, *AddOrderRequest) (*emptypb.Empty, error)
+	Refund(context.Context, *RefundRequest) (*emptypb.Empty, error)
+	GiveOrders(context.Context, *GiveOrdersRequest) (*emptypb.Empty, error)
+	Return(context.Context, *ReturnRequest) (*emptypb.Empty, error)
+	ViewOrders(context.Context, *ViewOrdersRequest) (*ViewOrdersResponse, error)
+	ViewRefunds(context.Context, *ViewRefundsRequest) (*ViewRefundsResponse, error)
 	mustEmbedUnimplementedManagerServiceServer()
 }
 
@@ -127,23 +128,23 @@ type ManagerServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedManagerServiceServer struct{}
 
-func (UnimplementedManagerServiceServer) AddOrderV1(context.Context, *AddOrderRequestV1) (*AddOrderResponseV1, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddOrderV1 not implemented")
+func (UnimplementedManagerServiceServer) AddOrder(context.Context, *AddOrderRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddOrder not implemented")
 }
-func (UnimplementedManagerServiceServer) RefundV1(context.Context, *RefundRequestV1) (*RefundResponseV1, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RefundV1 not implemented")
+func (UnimplementedManagerServiceServer) Refund(context.Context, *RefundRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Refund not implemented")
 }
-func (UnimplementedManagerServiceServer) GiveOrdersV1(context.Context, *GiveOrdersRequestV1) (*GiveOrdersResponseV1, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GiveOrdersV1 not implemented")
+func (UnimplementedManagerServiceServer) GiveOrders(context.Context, *GiveOrdersRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GiveOrders not implemented")
 }
-func (UnimplementedManagerServiceServer) ReturnV1(context.Context, *ReturnRequestV1) (*ReturnResponseV1, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReturnV1 not implemented")
+func (UnimplementedManagerServiceServer) Return(context.Context, *ReturnRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Return not implemented")
 }
-func (UnimplementedManagerServiceServer) ViewOrdersV1(context.Context, *ViewOrdersRequestV1) (*ViewOrdersResponseV1, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ViewOrdersV1 not implemented")
+func (UnimplementedManagerServiceServer) ViewOrders(context.Context, *ViewOrdersRequest) (*ViewOrdersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ViewOrders not implemented")
 }
-func (UnimplementedManagerServiceServer) ViewRefundsV1(context.Context, *ViewRefundsRequestV1) (*ViewRefundsResponseV1, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ViewRefundsV1 not implemented")
+func (UnimplementedManagerServiceServer) ViewRefunds(context.Context, *ViewRefundsRequest) (*ViewRefundsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ViewRefunds not implemented")
 }
 func (UnimplementedManagerServiceServer) mustEmbedUnimplementedManagerServiceServer() {}
 func (UnimplementedManagerServiceServer) testEmbeddedByValue()                        {}
@@ -166,110 +167,110 @@ func RegisterManagerServiceServer(s grpc.ServiceRegistrar, srv ManagerServiceSer
 	s.RegisterService(&ManagerService_ServiceDesc, srv)
 }
 
-func _ManagerService_AddOrderV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddOrderRequestV1)
+func _ManagerService_AddOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddOrderRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ManagerServiceServer).AddOrderV1(ctx, in)
+		return srv.(ManagerServiceServer).AddOrder(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ManagerService_AddOrderV1_FullMethodName,
+		FullMethod: ManagerService_AddOrder_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServiceServer).AddOrderV1(ctx, req.(*AddOrderRequestV1))
+		return srv.(ManagerServiceServer).AddOrder(ctx, req.(*AddOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ManagerService_RefundV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RefundRequestV1)
+func _ManagerService_Refund_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefundRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ManagerServiceServer).RefundV1(ctx, in)
+		return srv.(ManagerServiceServer).Refund(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ManagerService_RefundV1_FullMethodName,
+		FullMethod: ManagerService_Refund_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServiceServer).RefundV1(ctx, req.(*RefundRequestV1))
+		return srv.(ManagerServiceServer).Refund(ctx, req.(*RefundRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ManagerService_GiveOrdersV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GiveOrdersRequestV1)
+func _ManagerService_GiveOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GiveOrdersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ManagerServiceServer).GiveOrdersV1(ctx, in)
+		return srv.(ManagerServiceServer).GiveOrders(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ManagerService_GiveOrdersV1_FullMethodName,
+		FullMethod: ManagerService_GiveOrders_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServiceServer).GiveOrdersV1(ctx, req.(*GiveOrdersRequestV1))
+		return srv.(ManagerServiceServer).GiveOrders(ctx, req.(*GiveOrdersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ManagerService_ReturnV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReturnRequestV1)
+func _ManagerService_Return_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ReturnRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ManagerServiceServer).ReturnV1(ctx, in)
+		return srv.(ManagerServiceServer).Return(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ManagerService_ReturnV1_FullMethodName,
+		FullMethod: ManagerService_Return_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServiceServer).ReturnV1(ctx, req.(*ReturnRequestV1))
+		return srv.(ManagerServiceServer).Return(ctx, req.(*ReturnRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ManagerService_ViewOrdersV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ViewOrdersRequestV1)
+func _ManagerService_ViewOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ViewOrdersRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ManagerServiceServer).ViewOrdersV1(ctx, in)
+		return srv.(ManagerServiceServer).ViewOrders(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ManagerService_ViewOrdersV1_FullMethodName,
+		FullMethod: ManagerService_ViewOrders_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServiceServer).ViewOrdersV1(ctx, req.(*ViewOrdersRequestV1))
+		return srv.(ManagerServiceServer).ViewOrders(ctx, req.(*ViewOrdersRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ManagerService_ViewRefundsV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ViewRefundsRequestV1)
+func _ManagerService_ViewRefunds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ViewRefundsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ManagerServiceServer).ViewRefundsV1(ctx, in)
+		return srv.(ManagerServiceServer).ViewRefunds(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ManagerService_ViewRefundsV1_FullMethodName,
+		FullMethod: ManagerService_ViewRefunds_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServiceServer).ViewRefundsV1(ctx, req.(*ViewRefundsRequestV1))
+		return srv.(ManagerServiceServer).ViewRefunds(ctx, req.(*ViewRefundsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -282,28 +283,28 @@ var ManagerService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ManagerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "AddOrderV1",
-			Handler:    _ManagerService_AddOrderV1_Handler,
+			MethodName: "AddOrder",
+			Handler:    _ManagerService_AddOrder_Handler,
 		},
 		{
-			MethodName: "RefundV1",
-			Handler:    _ManagerService_RefundV1_Handler,
+			MethodName: "Refund",
+			Handler:    _ManagerService_Refund_Handler,
 		},
 		{
-			MethodName: "GiveOrdersV1",
-			Handler:    _ManagerService_GiveOrdersV1_Handler,
+			MethodName: "GiveOrders",
+			Handler:    _ManagerService_GiveOrders_Handler,
 		},
 		{
-			MethodName: "ReturnV1",
-			Handler:    _ManagerService_ReturnV1_Handler,
+			MethodName: "Return",
+			Handler:    _ManagerService_Return_Handler,
 		},
 		{
-			MethodName: "ViewOrdersV1",
-			Handler:    _ManagerService_ViewOrdersV1_Handler,
+			MethodName: "ViewOrders",
+			Handler:    _ManagerService_ViewOrders_Handler,
 		},
 		{
-			MethodName: "ViewRefundsV1",
-			Handler:    _ManagerService_ViewRefundsV1_Handler,
+			MethodName: "ViewRefunds",
+			Handler:    _ManagerService_ViewRefunds_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

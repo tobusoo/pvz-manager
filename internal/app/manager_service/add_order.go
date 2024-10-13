@@ -8,9 +8,10 @@ import (
 	desc "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (s *ManagerService) AddOrderV1(ctx context.Context, req *desc.AddOrderRequestV1) (*desc.AddOrderResponseV1, error) {
+func (s *ManagerService) AddOrder(ctx context.Context, req *desc.AddOrderRequest) (*emptypb.Empty, error) {
 	if err := req.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -32,5 +33,5 @@ func (s *ManagerService) AddOrderV1(ctx context.Context, req *desc.AddOrderReque
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &desc.AddOrderResponseV1{}, nil
+	return &emptypb.Empty{}, nil
 }

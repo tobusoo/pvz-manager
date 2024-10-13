@@ -32,14 +32,14 @@ func resetReturnFlags(cmd *cobra.Command) {
 func returnCmdRun(cmd *cobra.Command, args []string) {
 	defer resetReturnFlags(cmd)
 
-	req := &manager_service.ReturnRequestV1{
+	req := &manager_service.ReturnRequest{
 		OrderId: orderID,
 	}
 
 	task := &workers.TaskRequest{
 		Request: fmt.Sprintf("return -o=%d", orderID),
 		Func: func() error {
-			_, err := mng_service.ReturnV1(ctx, req)
+			_, err := mng_service.Return(ctx, req)
 			return err
 		},
 	}

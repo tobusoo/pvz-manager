@@ -88,7 +88,7 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	order := &manager_service.OrderV1{
+	order := &manager_service.Order{
 		ExpirationDate: timestamppb.New(exp_date),
 		PackageType:    containerType,
 		UseTape:        useTape,
@@ -96,7 +96,7 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 		Weight:         weight,
 	}
 
-	req := &manager_service.AddOrderRequestV1{
+	req := &manager_service.AddOrderRequest{
 		OrderId: orderID,
 		UserId:  userID,
 		Order:   order,
@@ -105,7 +105,7 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 	task := &workers.TaskRequest{
 		Request: request_str,
 		Func: func() error {
-			_, err := mng_service.AddOrderV1(ctx, req)
+			_, err := mng_service.AddOrder(ctx, req)
 			return err
 		},
 	}
@@ -117,7 +117,7 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 	defer resetRefundFlags(cmd)
 
-	req := &manager_service.RefundRequestV1{
+	req := &manager_service.RefundRequest{
 		UserId:  userID,
 		OrderId: orderID,
 	}
@@ -125,7 +125,7 @@ func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 	task := &workers.TaskRequest{
 		Request: fmt.Sprintf("accept refund -u=%d -o=%d", userID, orderID),
 		Func: func() error {
-			_, err := mng_service.RefundV1(ctx, req)
+			_, err := mng_service.Refund(ctx, req)
 			return err
 		},
 	}

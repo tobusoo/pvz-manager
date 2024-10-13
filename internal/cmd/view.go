@@ -71,12 +71,12 @@ func resetViewRefundFlags(cmd *cobra.Command) {
 
 func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 	defer resetViewRefundFlags(cmd)
-	req := &manager_service.ViewRefundsRequestV1{
+	req := &manager_service.ViewRefundsRequest{
 		PageId:        pageID,
 		OrdersPerPage: ordersPerPage,
 	}
 
-	refunds, err := mng_service.ViewRefundsV1(ctx, req)
+	refunds, err := mng_service.ViewRefunds(ctx, req)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -110,13 +110,13 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 	defer resetViewOrderFlags(cmd)
 
-	req := &manager_service.ViewOrdersRequestV1{
+	req := &manager_service.ViewOrdersRequest{
 		UserId:       userID,
 		FirstOrderId: orderID,
 		Limit:        ordersLimit,
 	}
 
-	orders, err := mng_service.ViewOrdersV1(ctx, req)
+	orders, err := mng_service.ViewOrders(ctx, req)
 	if err != nil {
 		fmt.Println(err)
 		return
