@@ -8,9 +8,9 @@ import (
 )
 
 func OrderViewToProto(in []domain.OrderView) []*desc.OrderView {
-	out := make([]*desc.OrderView, 0, len(in))
+	out := make([]*desc.OrderView, len(in))
 
-	for _, order := range in {
+	for i, order := range in {
 		date, _ := utils.StringToTime(order.ExpirationDate)
 		exp_date := timestamppb.New(date)
 
@@ -22,13 +22,11 @@ func OrderViewToProto(in []domain.OrderView) []*desc.OrderView {
 			UseTape:        order.UseTape,
 		}
 
-		res := &desc.OrderView{
+		out[i] = &desc.OrderView{
 			UserId:  order.UserID,
 			OrderId: order.OrderID,
 			Order:   proto_order,
 		}
-
-		out = append(out, res)
 	}
 
 	return out
