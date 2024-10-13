@@ -6,7 +6,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	manager_service "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
+	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 )
 
 func init() {
@@ -71,12 +71,12 @@ func resetViewRefundFlags(cmd *cobra.Command) {
 
 func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 	defer resetViewRefundFlags(cmd)
-	req := &manager_service.ViewRefundsRequest{
-		PageId:        pageID,
+	req := &dto.ViewRefundsRequest{
+		PageID:        pageID,
 		OrdersPerPage: ordersPerPage,
 	}
 
-	refunds, err := mng_service.ViewRefunds(ctx, req)
+	refunds, err := mng_client.ViewRefunds(ctx, req)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -84,13 +84,13 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 
 	templates := &promptui.SelectTemplates{
 		Label:    "{{.}}",
-		Active:   "\U0001F336 {{.OrderId | cyan}}",
-		Inactive: "  {{.OrderId | cyan}}",
+		Active:   "\U0001F336 {{.OrderID | cyan}}",
+		Inactive: "  {{.OrderID | cyan}}",
 		Selected: " ",
 		Details: `-----Order-----
-{{ "OrderID:" | faint }}  {{ .OrderId }} {{ "UserID:" | faint }}  {{ .UserId }}
-{{"Cost:" | faint }} {{ .Order.Cost }}rub {{"Weight:" | faint }} {{ .Order.Weight }}gr
-{{ "Package Type:" | faint }} {{ .Order.PackageType }}`,
+{{ "OrderID:" | faint }}  {{ .OrderID }} {{ "UserID:" | faint }}  {{ .UserID }}
+{{"Cost:" | faint }} {{ .Cost }}rub {{"Weight:" | faint }} {{ .Weight }}gr
+{{ "Package Type:" | faint }} {{ .PackageType }}`,
 	}
 
 	promt := promptui.Select{
@@ -110,13 +110,13 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 	defer resetViewOrderFlags(cmd)
 
-	req := &manager_service.ViewOrdersRequest{
-		UserId:       userID,
-		FirstOrderId: orderID,
-		Limit:        ordersLimit,
+	req := &dto.ViewOrdersRequest{
+		UserID:       userID,
+		FirstOrderID: orderID,
+		OrdersLimit:  ordersLimit,
 	}
 
-	orders, err := mng_service.ViewOrders(ctx, req)
+	orders, err := mng_client.ViewOrders(ctx, req)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -124,12 +124,12 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 
 	templates := &promptui.SelectTemplates{
 		Label:    "{{.}}",
-		Active:   "\U0001F336 {{.OrderId | cyan}}",
-		Inactive: "  {{.OrderId | cyan}}",
+		Active:   "\U0001F336 {{.OrderID | cyan}}",
+		Inactive: "  {{.OrderID | cyan}}",
 		Selected: " ",
 		Details: `-----Order-----
-{{ "OrderID:" | faint }}  {{ .OrderId }} {{"Cost:" | faint }} {{ .Order.Cost }}rub {{"Weight:" | faint }} {{ .Order.Weight }}gr
-{{ "Package Type:" | faint }} {{ .Order.PackageType }}`,
+{{ "OrderID:" | faint }}  {{ .OrderID }} {{"Cost:" | faint }} {{ .Cost }}rub {{"Weight:" | faint }} {{ .Weight }}gr
+{{ "Expiration date:" | faint }} {{ .ExpirationDate }} {{ "Package Type:" | faint }} {{ .PackageType }}`,
 	}
 
 	promt := promptui.Select{

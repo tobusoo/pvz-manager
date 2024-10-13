@@ -9,6 +9,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"gitlab.ozon.dev/chppppr/homework/internal/app/manager_cli"
+	"gitlab.ozon.dev/chppppr/homework/internal/clients/manager"
 	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
 	manager_service "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 	"google.golang.org/grpc"
@@ -31,7 +32,8 @@ func main() {
 	defer conn.Close()
 
 	mng_service := manager_service.NewManagerServiceClient(conn)
-	cmd.SetManagerService(mng_service)
+	mng_client := manager.NewManagerServiceClient(mng_service)
+	cmd.SetManagerServiceClient(mng_client)
 	cmd.SetContext(ctxWichCancel)
 
 	if len(os.Args[1:]) > 0 {

@@ -4,10 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"gitlab.ozon.dev/chppppr/homework/internal/utils"
+	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	"gitlab.ozon.dev/chppppr/homework/internal/workers"
-	manager_service "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func init() {
@@ -78,35 +76,20 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 	defer resetOrderFlags(cmd)
 
 	request_str := fmt.Sprintf("accept order -u=%d -o=%d ...", userID, orderID)
-
-	exp_date, err := utils.StringToTime(expirationDate)
-	if err != nil {
-		wk.Results <- &workers.TaskResponse{
-			Response: request_str,
-			Err:      err,
-		}
-		return
-	}
-
-	order := &manager_service.Order{
-		ExpirationDate: timestamppb.New(exp_date),
-		PackageType:    containerType,
+	req := &dto.AddOrderRequest{
+		UserID:         userID,
+		OrderID:        orderID,
+		ExpirationDate: expirationDate,
+		ContainerType:  containerType,
 		UseTape:        useTape,
 		Cost:           cost,
 		Weight:         weight,
 	}
 
-	req := &manager_service.AddOrderRequest{
-		OrderId: orderID,
-		UserId:  userID,
-		Order:   order,
-	}
-
 	task := &workers.TaskRequest{
 		Request: request_str,
 		Func: func() error {
-			_, err := mng_service.AddOrder(ctx, req)
-			return err
+			return mng_client.AddOrder(ctx, req)
 		},
 	}
 
@@ -117,16 +100,15 @@ func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 	defer resetRefundFlags(cmd)
 
-	req := &manager_service.RefundRequest{
-		UserId:  userID,
-		OrderId: orderID,
+	req := &dto.RefundRequest{
+		UserID:  userID,
+		OrderID: orderID,
 	}
 
 	task := &workers.TaskRequest{
 		Request: fmt.Sprintf("accept refund -u=%d -o=%d", userID, orderID),
 		Func: func() error {
-			_, err := mng_service.Refund(ctx, req)
-			return err
+			return mng_client.Refund(ctx, req)
 		},
 	}
 

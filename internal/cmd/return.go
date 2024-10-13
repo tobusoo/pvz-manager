@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	"gitlab.ozon.dev/chppppr/homework/internal/workers"
-	manager_service "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 )
 
 func init() {
@@ -32,15 +32,14 @@ func resetReturnFlags(cmd *cobra.Command) {
 func returnCmdRun(cmd *cobra.Command, args []string) {
 	defer resetReturnFlags(cmd)
 
-	req := &manager_service.ReturnRequest{
-		OrderId: orderID,
+	req := &dto.ReturnRequest{
+		OrderID: orderID,
 	}
 
 	task := &workers.TaskRequest{
 		Request: fmt.Sprintf("return -o=%d", orderID),
 		Func: func() error {
-			_, err := mng_service.Return(ctx, req)
-			return err
+			return mng_client.Return(ctx, req)
 		},
 	}
 

@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"sync"
 
 	"github.com/spf13/cobra"
+	"gitlab.ozon.dev/chppppr/homework/internal/clients"
 	"gitlab.ozon.dev/chppppr/homework/internal/workers"
-	manager_service "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 )
 
 func init() {
@@ -32,8 +31,8 @@ var (
 	prevNumWorkers uint
 	wk             *workers.Workers
 
-	mng_service manager_service.ManagerServiceClient
-	ctx         context.Context
+	mng_client clients.ManagerService
+	ctx        context.Context
 
 	cost           uint64
 	weight         uint64
@@ -55,8 +54,8 @@ var (
 	}
 )
 
-func SetManagerService(s manager_service.ManagerServiceClient) {
-	mng_service = s
+func SetManagerServiceClient(mng clients.ManagerService) {
+	mng_client = mng
 }
 
 func SetContext(context context.Context) {
@@ -99,9 +98,5 @@ func SetArgs(args []string) {
 }
 
 func Execute() error {
-	if mng_service == nil {
-		return fmt.Errorf("before Execute() need to set manager service")
-	}
-
 	return rootCmd.Execute()
 }
