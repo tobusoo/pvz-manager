@@ -1,29 +1,53 @@
 package manager_service
 
 import (
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
-	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
+	"gitlab.ozon.dev/chppppr/homework/internal/domain"
+	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	desc "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 )
 
-type ManagerService struct {
-	st storage.Storage
+type (
+	AcceptUsecase interface {
+		AcceptOrder(req *dto.AddOrderRequest) error
+		AcceptRefund(req *dto.RefundRequest) error
+	}
 
-	au *usecase.AcceptUsecase
-	gu *usecase.GiveUsecase
-	ru *usecase.ReturnUsecase
-	vu *usecase.ViewUsecase
+	GiveUsecase interface {
+		Give(req *dto.GiveOrdersRequest) []error
+	}
 
-	desc.UnimplementedManagerServiceServer
-}
+	ReturnUsecase interface {
+		Return(req *dto.ReturnRequest) error
+	}
 
-func NewManagerService(st storage.Storage) *ManagerService {
+	ViewUsecase interface {
+		GetOrders(req *dto.ViewOrdersRequest) ([]domain.OrderView, error)
+		GetRefunds(req *dto.ViewRefundsRequest) ([]domain.OrderView, error)
+	}
+
+	Usecases interface {
+		AcceptUsecase
+		GiveUsecase
+		ReturnUsecase
+		ViewUsecase
+	}
+
+	ManagerService struct {
+		au AcceptUsecase
+		gu GiveUsecase
+		ru ReturnUsecase
+		vu ViewUsecase
+
+		desc.UnimplementedManagerServiceServer
+	}
+)
+
+func NewManagerService(au AcceptUsecase, gu GiveUsecase, ru ReturnUsecase, vu ViewUsecase) *ManagerService {
 	s := &ManagerService{
-		st: st,
-		au: usecase.NewAcceptUsecase(st),
-		gu: usecase.NewGiveUsecase(st),
-		ru: usecase.NewReturnUsecase(st),
-		vu: usecase.NewViewUsecase(st),
+		au: au,
+		gu: gu,
+		ru: ru,
+		vu: vu,
 	}
 
 	return s

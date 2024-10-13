@@ -17,8 +17,8 @@ import (
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"gitlab.ozon.dev/chppppr/homework/internal/app/manager_service"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage/postgres"
+	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
 	desc "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -29,9 +29,19 @@ func init() {
 	_ = godotenv.Load()
 }
 
-func main() {
-	var st storage.Storage
+func newManagerService(ctx context.Context, pool *pgxpool.Pool) *manager_service.ManagerService {
+	txManager := postgres.NewTxManager(pool)
+	pgPepo := postgres.NewRepoPG(txManager)
+	st := postgres.NewStorageDB(ctx, txManager, pgPepo)
+	au := usecase.NewAcceptUsecase(st)
+	gu := usecase.NewGiveUsecase(st)
+	ru := usecase.NewReturnUsecase(st)
+	vu := usecase.NewViewUsecase(st)
 
+	return manager_service.NewManagerService(au, gu, ru, vu)
+}
+
+func main() {
 	ctx := context.Background()
 	ctxWichCancel, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
@@ -42,10 +52,7 @@ func main() {
 	}
 	defer pool.Close()
 
-	txManager := postgres.NewTxManager(pool)
-	pgPepo := postgres.NewRepoPG(txManager)
-	st = postgres.NewStorageDB(ctxWichCancel, txManager, pgPepo)
-	mng_service := manager_service.NewManagerService(st)
+	mng_service := newManagerService(ctxWichCancel, pool)
 
 	lis, err := net.Listen("tcp", os.Getenv("GRPC_HOST"))
 	if err != nil {
