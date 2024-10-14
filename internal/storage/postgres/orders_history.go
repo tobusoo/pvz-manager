@@ -45,7 +45,7 @@ func (pg *PgRepository) AddOrderStatus(ctx context.Context, orderID, userID uint
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return fmt.Errorf("order %d already exists", orderID)
+			return domain.ErrAlreadyExist
 		}
 		return fmt.Errorf("AddOrderStatus: %w", err)
 	}
@@ -66,7 +66,7 @@ func (pg *PgRepository) GetOrderOnlyStatus(ctx context.Context, orderID uint64) 
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return "", fmt.Errorf("order %d not found", orderID)
+		return "", domain.ErrNotFound
 	} else if err != nil {
 		return "", fmt.Errorf("GetOrderOnlyStatus: %w", err)
 	}
@@ -94,7 +94,7 @@ func (pg *PgRepository) GetOrderStatus(ctx context.Context, orderID uint64) (*do
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, fmt.Errorf("order %d not found", orderID)
+		return nil, domain.ErrNotFound
 	} else if err != nil {
 		return nil, fmt.Errorf("GetOrderStatus: %w", err)
 	}
@@ -117,7 +117,7 @@ func (pg *PgRepository) SetOrderStatus(ctx context.Context, orderID uint64, stat
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("order %d not found", orderID)
+		return domain.ErrNotFound
 	}
 
 	return nil

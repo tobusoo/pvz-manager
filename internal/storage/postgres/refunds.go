@@ -23,7 +23,7 @@ func (pg *PgRepository) AddRefund(ctx context.Context, userID, orderID uint64, o
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return fmt.Errorf("order %d already refunded", orderID)
+			return domain.ErrAlreadyExist
 		}
 		return fmt.Errorf("AddRefund: %w", err)
 	}
@@ -45,7 +45,7 @@ func (pg *PgRepository) RemoveRefund(ctx context.Context, orderID uint64) error 
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("not found order %d", orderID)
+		return fmt.Errorf("refund: %w", domain.ErrNotFound)
 	}
 
 	return err

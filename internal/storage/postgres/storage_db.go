@@ -55,7 +55,7 @@ func NewStorageDB(ctx context.Context, tx TransactionManager, db RepositoryDB) *
 func (s *StorageDB) AddOrder(userID, orderID uint64, order *domain.Order) (err error) {
 	return s.txManager.RunReadCommitted(s.ctx, func(ctxTx context.Context) error {
 		if stat, err := s.db.GetOrderOnlyStatus(ctxTx, orderID); err == nil {
-			return fmt.Errorf("order %d has already been %s", orderID, stat)
+			return fmt.Errorf("order %d has already been %s: %w", orderID, stat, domain.ErrAlreadyExist)
 		}
 
 		if err = s.db.AddOrder(ctxTx, userID, orderID); err != nil {
@@ -91,7 +91,7 @@ func (s *StorageDB) GetOrdersByUserID(userID, firstOrderID, limit uint64) (order
 
 func canRemoveOrderCheckStatus(status string, orderID uint64) error {
 	if status == domain.StatusGiveClient || status == domain.StatusGiveCourier {
-		return fmt.Errorf("order %d has already been %s", orderID, domain.StatusGiveClient)
+		return fmt.Errorf("order %d has already been %s: %w", orderID, domain.StatusGiveClient, domain.ErrAlreadyExist)
 	}
 	return nil
 }

@@ -23,7 +23,7 @@ func (u *ViewUsecase) GetRefunds(req *dto.ViewRefundsRequest) ([]domain.OrderVie
 	}
 
 	if len(refunds) == 0 {
-		return nil, fmt.Errorf("there are no refunds for page  %d with ordersPerPage equal to %d", req.PageID, req.OrdersPerPage)
+		return nil, fmt.Errorf("there are no refunds for page %d with ordersPerPage equal to %d: %w", req.PageID, req.OrdersPerPage, domain.ErrNotFound)
 	}
 
 	return refunds, nil
@@ -36,7 +36,7 @@ func (u *ViewUsecase) GetOrders(req *dto.ViewOrdersRequest) ([]domain.OrderView,
 	}
 
 	if len(orders) == 0 {
-		return nil, fmt.Errorf("user %d doesn't have orders", req.UserID)
+		return nil, fmt.Errorf("user %d doesn't have orders: %w", req.UserID, domain.ErrNotFound)
 	}
 
 	return orders, nil

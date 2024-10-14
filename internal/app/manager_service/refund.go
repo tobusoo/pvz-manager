@@ -21,7 +21,7 @@ func (s *ManagerService) Refund(ctx context.Context, req *desc.RefundRequest) (*
 	}
 
 	if err := s.au.AcceptRefund(usecase_req); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, DomainErrToHTPP(err)
 	}
 
 	return &emptypb.Empty{}, nil

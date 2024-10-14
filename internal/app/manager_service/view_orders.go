@@ -22,7 +22,7 @@ func (s *ManagerService) ViewOrders(ctx context.Context, req *desc.ViewOrdersReq
 
 	orders, err := s.vu.GetOrders(usecase_req)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, DomainErrToHTPP(err)
 	}
 
 	res_orders := OrderViewToProto(orders)

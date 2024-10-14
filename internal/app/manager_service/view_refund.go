@@ -21,7 +21,7 @@ func (s *ManagerService) ViewRefunds(ctx context.Context, req *desc.ViewRefundsR
 
 	orders, err := s.vu.GetRefunds(usecase_req)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, DomainErrToHTPP(err)
 	}
 
 	res_orders := OrderViewToProto(orders)

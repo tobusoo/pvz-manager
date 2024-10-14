@@ -25,7 +25,7 @@ func (u *ReturnUsecase) returnAccepted(orderID uint64, order *domain.OrderStatus
 	}
 
 	if expDate.Add(24 * time.Hour).After(utils.CurrentDate()) {
-		return fmt.Errorf("can't return order %d: expiration date hasn't expired yet", orderID)
+		return fmt.Errorf("can't return order %d: %w", orderID, domain.ErrNotExpirationDate)
 	}
 
 	return u.st.RemoveOrder(orderID, domain.StatusGiveCourier)
@@ -45,7 +45,7 @@ func (u *ReturnUsecase) Return(req *dto.ReturnRequest) error {
 	case domain.StatusAccepted:
 		return u.returnAccepted(req.OrderID, order)
 	default:
-		return fmt.Errorf("can't return order %d: status = %s", req.OrderID, order.Status)
+		return fmt.Errorf("can't return order %d: status = %s: %w", req.OrderID, order.Status, domain.ErrWrongStatus)
 	}
 
 	return nil

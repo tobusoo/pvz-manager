@@ -20,11 +20,11 @@ func NewGiveUsecase(st storage.Storage) *GiveUsecase {
 
 func (u *GiveUsecase) giveCheckErr(userID, orderID uint64, status *domain.OrderStatus) error {
 	if status.UserID != userID {
-		return fmt.Errorf("can't give order %d: different userID", orderID)
+		return fmt.Errorf("can't give order %d: different userID: %w", orderID, domain.ErrWrongInput)
 	}
 
 	if status.Status != domain.StatusAccepted {
-		return fmt.Errorf("can't give order %d: status = %s", orderID, status.Status)
+		return fmt.Errorf("can't give order %d: status = %s: %w", orderID, status.Status, domain.ErrWrongStatus)
 	}
 
 	expDate, err := u.st.GetExpirationDate(status.UserID, uint64(orderID))
@@ -33,7 +33,7 @@ func (u *GiveUsecase) giveCheckErr(userID, orderID uint64, status *domain.OrderS
 	}
 
 	if utils.CurrentDate().After(expDate) {
-		return fmt.Errorf("can't give order %d: expiration date has already passed", orderID)
+		return fmt.Errorf("can't give order %d: %w", orderID, domain.ErrExpirationDatePassed)
 	}
 
 	return u.st.CanRemoveOrder(orderID)

@@ -27,7 +27,7 @@ func (pg *PgRepository) AddOrder(ctx context.Context, userID, orderID uint64) er
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return fmt.Errorf("order %d already exists", orderID)
+			return domain.ErrAlreadyExist
 		}
 		return fmt.Errorf("AddOrder: %w", err)
 	}
@@ -53,7 +53,7 @@ func (pg *PgRepository) GetOrder(ctx context.Context, userID, orderID uint64) (*
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, fmt.Errorf("order %d for user %d not found", orderID, userID)
+		return nil, domain.ErrNotFound
 	} else if err != nil {
 		return nil, fmt.Errorf("GetOrder: %w", err)
 	}
@@ -75,7 +75,7 @@ func (pg *PgRepository) GetExpirationDate(ctx context.Context, userID, orderID u
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return time.Time{}, fmt.Errorf("order %d for user %d not found", orderID, userID)
+		return time.Time{}, domain.ErrNotFound
 	} else if err != nil {
 		return time.Time{}, fmt.Errorf("GetExpirationDate: %w", err)
 	}
@@ -125,7 +125,7 @@ func (pg *PgRepository) CanRemoveOrder(ctx context.Context, userID, orderID uint
 	}
 
 	if !exist {
-		return fmt.Errorf("not found user %d order's %d", userID, orderID)
+		return domain.ErrNotFound
 	}
 
 	return nil
@@ -147,7 +147,7 @@ func (pg *PgRepository) RemoveOrder(ctx context.Context, userID, orderID uint64)
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("user %d order's %d not found", userID, orderID)
+		return domain.ErrNotFound
 	}
 
 	return err

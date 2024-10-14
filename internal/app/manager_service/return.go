@@ -20,7 +20,7 @@ func (s *ManagerService) Return(ctx context.Context, req *desc.ReturnRequest) (*
 	}
 
 	if err := s.ru.Return(usecase_req); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, DomainErrToHTPP(err)
 	}
 
 	return &emptypb.Empty{}, nil

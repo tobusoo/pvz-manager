@@ -22,7 +22,7 @@ func (s *ManagerService) GiveOrders(ctx context.Context, req *desc.GiveOrdersReq
 
 	if err := s.gu.Give(usecase_req); err != nil {
 		err_join := errors.Join(err...)
-		return nil, status.Error(codes.Internal, err_join.Error())
+		return nil, DomainErrToHTPP(err_join)
 	}
 
 	return &emptypb.Empty{}, nil

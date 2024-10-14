@@ -30,7 +30,7 @@ func (s *ManagerService) AddOrder(ctx context.Context, req *desc.AddOrderRequest
 	}
 
 	if err := s.au.AcceptOrder(usecase_req); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		return nil, DomainErrToHTPP(err)
 	}
 
 	return &emptypb.Empty{}, nil
