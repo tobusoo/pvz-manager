@@ -1,4 +1,4 @@
-package app
+package manager_cli
 
 import (
 	"fmt"

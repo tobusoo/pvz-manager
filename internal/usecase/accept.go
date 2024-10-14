@@ -52,7 +52,7 @@ func (u *AcceptUsecase) AcceptOrder(req *dto.AddOrderRequest) error {
 
 	currentDate := utils.CurrentDate()
 	if currentDate.After(expDate) {
-		return fmt.Errorf("expiration date has already passed")
+		return domain.ErrExpirationDatePassed
 	}
 
 	req.ExpirationDate = expDate.Format("02-01-2006")
@@ -66,11 +66,11 @@ func (u *AcceptUsecase) AcceptOrder(req *dto.AddOrderRequest) error {
 
 func acceptRefundCheckErr(req *dto.RefundRequest, order *domain.OrderStatus) error {
 	if order.Status != domain.StatusGiveClient {
-		return fmt.Errorf("can not refund order %d: status = %s", req.OrderID, order.Status)
+		return fmt.Errorf("can not refund order %d: status = %s: %w", req.OrderID, order.Status, domain.ErrWrongStatus)
 	}
 
 	if req.UserID != order.UserID {
-		return fmt.Errorf("can not refund order %d: wrong userID", req.OrderID)
+		return fmt.Errorf("can not refund order %d: wrong userID: %w", req.OrderID, domain.ErrWrongInput)
 	}
 
 	issuedDate, err := time.Parse("02-01-2006", order.UpdatedAt)
@@ -82,7 +82,7 @@ func acceptRefundCheckErr(req *dto.RefundRequest, order *domain.OrderStatus) err
 	currentDate := utils.CurrentDate()
 
 	if currentDate.After(issuedDate) {
-		return fmt.Errorf("2 days have passed since the order was issued to the client")
+		return domain.ErrTwoDaysPassed
 	}
 
 	return nil

@@ -1,13 +1,12 @@
 package cmd
 
 import (
-	"fmt"
+	"context"
 	"os"
 	"sync"
 
 	"github.com/spf13/cobra"
-	"gitlab.ozon.dev/chppppr/homework/internal/storage"
-	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
+	"gitlab.ozon.dev/chppppr/homework/internal/clients"
 	"gitlab.ozon.dev/chppppr/homework/internal/workers"
 )
 
@@ -31,12 +30,9 @@ var (
 	numWorkers     uint
 	prevNumWorkers uint
 	wk             *workers.Workers
-	st             storage.Storage
 
-	acceptUsecase *usecase.AcceptUsecase
-	giveUsecase   *usecase.GiveUsecase
-	returnUsecase *usecase.ReturnUsecase
-	viewUsecase   *usecase.ViewUsecase
+	mng_client clients.ManagerService
+	ctx        context.Context
 
 	cost           uint64
 	weight         uint64
@@ -58,12 +54,12 @@ var (
 	}
 )
 
-func SetStorage(s storage.Storage) {
-	st = s
-	acceptUsecase = usecase.NewAcceptUsecase(st)
-	giveUsecase = usecase.NewGiveUsecase(st)
-	returnUsecase = usecase.NewReturnUsecase(st)
-	viewUsecase = usecase.NewViewUsecase(st)
+func SetManagerServiceClient(mng clients.ManagerService) {
+	mng_client = mng
+}
+
+func SetContext(context context.Context) {
+	ctx = context
 }
 
 func SetWorker(workers *workers.Workers) {
@@ -102,9 +98,5 @@ func SetArgs(args []string) {
 }
 
 func Execute() error {
-	if st == nil {
-		return fmt.Errorf("before Execute() need to set storage")
-	}
-
 	return rootCmd.Execute()
 }

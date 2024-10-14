@@ -39,7 +39,7 @@ func returnCmdRun(cmd *cobra.Command, args []string) {
 	task := &workers.TaskRequest{
 		Request: fmt.Sprintf("return -o=%d", orderID),
 		Func: func() error {
-			return returnUsecase.Return(req)
+			return mng_client.Return(ctx, req)
 		},
 	}
 

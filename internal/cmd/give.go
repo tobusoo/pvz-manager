@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -37,15 +36,19 @@ func resetGiveCmd(cmd *cobra.Command) {
 func giveCmdRun(cmd *cobra.Command, args []string) {
 	defer resetGiveCmd(cmd)
 
+	ordrs := make([]uint64, len(orders))
+	for i, v := range orders {
+		ordrs[i] = uint64(v)
+	}
+
 	req := &dto.GiveOrdersRequest{
-		Orders: orders,
+		Orders: ordrs,
 	}
 
 	task := &workers.TaskRequest{
 		Request: "give -o=...",
 		Func: func() error {
-			errs := giveUsecase.Give(req)
-			return errors.Join(errs...)
+			return mng_client.GiveOrders(ctx, req)
 		},
 	}
 

@@ -1,5 +1,7 @@
 include .env
 
+PROTO_GENERATE_PATH=$(CURDIR)/pkg
+
 GOCYCLO_PATH=$(shell go env GOPATH)/bin/gocyclo
 GOCOGNIT_PATH=$(shell go env GOPATH)/bin/gocognit
 GODEPGRAPH_PATH=$(shell go env GOPATH)/bin/godepgraph
@@ -9,19 +11,24 @@ MIGRATIONS_PATH=./migrations
 
 THRESHOLD=5
 
-BIN_DIR=bin
-APP_NAME=manager
+BIN_DIR=$(CURDIR)/bin
+SERVICE_NAME=manager
 
-APP_PATH_SRC=cmd/$(APP_NAME)/main.go
-APP_PATH_BIN=$(BIN_DIR)/$(APP_NAME)
+SERVICE_PATH_SRC=cmd/$(SERVICE_NAME)_service/main.go
+SERVICE_CLI_PATH_SRC=cmd/$(SERVICE_NAME)_cli/main.go
+SERVICE_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_service
+CLI_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_cli
 
 .PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
 .PHONY: unit-test integration-test integration-test-db e2e-test benchmark
 
-all: build
+all: bin-deps generate build compose-up goose-up run-service
 
-run: build
-	./$(APP_PATH_BIN)
+run-service: build
+	$(SERVICE_PATH_BIN)
+
+run-cli: build
+	$(CLI_PATH_BIN)
 
 unit-test:
 	@echo "Unit Tests:"
@@ -59,13 +66,16 @@ coverage: test
 benchmark:
 	@go test -bench=. -benchtime=10x  -benchmem ./benchmark/storage_test.go
 
-build: dependancy-install mkdir-bin $(APP_PATH_BIN) gocyclo gocognit
+build: dependancy-install gocyclo gocognit mkdir-bin $(SERVICE_PATH_BIN) $(CLI_PATH_BIN)
 
 mkdir-bin:
 	@mkdir -p bin
 
-$(APP_PATH_BIN): mkdir-bin
-	go build -o $(APP_PATH_BIN) $(APP_PATH_SRC)
+$(SERVICE_PATH_BIN): mkdir-bin
+	go build -o $(SERVICE_PATH_BIN) $(SERVICE_PATH_SRC)
+
+$(CLI_PATH_BIN): mkdir-bin
+	go build -o $(CLI_PATH_BIN) $(SERVICE_CLI_PATH_SRC)
 
 dependancy-update:
 	@go get -u
@@ -134,6 +144,78 @@ squawk:
 
 .PHONY: depgraph compose-up compose-down compose-stop compose-start goose-install goose-add goose-up goose-status goose-down
 .PHONY: squawk-install squawk
+
+$(BIN_DIR)/protoc-gen-go:
+	@GOBIN=$(BIN_DIR) go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+
+$(BIN_DIR)/protoc-gen-go-grpc:
+	@GOBIN=$(BIN_DIR) go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+$(BIN_DIR)/protoc-gen-grpc-gateway:
+	@GOBIN=$(BIN_DIR) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+
+$(BIN_DIR)/protoc-gen-openapiv2:
+	@GOBIN=$(BIN_DIR) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
+
+$(BIN_DIR)/protoc-gen-validate:
+	@GOBIN=$(BIN_DIR) go install github.com/envoyproxy/protoc-gen-validate@latest
+
+$(BIN_DIR)/statik:
+	@GOBIN=$(BIN_DIR) go install github.com/rakyll/statik@latest
+
+bin-deps: vendor.protogen $(BIN_DIR)/protoc-gen-go $(BIN_DIR)/protoc-gen-go-grpc $(BIN_DIR)/protoc-gen-grpc-gateway $(BIN_DIR)/protoc-gen-grpc-gateway $(BIN_DIR)/protoc-gen-openapiv2 $(BIN_DIR)/protoc-gen-validate $(BIN_DIR)/statik
+
+generate:
+	@mkdir -p ${PROTO_GENERATE_PATH}
+	@protoc --proto_path api --proto_path vendor.protogen \
+		--plugin=protoc-gen-go=$(BIN_DIR)/protoc-gen-go --go_out=${PROTO_GENERATE_PATH} --go_opt=paths=source_relative \
+		--plugin=protoc-gen-go-grpc=$(BIN_DIR)/protoc-gen-go-grpc --go-grpc_out=${PROTO_GENERATE_PATH} --go-grpc_opt=paths=source_relative \
+		--plugin=protoc-gen-grpc-gateway=$(BIN_DIR)/protoc-gen-grpc-gateway --grpc-gateway_out ${PROTO_GENERATE_PATH} --grpc-gateway_opt paths=source_relative \
+		--plugin=protoc-gen-openapiv2=$(BIN_DIR)/protoc-gen-openapiv2 --openapiv2_out=${PROTO_GENERATE_PATH} \
+		--plugin=protoc-gen-validate=$(BIN_DIR)/protoc-gen-validate --validate_out="lang=go,paths=source_relative:${PROTO_GENERATE_PATH}" \
+		./api/manager-service/v1/manager-service.proto
+
+vendor.protogen: vendor.protogen/google/protobuf vendor.protogen/google/api vendor.protogen/protoc-gen-openapiv2/options vendor.protogen/validate
+
+vendor.protogen/protoc-gen-openapiv2/options:
+	git clone -b main --single-branch -n --depth=1 --filter=tree:0 \
+ 		https://github.com/grpc-ecosystem/grpc-gateway vendor.protogen/grpc-ecosystem && \
+ 		cd vendor.protogen/grpc-ecosystem && \
+		git sparse-checkout set --no-cone protoc-gen-openapiv2/options && \
+		git checkout
+		mkdir -p vendor.protogen/protoc-gen-openapiv2
+		mv vendor.protogen/grpc-ecosystem/protoc-gen-openapiv2/options vendor.protogen/protoc-gen-openapiv2
+		rm -rf vendor.protogen/grpc-ecosystem
+
+vendor.protogen/google/protobuf:
+	git clone -b main --single-branch -n --depth=1 --filter=tree:0 \
+		https://github.com/protocolbuffers/protobuf vendor.protogen/protobuf &&\
+		cd vendor.protogen/protobuf &&\
+		git sparse-checkout set --no-cone src/google/protobuf &&\
+		git checkout
+		mkdir -p vendor.protogen/google
+		mv vendor.protogen/protobuf/src/google/protobuf vendor.protogen/google
+		rm -rf vendor.protogen/protobuf
+
+vendor.protogen/google/api:
+	git clone -b master --single-branch -n --depth=1 --filter=tree:0 \
+		https://github.com/googleapis/googleapis vendor.protogen/googleapis && \
+		cd vendor.protogen/googleapis && \
+		git sparse-checkout set --no-cone google/api && \
+	git checkout
+	mkdir -p  vendor.protogen/google
+	mv vendor.protogen/googleapis/google/api vendor.protogen/google
+	rm -rf vendor.protogen/googleapis
+
+vendor.protogen/validate:
+	git clone -b main --single-branch --depth=2 --filter=tree:0 \
+		https://github.com/bufbuild/protoc-gen-validate vendor.protogen/tmp && \
+		cd vendor.protogen/tmp && \
+	git sparse-checkout set --no-cone validate &&\
+	git checkout
+	mkdir -p vendor.protogen/validate
+	mv vendor.protogen/tmp/validate vendor.protogen/
+	rm -rf vendor.protogen/tmp
 
 clean:
 	rm -rf $(BIN_DIR) godepgraph.png

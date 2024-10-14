@@ -40,7 +40,7 @@ func TestGiveUsecase(t *testing.T) {
 	td := map[string]TestData{
 		"SuccessGive": {
 			req: &dto.GiveOrdersRequest{
-				Orders: []uint{1, 2},
+				Orders: []uint64{1, 2},
 			},
 			orderStatus: []*domain.OrderStatus{
 				{
@@ -61,7 +61,7 @@ func TestGiveUsecase(t *testing.T) {
 		},
 		"DifferentUserID": {
 			req: &dto.GiveOrdersRequest{
-				Orders: []uint{3, 4},
+				Orders: []uint64{3, 4},
 			},
 			orderStatus: []*domain.OrderStatus{
 				{
@@ -82,7 +82,7 @@ func TestGiveUsecase(t *testing.T) {
 		},
 		"BadOrderStatus": {
 			req: &dto.GiveOrdersRequest{
-				Orders: []uint{5},
+				Orders: []uint64{5},
 			},
 			orderStatus: []*domain.OrderStatus{
 				{
@@ -94,7 +94,7 @@ func TestGiveUsecase(t *testing.T) {
 		},
 		"ExpirationDatePassed": {
 			req: &dto.GiveOrdersRequest{
-				Orders: []uint{6},
+				Orders: []uint64{6},
 			},
 			orderStatus: []*domain.OrderStatus{
 				{

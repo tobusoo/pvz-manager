@@ -1,6 +1,8 @@
 package domain
 
 import (
+	"errors"
+
 	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
 )
 
@@ -9,6 +11,16 @@ const (
 	StatusGiveClient  = "issued to client"
 	StatusGiveCourier = "issued to courier"
 	StatusReturned    = "returned"
+)
+
+var (
+	ErrNotFound             = errors.New("order not found")
+	ErrWrongInput           = errors.New("wrong input")
+	ErrWrongStatus          = errors.New("wrong status")
+	ErrAlreadyExist         = errors.New("order already exist")
+	ErrNotExpirationDate    = errors.New("expiration date hasn't expired yet")
+	ErrExpirationDatePassed = errors.New("expiration date has already passed")
+	ErrTwoDaysPassed        = errors.New("2 days have passed since the order was issued to the client")
 )
 
 type (

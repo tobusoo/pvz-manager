@@ -75,20 +75,21 @@ func resetOrderFlags(cmd *cobra.Command) {
 func acceptOrderCmdRun(cmd *cobra.Command, args []string) {
 	defer resetOrderFlags(cmd)
 
+	request_str := fmt.Sprintf("accept order -u=%d -o=%d ...", userID, orderID)
 	req := &dto.AddOrderRequest{
+		UserID:         userID,
+		OrderID:        orderID,
 		ExpirationDate: expirationDate,
 		ContainerType:  containerType,
 		UseTape:        useTape,
 		Cost:           cost,
 		Weight:         weight,
-		OrderID:        orderID,
-		UserID:         userID,
 	}
 
 	task := &workers.TaskRequest{
-		Request: fmt.Sprintf("accept order -u=%d -o=%d ...", userID, orderID),
+		Request: request_str,
 		Func: func() error {
-			return acceptUsecase.AcceptOrder(req)
+			return mng_client.AddOrder(ctx, req)
 		},
 	}
 
@@ -107,7 +108,7 @@ func acceptRefundCmdRun(cmd *cobra.Command, args []string) {
 	task := &workers.TaskRequest{
 		Request: fmt.Sprintf("accept refund -u=%d -o=%d", userID, orderID),
 		Func: func() error {
-			return acceptUsecase.AcceptRefund(req)
+			return mng_client.Refund(ctx, req)
 		},
 	}
 

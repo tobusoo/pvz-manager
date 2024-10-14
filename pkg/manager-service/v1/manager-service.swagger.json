@@ -1,0 +1,398 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Менеджер ПВЗ",
+    "description": "Сервис реализует взаимодействие менеджера ПВЗ с курьером и покупателями",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "ManagerService"
+    }
+  ],
+  "host": "localhost:8080",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/add_order": {
+      "post": {
+        "summary": "Добавление заказа",
+        "description": "Принимает идентификатор клиента, идентификатор заказа и сам заказ",
+        "operationId": "ManagerService_AddOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/managerAddOrderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ManagerService"
+        ]
+      }
+    },
+    "/api/v1/give_orders": {
+      "get": {
+        "summary": "Выдача заказов клиенту",
+        "description": "Принимает массив номеров заказов для выдачи",
+        "operationId": "ManagerService_GiveOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "orders",
+            "in": "query",
+            "required": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uint64"
+            },
+            "collectionFormat": "multi"
+          }
+        ],
+        "tags": [
+          "ManagerService"
+        ]
+      }
+    },
+    "/api/v1/refund": {
+      "post": {
+        "summary": "Возвращение заказа от клиента обратно на ПВЗ",
+        "description": "Принимает идентификатор клиента и идентификатор заказа",
+        "operationId": "ManagerService_Refund",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/managerRefundRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ManagerService"
+        ]
+      }
+    },
+    "/api/v1/return": {
+      "post": {
+        "summary": "Возвращение заказа от ПВЗ курьеру",
+        "description": "Принимает идентификатор заказа",
+        "operationId": "ManagerService_Return",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/managerReturnRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ManagerService"
+        ]
+      }
+    },
+    "/api/v1/view_orders": {
+      "get": {
+        "summary": "Получение заказов определенного пользователя",
+        "description": "Принимает идентификатор клиента, минимальный номер первого заказа, который должен быть возвращён и лимит заказов",
+        "operationId": "ManagerService_ViewOrders",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/managerViewOrdersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "firstOrderId",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "ManagerService"
+        ]
+      }
+    },
+    "/api/v1/view_refunds": {
+      "get": {
+        "summary": "Получение заказов, находящихся в статусе returned",
+        "description": "Принимает номер страницы и количество заказов на одной странице",
+        "operationId": "ManagerService_ViewRefunds",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/managerViewRefundsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "pageId",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          },
+          {
+            "name": "ordersPerPage",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uint64"
+          }
+        ],
+        "tags": [
+          "ManagerService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "managerAddOrderRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "orderId": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "order": {
+          "$ref": "#/definitions/managerOrder"
+        }
+      },
+      "required": [
+        "userId",
+        "orderId",
+        "order"
+      ]
+    },
+    "managerOrder": {
+      "type": "object",
+      "properties": {
+        "expirationDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "packageType": {
+          "type": "string"
+        },
+        "cost": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "weight": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "useTape": {
+          "type": "boolean"
+        }
+      }
+    },
+    "managerOrderView": {
+      "type": "object",
+      "properties": {
+        "order": {
+          "$ref": "#/definitions/managerOrder"
+        },
+        "userId": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "orderId": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "managerRefundRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "orderId": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "required": [
+        "userId",
+        "orderId"
+      ]
+    },
+    "managerReturnRequest": {
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "format": "uint64"
+        }
+      },
+      "required": [
+        "orderId"
+      ]
+    },
+    "managerViewOrdersResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/managerOrderView"
+          }
+        }
+      }
+    },
+    "managerViewRefundsResponse": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/managerOrderView"
+          }
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

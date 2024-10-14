@@ -58,7 +58,7 @@ var (
 func resetViewOrderFlags(cmd *cobra.Command) {
 	cmd.ResetFlags()
 	cmd.PersistentFlags().Uint64VarP(&userID, "userID", "u", 0, "userID (required)")
-	cmd.PersistentFlags().Uint64VarP(&orderID, "orderID", "o", 0, "first orderID which should be output")
+	cmd.PersistentFlags().Uint64VarP(&orderID, "orderID", "o", 1, "first orderID which should be output")
 	cmd.PersistentFlags().Uint64VarP(&ordersLimit, "n", "n", 25, "limit of returned orders (defalut 25)")
 	cmd.MarkPersistentFlagRequired("userID")
 }
@@ -76,7 +76,7 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 		OrdersPerPage: ordersPerPage,
 	}
 
-	refunds, err := viewUsecase.GetRefunds(req)
+	refunds, err := mng_client.ViewRefunds(ctx, req)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -90,12 +90,12 @@ func viewRefundCmdRun(cmd *cobra.Command, args []string) {
 		Details: `-----Order-----
 {{ "OrderID:" | faint }}  {{ .OrderID }} {{ "UserID:" | faint }}  {{ .UserID }}
 {{"Cost:" | faint }} {{ .Cost }}rub {{"Weight:" | faint }} {{ .Weight }}gr
-{{ "Date of refund: " | faint }}  {{ .ExpirationDate }} {{ "Package Type:" | faint }} {{ .PackageType }}`,
+{{ "Package Type:" | faint }} {{ .PackageType }}`,
 	}
 
 	promt := promptui.Select{
 		Label:     "OrderID:",
-		Items:     refunds,
+		Items:     refunds.Orders,
 		Templates: templates,
 	}
 
@@ -116,7 +116,7 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 		OrdersLimit:  ordersLimit,
 	}
 
-	orders, err := viewUsecase.GetOrders(req)
+	orders, err := mng_client.ViewOrders(ctx, req)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -134,7 +134,7 @@ func viewOrdersCmdRun(cmd *cobra.Command, args []string) {
 
 	promt := promptui.Select{
 		Label:     fmt.Sprintf("Orders of User %d", userID),
-		Items:     orders,
+		Items:     orders.Orders,
 		Templates: templates,
 	}
 
