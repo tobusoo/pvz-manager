@@ -19,13 +19,15 @@ SERVICE_CLI_PATH_SRC=cmd/$(SERVICE_NAME)_cli/main.go
 SERVICE_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_service
 CLI_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_cli
 
+SERVICE_DOCKERFILE_PATH=build/dev/$(SERVICE_NAME)_service/Dockerfile
+SERIVCE_DOCKER_CONTAINER_NAME=manager-service-image
+DOCKER_DEV_COMPOSE_PATH=build/dev/docker-compose.yml
+DOCKER_TEST_COMPOSE_PATH=build/test/docker-compose.yml
+
 .PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
 .PHONY: unit-test integration-test integration-test-db e2e-test benchmark
 
-all: bin-deps generate build compose-up goose-up run-service
-
-run-service: build
-	$(SERVICE_PATH_BIN)
+all: bin-deps generate build compose-up goose-up
 
 run-cli: build
 	$(CLI_PATH_BIN)
@@ -35,14 +37,14 @@ unit-test:
 	@go test ./internal/usecase/ -coverprofile=coverage_usecase.out
 
 integration-test-db:
-	docker-compose up -d postgres_test
+	docker-compose -f $(DOCKER_TEST_COMPOSE_PATH) up -d
 	@echo "Sleeping 4 seconds for postgreSQL preparation"
 	@sleep 4
 	@$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_TEST_DSN) up
 	@POSTGRESQL_TEST_DSN=${POSTGRESQL_TEST_DSN} go test -v -coverpkg=./internal/storage/postgres \
 		-coverprofile=coverage_storage_postgres.out \
 		./tests/integration/storage_db/integration_test.go
-	docker-compose down postgres_test
+	docker-compose -f $(DOCKER_TEST_COMPOSE_PATH) down
 
 integration-test:
 	@echo "Integration Tests:"
@@ -106,20 +108,23 @@ depgraph-build:
 
 depgraph: depgraph-install depgraph-build
 
+docker-build:
+	docker build -f $(SERVICE_DOCKERFILE_PATH) . -t $(SERIVCE_DOCKER_CONTAINER_NAME)
+
 compose-up:
-	docker-compose up -d postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) up --detach
 
 compose-down:
-	docker-compose down postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) down
 
 compose-stop:
-	docker-compose stop postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) stop
 
 compose-start:
-	docker-compose start postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) start
 
 compose-ps:
-	docker-compose ps postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) ps
 
 goose-install:
 	go install github.com/pressly/goose/v3/cmd/goose@latest
@@ -218,4 +223,4 @@ vendor.protogen/validate:
 	rm -rf vendor.protogen/tmp
 
 clean:
-	rm -rf $(BIN_DIR) godepgraph.png
+	rm -rf $(BIN_DIR) godepgraph.png coverage*.out

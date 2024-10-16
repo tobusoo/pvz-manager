@@ -1,0 +1,9 @@
+./api
+./benchmark
+./bin
+./docs
+./migrations
+./pgdata
+./scripts
+./tests
+./vendor.protogen

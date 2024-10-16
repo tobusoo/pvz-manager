@@ -85,7 +85,7 @@ func main() {
 	r.Get("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "pkg/manager-service/v1/manager-service.swagger.json")
 	})
-	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://"+os.Getenv("HTTP_HOST")+"/swagger.json")))
+	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://"+os.Getenv("SWAGGER_HOST")+"/swagger.json")))
 
 	httpServer := http.Server{Addr: os.Getenv("HTTP_HOST"), Handler: r}
 	go httpServer.ListenAndServe()
