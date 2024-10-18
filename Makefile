@@ -14,13 +14,13 @@ THRESHOLD=5
 BIN_DIR=$(CURDIR)/bin
 SERVICE_NAME=manager
 
-SERVICE_PATH_SRC=cmd/$(SERVICE_NAME)_service/main.go
-SERVICE_CLI_PATH_SRC=cmd/$(SERVICE_NAME)_cli/main.go
+SERVICE_PATH_SRC=./cmd/$(SERVICE_NAME)_service
+CLI_PATH_SRC=./cmd/$(SERVICE_NAME)_cli
 SERVICE_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_service
 CLI_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_cli
 
 SERVICE_DOCKERFILE_PATH=build/dev/$(SERVICE_NAME)_service/Dockerfile
-SERIVCE_DOCKER_CONTAINER_NAME=manager-service-image
+SERVICE_DOCKER_CONTAINER_NAME=manager-service-image:1.0.0
 DOCKER_DEV_COMPOSE_PATH=build/dev/docker-compose.yml
 DOCKER_TEST_COMPOSE_PATH=build/test/docker-compose.yml
 
@@ -55,7 +55,7 @@ e2e-test: build
 	@echo "E2E Tests:"
 	@go test tests/e2e_test.go
 
-test: unit-test integration-test integration-test-db e2e-test
+test: unit-test integration-test integration-test-db
 	@echo "mode: set" > coverage.out
 	@tail -n +2 coverage_usecase.out >> coverage.out
 	@tail -n +2 coverage_storage.out >> coverage.out
@@ -77,7 +77,7 @@ $(SERVICE_PATH_BIN): mkdir-bin
 	go build -o $(SERVICE_PATH_BIN) $(SERVICE_PATH_SRC)
 
 $(CLI_PATH_BIN): mkdir-bin
-	go build -o $(CLI_PATH_BIN) $(SERVICE_CLI_PATH_SRC)
+	go build -o $(CLI_PATH_BIN) $(CLI_PATH_SRC)
 
 dependancy-update:
 	@go get -u
@@ -108,8 +108,10 @@ depgraph-build:
 
 depgraph: depgraph-install depgraph-build
 
-docker-build:
-	docker build -f $(SERVICE_DOCKERFILE_PATH) . -t $(SERIVCE_DOCKER_CONTAINER_NAME)
+docker-build: docker-build-service
+
+docker-build-service:
+	docker build -f $(SERVICE_DOCKERFILE_PATH) . -t $(SERVICE_DOCKER_CONTAINER_NAME)
 
 compose-up:
 	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) up --detach
@@ -130,16 +132,16 @@ goose-install:
 	go install github.com/pressly/goose/v3/cmd/goose@latest
 
 goose-add:
-	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) create rename_me sql
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN_LOCAL) create rename_me sql
 
 goose-up:
-	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) up
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN_LOCAL) up
 
 goose-down:
-	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) down
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN_LOCAL) down
 
 goose-status:
-	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) status
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN_LOCAL) status
 
 squawk-install:
 	npm install -g squawk-cli

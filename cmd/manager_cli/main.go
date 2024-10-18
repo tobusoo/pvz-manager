@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/joho/godotenv"
 	"gitlab.ozon.dev/chppppr/homework/internal/app/manager_cli"
 	"gitlab.ozon.dev/chppppr/homework/internal/clients/manager"
 	"gitlab.ozon.dev/chppppr/homework/internal/cmd"
@@ -16,16 +15,17 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func init() {
-	_ = godotenv.Load()
-}
-
 func main() {
+	cfg, err := LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ctx := context.Background()
 	ctxWichCancel, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
 
-	conn, err := grpc.NewClient(os.Getenv("GRPC_HOST"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(cfg.GRPC.Address, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}

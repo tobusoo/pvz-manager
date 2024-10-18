@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/IBM/sarama"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -17,6 +18,8 @@ import (
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"gitlab.ozon.dev/chppppr/homework/internal/app/manager_service"
+	kafka_client "gitlab.ozon.dev/chppppr/homework/internal/clients/kafka"
+	"gitlab.ozon.dev/chppppr/homework/internal/infra/kafka/producer"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage/postgres"
 	"gitlab.ozon.dev/chppppr/homework/internal/usecase"
 	desc "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
@@ -29,7 +32,7 @@ func init() {
 	_ = godotenv.Load()
 }
 
-func newManagerService(ctx context.Context, pool *pgxpool.Pool) *manager_service.ManagerService {
+func newManagerService(ctx context.Context, pool *pgxpool.Pool, pr sarama.SyncProducer, cfg *Config) (*manager_service.ManagerService, error) {
 	txManager := postgres.NewTxManager(pool)
 	pgPepo := postgres.NewRepoPG(txManager)
 	st := postgres.NewStorageDB(ctx, txManager, pgPepo)
@@ -38,33 +41,49 @@ func newManagerService(ctx context.Context, pool *pgxpool.Pool) *manager_service
 	ru := usecase.NewReturnUsecase(st)
 	vu := usecase.NewViewUsecase(st)
 
-	return manager_service.NewManagerService(au, gu, ru, vu)
+	pr_client := kafka_client.NewProducerClient(pr, cfg.Kafka.Topic)
+	return manager_service.NewManagerService(au, gu, ru, vu, pr_client), nil
 }
 
 func main() {
+	cfg, err := LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	ctx := context.Background()
 	ctxWichCancel, cancel := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
 
 	pool, err := pgxpool.New(ctxWichCancel, os.Getenv("POSTGRESQL_DSN"))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("pgxpool.New:", err)
 	}
 	defer pool.Close()
 
-	mng_service := newManagerService(ctxWichCancel, pool)
+	pr, err := producer.NewSyncProducer(cfg.Kafka.Config)
+	if err != nil {
+		log.Fatal("producer.NewSyncProducer:", err)
+	}
+	defer pr.Close()
 
-	lis, err := net.Listen("tcp", os.Getenv("GRPC_HOST"))
+	mng_service, err := newManagerService(ctxWichCancel, pool, pr, cfg)
+	if err != nil {
+		log.Fatal("newManagerService:", err)
+	}
+
+	lis, err := net.Listen("tcp", cfg.GRPC.Address)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	defer lis.Close()
 
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
 	desc.RegisterManagerServiceServer(grpcServer, mng_service)
 
 	mux := runtime.NewServeMux()
-	err = desc.RegisterManagerServiceHandlerFromEndpoint(ctxWichCancel, mux, os.Getenv("GRPC_HOST"), []grpc.DialOption{
+	err = desc.RegisterManagerServiceHandlerFromEndpoint(ctxWichCancel, mux, cfg.GRPC.Address, []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	})
 	if err != nil {
@@ -85,9 +104,9 @@ func main() {
 	r.Get("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "pkg/manager-service/v1/manager-service.swagger.json")
 	})
-	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://"+os.Getenv("SWAGGER_HOST")+"/swagger.json")))
+	r.Get("/swagger/*", httpSwagger.Handler(httpSwagger.URL("http://"+cfg.Swagger.Address+"/swagger.json")))
 
-	httpServer := http.Server{Addr: os.Getenv("HTTP_HOST"), Handler: r}
+	httpServer := http.Server{Addr: cfg.HTPP.Address, Handler: r}
 	go httpServer.ListenAndServe()
 
 	<-ctxWichCancel.Done()

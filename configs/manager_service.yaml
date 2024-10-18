@@ -1,0 +1,14 @@
+grpc:
+  address: 0.0.0.0:8081
+
+http:
+  address: 0.0.0.0:8080
+
+swagger:
+  address: localhost:8080
+
+kafka:
+  topic: pvz.events-log
+  config:
+    brokers: 
+    - kafka0:29092

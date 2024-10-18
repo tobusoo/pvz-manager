@@ -1,7 +1,7 @@
 services:
   manager-service:
     container_name: manager-service
-    image: manager-service-image
+    image: manager-service-image:1.0.0
     build:
       context: ./../../
       dockerfile: ${PWD}/build/dev/manager_service/Dockerfile
@@ -10,6 +10,9 @@ services:
     ports:
       - 8080:8080
       - 8081:8081
+    depends_on:
+      - postgres
+      - kafka-init-topics
     restart: always
 
   postgres:
