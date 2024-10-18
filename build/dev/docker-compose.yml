@@ -15,6 +15,16 @@ services:
       - kafka-init-topics
     restart: always
 
+  notifier:
+    container_name: notifier
+    image: notifier-image:1.0.0
+    build:
+      context: ./../../
+      dockerfile: ${PWD}/build/dev/notifier/Dockerfile
+    depends_on:
+      - kafka-init-topics
+    restart: always
+
   postgres:
     container_name: postgres_db
     image: postgres:15-alpine

@@ -21,6 +21,8 @@ CLI_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_cli
 
 SERVICE_DOCKERFILE_PATH=build/dev/$(SERVICE_NAME)_service/Dockerfile
 SERVICE_DOCKER_CONTAINER_NAME=manager-service-image:1.0.0
+NOTIFIER_DOCKERFILE_PATH=build/dev/notifier/Dockerfile
+NOTIFIER_DOCKER_CONTAINER_NAME=notifier-image:1.0.0
 DOCKER_DEV_COMPOSE_PATH=build/dev/docker-compose.yml
 DOCKER_TEST_COMPOSE_PATH=build/test/docker-compose.yml
 
@@ -108,10 +110,13 @@ depgraph-build:
 
 depgraph: depgraph-install depgraph-build
 
-docker-build: docker-build-service
+docker-build: docker-build-service docker-build-notifier
 
 docker-build-service:
 	docker build -f $(SERVICE_DOCKERFILE_PATH) . -t $(SERVICE_DOCKER_CONTAINER_NAME)
+
+docker-build-notifier:
+	docker build -f $(NOTIFIER_DOCKERFILE_PATH) . -t $(NOTIFIER_DOCKER_CONTAINER_NAME)
 
 compose-up:
 	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) up --detach
