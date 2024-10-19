@@ -38,7 +38,7 @@ unit-test:
 	@echo "Unit Tests:"
 	@go test ./internal/usecase/ -coverprofile=coverage_usecase.out
 
-integration-test-db:
+integration-test:
 	docker-compose -f $(DOCKER_TEST_COMPOSE_PATH) up -d
 	@echo "Sleeping 4 seconds for postgreSQL preparation"
 	@sleep 4
@@ -46,9 +46,10 @@ integration-test-db:
 	@POSTGRESQL_TEST_DSN=${POSTGRESQL_TEST_DSN} go test -v -coverpkg=./internal/storage/postgres \
 		-coverprofile=coverage_storage_postgres.out \
 		./tests/integration/storage_db/integration_test.go
+	@go test -v ./tests/integration/kafka/integration_test.go
 	docker-compose -f $(DOCKER_TEST_COMPOSE_PATH) down
 
-integration-test:
+integration-test-intergnal:
 	@echo "Integration Tests:"
 	@go test -coverpkg=./internal/storage/storage_json -coverprofile=coverage_storage.out \
 		./tests/integration/storage_json/integration_test.go
@@ -57,7 +58,7 @@ e2e-test: build
 	@echo "E2E Tests:"
 	@go test tests/e2e_test.go
 
-test: unit-test integration-test integration-test-db
+test: unit-test integration-test-intergnal integration-test
 	@echo "mode: set" > coverage.out
 	@tail -n +2 coverage_usecase.out >> coverage.out
 	@tail -n +2 coverage_storage.out >> coverage.out

@@ -66,7 +66,6 @@ require (
 	github.com/IBM/sarama v1.43.3
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/fossoreslp/go-uuid-v4 v1.0.0
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

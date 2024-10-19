@@ -10,7 +10,7 @@ import (
 	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
 	"gitlab.ozon.dev/chppppr/homework/internal/storage/storage_json"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
-	storage_suite "gitlab.ozon.dev/chppppr/homework/tests/suite"
+	storage_suite "gitlab.ozon.dev/chppppr/homework/tests/suite/storage"
 )
 
 func TestSuite(t *testing.T) {
