@@ -30,11 +30,8 @@ func (s *ManagerService) AddOrder(ctx context.Context, req *desc.AddOrderRequest
 		UseTape:        order.GetUseTape(),
 	}
 
-	if err := s.au.AcceptOrder(usecase_req); err != nil {
-		s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderAccepted, err)
-		return nil, DomainErrToHTPP(err)
-	}
+	err := s.au.AcceptOrder(usecase_req)
+	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderAccepted, err)
 
-	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderAccepted, nil)
-	return nil, nil
+	return nil, DomainErrToHTPP(err)
 }

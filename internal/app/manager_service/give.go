@@ -21,12 +21,9 @@ func (s *ManagerService) GiveOrders(ctx context.Context, req *desc.GiveOrdersReq
 		Orders: req.GetOrders(),
 	}
 
-	if err := s.gu.Give(usecase_req); err != nil {
-		err_join := errors.Join(err...)
-		s.sendEvent(req.GetOrders(), domain.EventOrderGiveClient, err_join)
-		return nil, DomainErrToHTPP(err_join)
-	}
+	err := s.gu.Give(usecase_req)
+	err_join := errors.Join(err...)
+	s.sendEvent(req.GetOrders(), domain.EventOrderGiveClient, err_join)
 
-	s.sendEvent(req.GetOrders(), domain.EventOrderGiveClient, nil)
-	return nil, nil
+	return nil, DomainErrToHTPP(err_join)
 }

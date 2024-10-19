@@ -20,11 +20,8 @@ func (s *ManagerService) Return(ctx context.Context, req *desc.ReturnRequest) (*
 		OrderID: req.GetOrderId(),
 	}
 
-	if err := s.ru.Return(usecase_req); err != nil {
-		s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderGiveCourier, err)
-		return nil, DomainErrToHTPP(err)
-	}
+	err := s.ru.Return(usecase_req)
+	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderGiveCourier, err)
 
-	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderGiveCourier, nil)
-	return nil, nil
+	return nil, DomainErrToHTPP(err)
 }

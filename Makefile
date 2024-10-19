@@ -16,8 +16,11 @@ SERVICE_NAME=manager
 
 SERVICE_PATH_SRC=./cmd/$(SERVICE_NAME)_service
 CLI_PATH_SRC=./cmd/$(SERVICE_NAME)_cli
+NOTIFIER_PATH_SRC=./cmd/notifier
+
 SERVICE_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_service
 CLI_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_cli
+NOTIFIER_BIN=$(BIN_DIR)/notifier
 
 SERVICE_DOCKERFILE_PATH=build/dev/$(SERVICE_NAME)_service/Dockerfile
 SERVICE_DOCKER_CONTAINER_NAME=manager-service-image:1.0.0
@@ -73,7 +76,7 @@ coverage: test
 benchmark:
 	@go test -bench=. -benchtime=10x  -benchmem ./benchmark/storage_test.go
 
-build: dependancy-install gocyclo gocognit mkdir-bin $(SERVICE_PATH_BIN) $(CLI_PATH_BIN)
+build: dependancy-install gocyclo gocognit mkdir-bin $(SERVICE_PATH_BIN) $(CLI_PATH_BIN) $(NOTIFIER_BIN)
 
 mkdir-bin:
 	@mkdir -p bin
@@ -83,6 +86,9 @@ $(SERVICE_PATH_BIN): mkdir-bin
 
 $(CLI_PATH_BIN): mkdir-bin
 	go build -o $(CLI_PATH_BIN) $(CLI_PATH_SRC)
+
+$(NOTIFIER_BIN): mkdir-bin
+	go build -o $(NOTIFIER_BIN) $(NOTIFIER_PATH_SRC)
 
 dependancy-update:
 	@go get -u

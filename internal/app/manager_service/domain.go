@@ -13,6 +13,10 @@ import (
 
 //gocyclo:ignore
 func DomainErrToHTPP(err error) error {
+	if err == nil {
+		return err
+	}
+
 	if errors.Is(err, domain.ErrWrongInput) {
 		return status.Error(codes.InvalidArgument, err.Error())
 	} else if errors.Is(err, domain.ErrNotFound) {
