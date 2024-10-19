@@ -12,6 +12,7 @@ import (
 )
 
 //gocyclo:ignore
+//gocognit:ignore
 func DomainErrToHTPP(err error) error {
 	if err == nil {
 		return err
