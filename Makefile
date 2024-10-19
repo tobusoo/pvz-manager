@@ -37,6 +37,7 @@ run-cli: build
 unit-test:
 	@echo "Unit Tests:"
 	@go test ./internal/usecase/ -coverprofile=coverage_usecase.out
+	@go test ./internal/app/manager_service/ -coverprofile=coverage_manager.out
 
 integration-test:
 	docker-compose -f $(DOCKER_TEST_COMPOSE_PATH) up -d
@@ -63,7 +64,8 @@ test: unit-test integration-test-intergnal integration-test
 	@tail -n +2 coverage_usecase.out >> coverage.out
 	@tail -n +2 coverage_storage.out >> coverage.out
 	@tail -n +2 coverage_storage_postgres.out >> coverage.out
-	@rm coverage_usecase.out coverage_storage.out coverage_storage_postgres.out
+	@tail -n +2 coverage_manager.out >> coverage.out
+	@rm coverage_usecase.out coverage_storage.out coverage_storage_postgres.out coverage_manager.out
 
 coverage: test
 	go tool cover -html=coverage.out -o coverage.html 
