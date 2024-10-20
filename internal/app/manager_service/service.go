@@ -59,14 +59,11 @@ func NewManagerService(au AcceptUsecase, gu GiveUsecase, ru ReturnUsecase, vu Vi
 }
 
 func (s *ManagerService) sendEvent(orderIDs []uint64, event domain.EventType, err error) {
-	var err_usr, err_ser error
-	if IsServiceError(err) {
-		err_ser = err
-	} else {
-		err_usr = err
+	if !IsServiceError(err) {
+		return
 	}
 
-	prod_err := s.pr.Send(orderIDs, event, err_usr, err_ser)
+	prod_err := s.pr.Send(orderIDs, event, err)
 	if prod_err != nil {
 		log.Println("ManagerService.sendEvent() failed: ", prod_err)
 	}

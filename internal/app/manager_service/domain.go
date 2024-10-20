@@ -37,7 +37,9 @@ func DomainErrToGRPC(err error) error {
 //gocyclo:ignore
 //gocognit:ignore
 func IsServiceError(err error) bool {
-	if errors.Is(err, domain.ErrWrongInput) {
+	if err == nil {
+		return false
+	} else if errors.Is(err, domain.ErrWrongInput) {
 		return false
 	} else if errors.Is(err, domain.ErrNotFound) {
 		return false

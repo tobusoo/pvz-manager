@@ -18,9 +18,9 @@ type KafkaProducerMock struct {
 	t          minimock.Tester
 	finishOnce sync.Once
 
-	funcSend          func(orderIDs []uint64, eventType domain.EventType, err_usr error, err_ser error) (err error)
+	funcSend          func(orderIDs []uint64, eventType domain.EventType, err_ser error) (err error)
 	funcSendOrigin    string
-	inspectFuncSend   func(orderIDs []uint64, eventType domain.EventType, err_usr error, err_ser error)
+	inspectFuncSend   func(orderIDs []uint64, eventType domain.EventType, err_ser error)
 	afterSendCounter  uint64
 	beforeSendCounter uint64
 	SendMock          mKafkaProducerMockSend
@@ -70,7 +70,6 @@ type KafkaProducerMockSendExpectation struct {
 type KafkaProducerMockSendParams struct {
 	orderIDs  []uint64
 	eventType domain.EventType
-	err_usr   error
 	err_ser   error
 }
 
@@ -78,7 +77,6 @@ type KafkaProducerMockSendParams struct {
 type KafkaProducerMockSendParamPtrs struct {
 	orderIDs  *[]uint64
 	eventType *domain.EventType
-	err_usr   *error
 	err_ser   *error
 }
 
@@ -92,7 +90,6 @@ type KafkaProducerMockSendExpectationOrigins struct {
 	origin          string
 	originOrderIDs  string
 	originEventType string
-	originErr_usr   string
 	originErr_ser   string
 }
 
@@ -107,7 +104,7 @@ func (mmSend *mKafkaProducerMockSend) Optional() *mKafkaProducerMockSend {
 }
 
 // Expect sets up expected params for KafkaProducer.Send
-func (mmSend *mKafkaProducerMockSend) Expect(orderIDs []uint64, eventType domain.EventType, err_usr error, err_ser error) *mKafkaProducerMockSend {
+func (mmSend *mKafkaProducerMockSend) Expect(orderIDs []uint64, eventType domain.EventType, err_ser error) *mKafkaProducerMockSend {
 	if mmSend.mock.funcSend != nil {
 		mmSend.mock.t.Fatalf("KafkaProducerMock.Send mock is already set by Set")
 	}
@@ -120,7 +117,7 @@ func (mmSend *mKafkaProducerMockSend) Expect(orderIDs []uint64, eventType domain
 		mmSend.mock.t.Fatalf("KafkaProducerMock.Send mock is already set by ExpectParams functions")
 	}
 
-	mmSend.defaultExpectation.params = &KafkaProducerMockSendParams{orderIDs, eventType, err_usr, err_ser}
+	mmSend.defaultExpectation.params = &KafkaProducerMockSendParams{orderIDs, eventType, err_ser}
 	mmSend.defaultExpectation.expectationOrigins.origin = minimock.CallerInfo(1)
 	for _, e := range mmSend.expectations {
 		if minimock.Equal(e.params, mmSend.defaultExpectation.params) {
@@ -177,31 +174,8 @@ func (mmSend *mKafkaProducerMockSend) ExpectEventTypeParam2(eventType domain.Eve
 	return mmSend
 }
 
-// ExpectErr_usrParam3 sets up expected param err_usr for KafkaProducer.Send
-func (mmSend *mKafkaProducerMockSend) ExpectErr_usrParam3(err_usr error) *mKafkaProducerMockSend {
-	if mmSend.mock.funcSend != nil {
-		mmSend.mock.t.Fatalf("KafkaProducerMock.Send mock is already set by Set")
-	}
-
-	if mmSend.defaultExpectation == nil {
-		mmSend.defaultExpectation = &KafkaProducerMockSendExpectation{}
-	}
-
-	if mmSend.defaultExpectation.params != nil {
-		mmSend.mock.t.Fatalf("KafkaProducerMock.Send mock is already set by Expect")
-	}
-
-	if mmSend.defaultExpectation.paramPtrs == nil {
-		mmSend.defaultExpectation.paramPtrs = &KafkaProducerMockSendParamPtrs{}
-	}
-	mmSend.defaultExpectation.paramPtrs.err_usr = &err_usr
-	mmSend.defaultExpectation.expectationOrigins.originErr_usr = minimock.CallerInfo(1)
-
-	return mmSend
-}
-
-// ExpectErr_serParam4 sets up expected param err_ser for KafkaProducer.Send
-func (mmSend *mKafkaProducerMockSend) ExpectErr_serParam4(err_ser error) *mKafkaProducerMockSend {
+// ExpectErr_serParam3 sets up expected param err_ser for KafkaProducer.Send
+func (mmSend *mKafkaProducerMockSend) ExpectErr_serParam3(err_ser error) *mKafkaProducerMockSend {
 	if mmSend.mock.funcSend != nil {
 		mmSend.mock.t.Fatalf("KafkaProducerMock.Send mock is already set by Set")
 	}
@@ -224,7 +198,7 @@ func (mmSend *mKafkaProducerMockSend) ExpectErr_serParam4(err_ser error) *mKafka
 }
 
 // Inspect accepts an inspector function that has same arguments as the KafkaProducer.Send
-func (mmSend *mKafkaProducerMockSend) Inspect(f func(orderIDs []uint64, eventType domain.EventType, err_usr error, err_ser error)) *mKafkaProducerMockSend {
+func (mmSend *mKafkaProducerMockSend) Inspect(f func(orderIDs []uint64, eventType domain.EventType, err_ser error)) *mKafkaProducerMockSend {
 	if mmSend.mock.inspectFuncSend != nil {
 		mmSend.mock.t.Fatalf("Inspect function is already set for KafkaProducerMock.Send")
 	}
@@ -249,7 +223,7 @@ func (mmSend *mKafkaProducerMockSend) Return(err error) *KafkaProducerMock {
 }
 
 // Set uses given function f to mock the KafkaProducer.Send method
-func (mmSend *mKafkaProducerMockSend) Set(f func(orderIDs []uint64, eventType domain.EventType, err_usr error, err_ser error) (err error)) *KafkaProducerMock {
+func (mmSend *mKafkaProducerMockSend) Set(f func(orderIDs []uint64, eventType domain.EventType, err_ser error) (err error)) *KafkaProducerMock {
 	if mmSend.defaultExpectation != nil {
 		mmSend.mock.t.Fatalf("Default expectation is already set for the KafkaProducer.Send method")
 	}
@@ -265,14 +239,14 @@ func (mmSend *mKafkaProducerMockSend) Set(f func(orderIDs []uint64, eventType do
 
 // When sets expectation for the KafkaProducer.Send which will trigger the result defined by the following
 // Then helper
-func (mmSend *mKafkaProducerMockSend) When(orderIDs []uint64, eventType domain.EventType, err_usr error, err_ser error) *KafkaProducerMockSendExpectation {
+func (mmSend *mKafkaProducerMockSend) When(orderIDs []uint64, eventType domain.EventType, err_ser error) *KafkaProducerMockSendExpectation {
 	if mmSend.mock.funcSend != nil {
 		mmSend.mock.t.Fatalf("KafkaProducerMock.Send mock is already set by Set")
 	}
 
 	expectation := &KafkaProducerMockSendExpectation{
 		mock:               mmSend.mock,
-		params:             &KafkaProducerMockSendParams{orderIDs, eventType, err_usr, err_ser},
+		params:             &KafkaProducerMockSendParams{orderIDs, eventType, err_ser},
 		expectationOrigins: KafkaProducerMockSendExpectationOrigins{origin: minimock.CallerInfo(1)},
 	}
 	mmSend.expectations = append(mmSend.expectations, expectation)
@@ -307,17 +281,17 @@ func (mmSend *mKafkaProducerMockSend) invocationsDone() bool {
 }
 
 // Send implements mm_clients.KafkaProducer
-func (mmSend *KafkaProducerMock) Send(orderIDs []uint64, eventType domain.EventType, err_usr error, err_ser error) (err error) {
+func (mmSend *KafkaProducerMock) Send(orderIDs []uint64, eventType domain.EventType, err_ser error) (err error) {
 	mm_atomic.AddUint64(&mmSend.beforeSendCounter, 1)
 	defer mm_atomic.AddUint64(&mmSend.afterSendCounter, 1)
 
 	mmSend.t.Helper()
 
 	if mmSend.inspectFuncSend != nil {
-		mmSend.inspectFuncSend(orderIDs, eventType, err_usr, err_ser)
+		mmSend.inspectFuncSend(orderIDs, eventType, err_ser)
 	}
 
-	mm_params := KafkaProducerMockSendParams{orderIDs, eventType, err_usr, err_ser}
+	mm_params := KafkaProducerMockSendParams{orderIDs, eventType, err_ser}
 
 	// Record call args
 	mmSend.SendMock.mutex.Lock()
@@ -336,7 +310,7 @@ func (mmSend *KafkaProducerMock) Send(orderIDs []uint64, eventType domain.EventT
 		mm_want := mmSend.SendMock.defaultExpectation.params
 		mm_want_ptrs := mmSend.SendMock.defaultExpectation.paramPtrs
 
-		mm_got := KafkaProducerMockSendParams{orderIDs, eventType, err_usr, err_ser}
+		mm_got := KafkaProducerMockSendParams{orderIDs, eventType, err_ser}
 
 		if mm_want_ptrs != nil {
 
@@ -348,11 +322,6 @@ func (mmSend *KafkaProducerMock) Send(orderIDs []uint64, eventType domain.EventT
 			if mm_want_ptrs.eventType != nil && !minimock.Equal(*mm_want_ptrs.eventType, mm_got.eventType) {
 				mmSend.t.Errorf("KafkaProducerMock.Send got unexpected parameter eventType, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
 					mmSend.SendMock.defaultExpectation.expectationOrigins.originEventType, *mm_want_ptrs.eventType, mm_got.eventType, minimock.Diff(*mm_want_ptrs.eventType, mm_got.eventType))
-			}
-
-			if mm_want_ptrs.err_usr != nil && !minimock.Equal(*mm_want_ptrs.err_usr, mm_got.err_usr) {
-				mmSend.t.Errorf("KafkaProducerMock.Send got unexpected parameter err_usr, expected at\n%s:\nwant: %#v\n got: %#v%s\n",
-					mmSend.SendMock.defaultExpectation.expectationOrigins.originErr_usr, *mm_want_ptrs.err_usr, mm_got.err_usr, minimock.Diff(*mm_want_ptrs.err_usr, mm_got.err_usr))
 			}
 
 			if mm_want_ptrs.err_ser != nil && !minimock.Equal(*mm_want_ptrs.err_ser, mm_got.err_ser) {
@@ -372,9 +341,9 @@ func (mmSend *KafkaProducerMock) Send(orderIDs []uint64, eventType domain.EventT
 		return (*mm_results).err
 	}
 	if mmSend.funcSend != nil {
-		return mmSend.funcSend(orderIDs, eventType, err_usr, err_ser)
+		return mmSend.funcSend(orderIDs, eventType, err_ser)
 	}
-	mmSend.t.Fatalf("Unexpected call to KafkaProducerMock.Send. %v %v %v %v", orderIDs, eventType, err_usr, err_ser)
+	mmSend.t.Fatalf("Unexpected call to KafkaProducerMock.Send. %v %v %v", orderIDs, eventType, err_ser)
 	return
 }
 

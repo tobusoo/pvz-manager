@@ -20,8 +20,8 @@ func NewProducerClient(producer sarama.SyncProducer, topic string) *ProducerClie
 	}
 }
 
-func (p *ProducerClient) Send(orderIDs []uint64, eventType domain.EventType, err_usr, err_ser error) error {
-	ev := domain.NewEvent(orderIDs, eventType, err_usr, err_ser)
+func (p *ProducerClient) Send(orderIDs []uint64, eventType domain.EventType, err_ser error) error {
+	ev := domain.NewEvent(orderIDs, eventType, err_ser)
 
 	bytes, err := json.Marshal(ev)
 	if err != nil {

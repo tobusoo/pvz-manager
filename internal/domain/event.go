@@ -16,7 +16,6 @@ type Event struct {
 	Timestamp time.Time `json:"timestamp"`
 
 	OrderIDs   []uint64 `json:"orders_id"`
-	ErrUser    string   `json:"error_user"`
 	ErrService string   `json:"error_service"`
 }
 
@@ -28,13 +27,12 @@ func errToString(err error) string {
 	return ""
 }
 
-func NewEvent(orderIDs []uint64, eventType EventType, err_user, err_ser error) *Event {
+func NewEvent(orderIDs []uint64, eventType EventType, err_ser error) *Event {
 	return &Event{
 		EventType: eventType,
 		Timestamp: time.Now().UTC(),
 
 		OrderIDs:   orderIDs,
-		ErrUser:    errToString(err_user),
 		ErrService: errToString(err_ser),
 	}
 }

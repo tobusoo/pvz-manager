@@ -41,18 +41,6 @@ func (h *ConsumerGroupHandler) handleMessage(session sarama.ConsumerGroupSession
 			"event", event.EventType,
 			"timestamp", event.Timestamp,
 			"orders_id", event.OrderIDs,
-			"error_user", event.ErrUser,
-			"error_serice", event.ErrService,
-		)
-	} else {
-		h.logger.Info(
-			"handle message",
-			"partition", message.Partition,
-			"offset", message.Offset,
-			"event", event.EventType,
-			"timestamp", event.Timestamp,
-			"orders_id", event.OrderIDs,
-			"error_user", event.ErrUser,
 			"error_serice", event.ErrService,
 		)
 	}

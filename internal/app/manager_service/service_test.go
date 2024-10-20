@@ -98,7 +98,6 @@ func TestManagerService_AddOrder(t *testing.T) {
 				req := data.req_dto
 
 				us.AcceptOrderMock.When(req).Then(nil)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderAccepted, nil, nil).Then(nil)
 			},
 			wantErr: assert.NoError,
 		},
@@ -112,7 +111,6 @@ func TestManagerService_AddOrder(t *testing.T) {
 				req := data.req_dto
 
 				us.AcceptOrderMock.When(req).Then(domain.ErrAlreadyExist)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderAccepted, domain.ErrAlreadyExist, nil).Then(nil)
 			},
 			wantErr: assert.Error,
 		},
@@ -127,7 +125,7 @@ func TestManagerService_AddOrder(t *testing.T) {
 
 				some_service_error := fmt.Errorf("some bad service error")
 				us.AcceptOrderMock.When(req).Then(some_service_error)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderAccepted, nil, some_service_error).Then(nil)
+				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderAccepted, some_service_error).Then(nil)
 			},
 			wantErr: assert.Error,
 		},
@@ -206,7 +204,6 @@ func TestManagerService_GiveOrder(t *testing.T) {
 				req := data.req_dto
 
 				us.GiveMock.When(req).Then(nil)
-				prod.SendMock.When(req.Orders, domain.EventOrderGiveClient, nil, nil).Then(nil)
 			},
 			wantErr: assert.NoError,
 		},
@@ -219,9 +216,7 @@ func TestManagerService_GiveOrder(t *testing.T) {
 				data := td["NotFound"]
 				req := data.req_dto
 
-				err_join := errors.Join(domain.ErrNotFound)
 				us.GiveMock.When(req).Then([]error{domain.ErrNotFound})
-				prod.SendMock.When(req.Orders, domain.EventOrderGiveClient, err_join, nil).Then(nil)
 			},
 			wantErr: assert.Error,
 		},
@@ -237,7 +232,7 @@ func TestManagerService_GiveOrder(t *testing.T) {
 				some_service_error := fmt.Errorf("some bad service error")
 				err_join := errors.Join(some_service_error)
 				us.GiveMock.When(req).Then([]error{some_service_error})
-				prod.SendMock.When(req.Orders, domain.EventOrderGiveClient, nil, err_join).Then(nil)
+				prod.SendMock.When(req.Orders, domain.EventOrderGiveClient, err_join).Then(nil)
 			},
 			wantErr: assert.Error,
 		},
@@ -322,7 +317,6 @@ func TestManagerService_Refund(t *testing.T) {
 				req := data.req_dto
 
 				us.AcceptRefundMock.When(req).Then(nil)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderReturned, nil, nil).Then(nil)
 			},
 			wantErr: assert.NoError,
 		},
@@ -336,7 +330,6 @@ func TestManagerService_Refund(t *testing.T) {
 				req := data.req_dto
 
 				us.AcceptRefundMock.When(req).Then(domain.ErrNotFound)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderReturned, domain.ErrNotFound, nil).Then(nil)
 			},
 			wantErr: assert.Error,
 		},
@@ -351,7 +344,7 @@ func TestManagerService_Refund(t *testing.T) {
 
 				some_service_error := fmt.Errorf("some bad service error")
 				us.AcceptRefundMock.When(req).Then(some_service_error)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderReturned, nil, some_service_error).Then(nil)
+				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderReturned, some_service_error).Then(nil)
 			},
 			wantErr: assert.Error,
 		},
@@ -430,7 +423,6 @@ func TestManagerService_Return(t *testing.T) {
 				req := data.req_dto
 
 				us.ReturnMock.When(req).Then(nil)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderGiveCourier, nil, nil).Then(nil)
 			},
 			wantErr: assert.NoError,
 		},
@@ -444,7 +436,6 @@ func TestManagerService_Return(t *testing.T) {
 				req := data.req_dto
 
 				us.ReturnMock.When(req).Then(domain.ErrNotFound)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderGiveCourier, domain.ErrNotFound, nil).Then(nil)
 			},
 			wantErr: assert.Error,
 		},
@@ -459,7 +450,7 @@ func TestManagerService_Return(t *testing.T) {
 
 				some_service_error := fmt.Errorf("some bad service error")
 				us.ReturnMock.When(req).Then(some_service_error)
-				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderGiveCourier, nil, some_service_error).Then(nil)
+				prod.SendMock.When([]uint64{req.OrderID}, domain.EventOrderGiveCourier, some_service_error).Then(nil)
 			},
 			wantErr: assert.Error,
 		},

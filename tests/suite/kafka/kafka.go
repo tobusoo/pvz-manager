@@ -50,33 +50,35 @@ func (s *KafkaSuite) TearDownSuite() {
 	s.pr.Close()
 }
 
-func (s *KafkaSuite) TestEventOrderAccepted() {
-	var err_user, err_ser error
+func (s *KafkaSuite) TestEventOrderAcceptedWithServiceError() {
+	var err_ser error
 	orders := []uint64{1}
 	event_type := domain.EventOrderAccepted
+	err_ser = fmt.Errorf("some service error")
 
-	expected_event := domain.NewEvent(orders, event_type, err_user, err_ser)
-	err := s.pr_client.Send(orders, event_type, err_user, err_ser)
+	expected_event := domain.NewEvent(orders, event_type, err_ser)
+	err := s.pr_client.Send(orders, event_type, err_ser)
 	s.Require().NoError(err)
 
 	actual_bytes := <-s.result
 	var actual_event *domain.Event
 	err = json.Unmarshal(actual_bytes, &actual_event)
 	s.Require().NoError(err)
+	fmt.Println(expected_event, actual_event)
 
 	s.Require().Equal(expected_event.OrderIDs, actual_event.OrderIDs)
 	s.Require().Equal(expected_event.EventType, actual_event.EventType)
-	s.Require().Equal(expected_event.ErrUser, actual_event.ErrUser)
 	s.Require().Equal(expected_event.ErrService, actual_event.ErrService)
 }
 
-func (s *KafkaSuite) TestEventOrderGiveClient() {
-	var err_user, err_ser error
+func (s *KafkaSuite) TestEventOrderGiveClientWithServiceError() {
+	var err_ser error
 	orders := []uint64{2}
 	event_type := domain.EventOrderGiveClient
+	err_ser = fmt.Errorf("some service error")
 
-	expected_event := domain.NewEvent(orders, event_type, err_user, err_ser)
-	err := s.pr_client.Send(orders, event_type, err_user, err_ser)
+	expected_event := domain.NewEvent(orders, event_type, err_ser)
+	err := s.pr_client.Send(orders, event_type, err_ser)
 	s.Require().NoError(err)
 
 	actual_bytes := <-s.result
@@ -86,79 +88,17 @@ func (s *KafkaSuite) TestEventOrderGiveClient() {
 
 	s.Require().Equal(expected_event.OrderIDs, actual_event.OrderIDs)
 	s.Require().Equal(expected_event.EventType, actual_event.EventType)
-	s.Require().Equal(expected_event.ErrUser, actual_event.ErrUser)
 	s.Require().Equal(expected_event.ErrService, actual_event.ErrService)
 }
 
-func (s *KafkaSuite) TestEventOrderGiveReturned() {
-	var err_user, err_ser error
+func (s *KafkaSuite) TestEventOrderGiveReturnedWithServiceError() {
+	var err_ser error
 	orders := []uint64{3}
-	event_type := domain.EventOrderReturned
-
-	expected_event := domain.NewEvent(orders, event_type, err_user, err_ser)
-	err := s.pr_client.Send(orders, event_type, err_user, err_ser)
-	s.Require().NoError(err)
-
-	actual_bytes := <-s.result
-	var actual_event *domain.Event
-	err = json.Unmarshal(actual_bytes, &actual_event)
-	s.Require().NoError(err)
-
-	s.Require().Equal(expected_event.OrderIDs, actual_event.OrderIDs)
-	s.Require().Equal(expected_event.EventType, actual_event.EventType)
-	s.Require().Equal(expected_event.ErrUser, actual_event.ErrUser)
-	s.Require().Equal(expected_event.ErrService, actual_event.ErrService)
-}
-
-func (s *KafkaSuite) TestEventOrderGiveCourier() {
-	var err_user, err_ser error
-	orders := []uint64{41, 42, 43, 44}
-	event_type := domain.EventOrderGiveCourier
-
-	expected_event := domain.NewEvent(orders, event_type, err_user, err_ser)
-	err := s.pr_client.Send(orders, event_type, err_user, err_ser)
-	s.Require().NoError(err)
-
-	actual_bytes := <-s.result
-	var actual_event *domain.Event
-	err = json.Unmarshal(actual_bytes, &actual_event)
-	s.Require().NoError(err)
-
-	s.Require().Equal(expected_event.OrderIDs, actual_event.OrderIDs)
-	s.Require().Equal(expected_event.EventType, actual_event.EventType)
-	s.Require().Equal(expected_event.ErrUser, actual_event.ErrUser)
-	s.Require().Equal(expected_event.ErrService, actual_event.ErrService)
-}
-
-func (s *KafkaSuite) TestEventOrderAcceptedWithUserError() {
-	var err_user, err_ser error
-	orders := []uint64{5}
-	event_type := domain.EventOrderReturned
-	err_user = domain.ErrNotFound
-
-	expected_event := domain.NewEvent(orders, event_type, err_user, err_ser)
-	err := s.pr_client.Send(orders, event_type, err_user, err_ser)
-	s.Require().NoError(err)
-
-	actual_bytes := <-s.result
-	var actual_event *domain.Event
-	err = json.Unmarshal(actual_bytes, &actual_event)
-	s.Require().NoError(err)
-
-	s.Require().Equal(expected_event.OrderIDs, actual_event.OrderIDs)
-	s.Require().Equal(expected_event.EventType, actual_event.EventType)
-	s.Require().Equal(expected_event.ErrUser, actual_event.ErrUser)
-	s.Require().Equal(expected_event.ErrService, actual_event.ErrService)
-}
-
-func (s *KafkaSuite) TestEventOrderAcceptedWithServiceError() {
-	var err_user, err_ser error
-	orders := []uint64{6}
 	event_type := domain.EventOrderReturned
 	err_ser = fmt.Errorf("some service error")
 
-	expected_event := domain.NewEvent(orders, event_type, err_user, err_ser)
-	err := s.pr_client.Send(orders, event_type, err_user, err_ser)
+	expected_event := domain.NewEvent(orders, event_type, err_ser)
+	err := s.pr_client.Send(orders, event_type, err_ser)
 	s.Require().NoError(err)
 
 	actual_bytes := <-s.result
@@ -168,6 +108,25 @@ func (s *KafkaSuite) TestEventOrderAcceptedWithServiceError() {
 
 	s.Require().Equal(expected_event.OrderIDs, actual_event.OrderIDs)
 	s.Require().Equal(expected_event.EventType, actual_event.EventType)
-	s.Require().Equal(expected_event.ErrUser, actual_event.ErrUser)
+	s.Require().Equal(expected_event.ErrService, actual_event.ErrService)
+}
+
+func (s *KafkaSuite) TestEventOrderGiveCourierWithServiceError() {
+	var err_ser error
+	orders := []uint64{41, 42, 43, 44}
+	event_type := domain.EventOrderGiveCourier
+	err_ser = fmt.Errorf("some service error")
+
+	expected_event := domain.NewEvent(orders, event_type, err_ser)
+	err := s.pr_client.Send(orders, event_type, err_ser)
+	s.Require().NoError(err)
+
+	actual_bytes := <-s.result
+	var actual_event *domain.Event
+	err = json.Unmarshal(actual_bytes, &actual_event)
+	s.Require().NoError(err)
+
+	s.Require().Equal(expected_event.OrderIDs, actual_event.OrderIDs)
+	s.Require().Equal(expected_event.EventType, actual_event.EventType)
 	s.Require().Equal(expected_event.ErrService, actual_event.ErrService)
 }

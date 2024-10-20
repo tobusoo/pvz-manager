@@ -18,6 +18,6 @@ type (
 	}
 
 	KafkaProducer interface {
-		Send(orderIDs []uint64, eventType domain.EventType, err_usr, err_ser error) error
+		Send(orderIDs []uint64, eventType domain.EventType, err_ser error) error
 	}
 )
