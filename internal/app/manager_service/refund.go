@@ -24,5 +24,5 @@ func (s *ManagerService) Refund(ctx context.Context, req *desc.RefundRequest) (*
 	err := s.au.AcceptRefund(usecase_req)
 	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderReturned, err)
 
-	return nil, DomainErrToHTPP(err)
+	return nil, DomainErrToGRPC(err)
 }

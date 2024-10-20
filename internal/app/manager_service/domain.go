@@ -13,7 +13,7 @@ import (
 
 //gocyclo:ignore
 //gocognit:ignore
-func DomainErrToHTPP(err error) error {
+func DomainErrToGRPC(err error) error {
 	if err == nil {
 		return err
 	}

@@ -33,5 +33,5 @@ func (s *ManagerService) AddOrder(ctx context.Context, req *desc.AddOrderRequest
 	err := s.au.AcceptOrder(usecase_req)
 	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderAccepted, err)
 
-	return nil, DomainErrToHTPP(err)
+	return nil, DomainErrToGRPC(err)
 }

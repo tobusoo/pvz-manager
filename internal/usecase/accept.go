@@ -21,7 +21,7 @@ func NewAcceptUsecase(st storage.Storage) *AcceptUsecase {
 
 func addAdditionalTape(req *dto.AddOrderRequest, cs strategy.ContainerStrategy) error {
 	if req.ContainerType == "" {
-		return fmt.Errorf("can't use additional tape: containerType must be defined")
+		return fmt.Errorf("can't use additional tape: containerType must be defined: %w", domain.ErrWrongInput)
 	}
 
 	return cs.UseTape()
@@ -31,7 +31,7 @@ func generateOrder(req *dto.AddOrderRequest) (*domain.Order, error) {
 	var cs strategy.ContainerStrategy
 	cs, ok := strategy.ContainerTypeMap[req.ContainerType]
 	if !ok {
-		return nil, fmt.Errorf("%s isn't container type", req.ContainerType)
+		return nil, fmt.Errorf("%s isn't container type: %w", req.ContainerType, domain.ErrWrongInput)
 	}
 
 	if req.UseTape {
@@ -47,7 +47,7 @@ func generateOrder(req *dto.AddOrderRequest) (*domain.Order, error) {
 func (u *AcceptUsecase) AcceptOrder(req *dto.AddOrderRequest) error {
 	expDate, err := time.Parse("02-01-2006", req.ExpirationDate)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w: %w", err, domain.ErrWrongInput)
 	}
 
 	currentDate := utils.CurrentDate()

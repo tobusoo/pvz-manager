@@ -23,5 +23,5 @@ func (s *ManagerService) Return(ctx context.Context, req *desc.ReturnRequest) (*
 	err := s.ru.Return(usecase_req)
 	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderGiveCourier, err)
 
-	return nil, DomainErrToHTPP(err)
+	return nil, DomainErrToGRPC(err)
 }

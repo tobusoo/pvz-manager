@@ -25,5 +25,5 @@ func (s *ManagerService) GiveOrders(ctx context.Context, req *desc.GiveOrdersReq
 	err_join := errors.Join(err...)
 	s.sendEvent(req.GetOrders(), domain.EventOrderGiveClient, err_join)
 
-	return nil, DomainErrToHTPP(err_join)
+	return nil, DomainErrToGRPC(err_join)
 }
