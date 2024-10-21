@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	storage_suite "gitlab.ozon.dev/chppppr/homework/tests/suite"
+	storage_suite "gitlab.ozon.dev/chppppr/homework/tests/suite/storage"
 )
 
 func TestStorageDBSuite(t *testing.T) {

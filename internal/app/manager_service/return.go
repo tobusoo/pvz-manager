@@ -3,6 +3,7 @@ package manager_service
 import (
 	"context"
 
+	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	desc "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 	"google.golang.org/grpc/codes"
@@ -19,9 +20,8 @@ func (s *ManagerService) Return(ctx context.Context, req *desc.ReturnRequest) (*
 		OrderID: req.GetOrderId(),
 	}
 
-	if err := s.ru.Return(usecase_req); err != nil {
-		return nil, DomainErrToHTPP(err)
-	}
+	err := s.ru.Return(usecase_req)
+	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderGiveCourier, err)
 
-	return &emptypb.Empty{}, nil
+	return nil, DomainErrToGRPC(err)
 }

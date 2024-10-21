@@ -14,18 +14,25 @@ THRESHOLD=5
 BIN_DIR=$(CURDIR)/bin
 SERVICE_NAME=manager
 
-SERVICE_PATH_SRC=cmd/$(SERVICE_NAME)_service/main.go
-SERVICE_CLI_PATH_SRC=cmd/$(SERVICE_NAME)_cli/main.go
+SERVICE_PATH_SRC=./cmd/$(SERVICE_NAME)_service
+CLI_PATH_SRC=./cmd/$(SERVICE_NAME)_cli
+NOTIFIER_PATH_SRC=./cmd/notifier
+
 SERVICE_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_service
 CLI_PATH_BIN=$(BIN_DIR)/$(SERVICE_NAME)_cli
+NOTIFIER_BIN=$(BIN_DIR)/notifier
+
+SERVICE_DOCKERFILE_PATH=build/dev/$(SERVICE_NAME)_service/Dockerfile
+SERVICE_DOCKER_CONTAINER_NAME=manager-service-image:1.0.0
+NOTIFIER_DOCKERFILE_PATH=build/dev/notifier/Dockerfile
+NOTIFIER_DOCKER_CONTAINER_NAME=notifier-image:1.0.0
+DOCKER_DEV_COMPOSE_PATH=build/dev/docker-compose.yml
+DOCKER_TEST_COMPOSE_PATH=build/test/docker-compose.yml
 
 .PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
 .PHONY: unit-test integration-test integration-test-db e2e-test benchmark
 
-all: bin-deps generate build compose-up goose-up run-service
-
-run-service: build
-	$(SERVICE_PATH_BIN)
+all: bin-deps generate build compose-up goose-up
 
 run-cli: build
 	$(CLI_PATH_BIN)
@@ -33,18 +40,20 @@ run-cli: build
 unit-test:
 	@echo "Unit Tests:"
 	@go test ./internal/usecase/ -coverprofile=coverage_usecase.out
+	@go test ./internal/app/manager_service/ -coverprofile=coverage_manager.out
 
-integration-test-db:
-	docker-compose up -d postgres_test
+integration-test:
+	docker-compose -f $(DOCKER_TEST_COMPOSE_PATH) up -d
 	@echo "Sleeping 4 seconds for postgreSQL preparation"
 	@sleep 4
 	@$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_TEST_DSN) up
 	@POSTGRESQL_TEST_DSN=${POSTGRESQL_TEST_DSN} go test -v -coverpkg=./internal/storage/postgres \
 		-coverprofile=coverage_storage_postgres.out \
 		./tests/integration/storage_db/integration_test.go
-	docker-compose down postgres_test
+	@go test -v ./tests/integration/kafka/integration_test.go
+	docker-compose -f $(DOCKER_TEST_COMPOSE_PATH) down
 
-integration-test:
+integration-test-intergnal:
 	@echo "Integration Tests:"
 	@go test -coverpkg=./internal/storage/storage_json -coverprofile=coverage_storage.out \
 		./tests/integration/storage_json/integration_test.go
@@ -53,12 +62,13 @@ e2e-test: build
 	@echo "E2E Tests:"
 	@go test tests/e2e_test.go
 
-test: unit-test integration-test integration-test-db e2e-test
+test: unit-test integration-test-intergnal integration-test
 	@echo "mode: set" > coverage.out
 	@tail -n +2 coverage_usecase.out >> coverage.out
 	@tail -n +2 coverage_storage.out >> coverage.out
 	@tail -n +2 coverage_storage_postgres.out >> coverage.out
-	@rm coverage_usecase.out coverage_storage.out coverage_storage_postgres.out
+	@tail -n +2 coverage_manager.out >> coverage.out
+	@rm coverage_usecase.out coverage_storage.out coverage_storage_postgres.out coverage_manager.out
 
 coverage: test
 	go tool cover -html=coverage.out -o coverage.html 
@@ -66,7 +76,7 @@ coverage: test
 benchmark:
 	@go test -bench=. -benchtime=10x  -benchmem ./benchmark/storage_test.go
 
-build: dependancy-install gocyclo gocognit mkdir-bin $(SERVICE_PATH_BIN) $(CLI_PATH_BIN)
+build: dependancy-install gocyclo gocognit mkdir-bin $(SERVICE_PATH_BIN) $(CLI_PATH_BIN) $(NOTIFIER_BIN)
 
 mkdir-bin:
 	@mkdir -p bin
@@ -75,7 +85,10 @@ $(SERVICE_PATH_BIN): mkdir-bin
 	go build -o $(SERVICE_PATH_BIN) $(SERVICE_PATH_SRC)
 
 $(CLI_PATH_BIN): mkdir-bin
-	go build -o $(CLI_PATH_BIN) $(SERVICE_CLI_PATH_SRC)
+	go build -o $(CLI_PATH_BIN) $(CLI_PATH_SRC)
+
+$(NOTIFIER_BIN): mkdir-bin
+	go build -o $(NOTIFIER_BIN) $(NOTIFIER_PATH_SRC)
 
 dependancy-update:
 	@go get -u
@@ -106,35 +119,43 @@ depgraph-build:
 
 depgraph: depgraph-install depgraph-build
 
+docker-build: docker-build-service docker-build-notifier
+
+docker-build-service:
+	docker build -f $(SERVICE_DOCKERFILE_PATH) . -t $(SERVICE_DOCKER_CONTAINER_NAME)
+
+docker-build-notifier:
+	docker build -f $(NOTIFIER_DOCKERFILE_PATH) . -t $(NOTIFIER_DOCKER_CONTAINER_NAME)
+
 compose-up:
-	docker-compose up -d postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) up --detach
 
 compose-down:
-	docker-compose down postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) down
 
 compose-stop:
-	docker-compose stop postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) stop
 
 compose-start:
-	docker-compose start postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) start
 
 compose-ps:
-	docker-compose ps postgres
+	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) ps
 
 goose-install:
 	go install github.com/pressly/goose/v3/cmd/goose@latest
 
 goose-add:
-	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) create rename_me sql
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN_LOCAL) create rename_me sql
 
 goose-up:
-	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) up
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN_LOCAL) up
 
 goose-down:
-	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) down
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN_LOCAL) down
 
 goose-status:
-	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN) status
+	$(GOOSEE_PATH) -dir $(MIGRATIONS_PATH) postgres $(POSTGRESQL_DSN_LOCAL) status
 
 squawk-install:
 	npm install -g squawk-cli
@@ -218,4 +239,4 @@ vendor.protogen/validate:
 	rm -rf vendor.protogen/tmp
 
 clean:
-	rm -rf $(BIN_DIR) godepgraph.png
+	rm -rf $(BIN_DIR) godepgraph.png coverage*.out

@@ -3,6 +3,7 @@ package manager_service
 import (
 	"context"
 
+	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 	desc "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
@@ -29,9 +30,8 @@ func (s *ManagerService) AddOrder(ctx context.Context, req *desc.AddOrderRequest
 		UseTape:        order.GetUseTape(),
 	}
 
-	if err := s.au.AcceptOrder(usecase_req); err != nil {
-		return nil, DomainErrToHTPP(err)
-	}
+	err := s.au.AcceptOrder(usecase_req)
+	s.sendEvent([]uint64{req.GetOrderId()}, domain.EventOrderAccepted, err)
 
-	return &emptypb.Empty{}, nil
+	return nil, DomainErrToGRPC(err)
 }

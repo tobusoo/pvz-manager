@@ -1,0 +1,7 @@
+kafka:
+  group_id: pvz-consumer-group
+  topics:
+    - pvz.events-log
+  config:
+    brokers: 
+    - kafka0:29092

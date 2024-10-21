@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"gitlab.ozon.dev/chppppr/homework/internal/domain"
 	"gitlab.ozon.dev/chppppr/homework/internal/dto"
 	desc "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 	"google.golang.org/grpc/codes"
@@ -20,10 +21,9 @@ func (s *ManagerService) GiveOrders(ctx context.Context, req *desc.GiveOrdersReq
 		Orders: req.GetOrders(),
 	}
 
-	if err := s.gu.Give(usecase_req); err != nil {
-		err_join := errors.Join(err...)
-		return nil, DomainErrToHTPP(err_join)
-	}
+	err := s.gu.Give(usecase_req)
+	err_join := errors.Join(err...)
+	s.sendEvent(req.GetOrders(), domain.EventOrderGiveClient, err_join)
 
-	return &emptypb.Empty{}, nil
+	return nil, DomainErrToGRPC(err_join)
 }

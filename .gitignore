@@ -5,6 +5,7 @@ godepgraph.png
 coverage_usecase.out
 coverage_storage.out
 coverage_storage_postgres.out
+coverage_manager.out
 coverage.out
 coverage.html
 vendor.protogen

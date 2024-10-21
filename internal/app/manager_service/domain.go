@@ -12,7 +12,12 @@ import (
 )
 
 //gocyclo:ignore
-func DomainErrToHTPP(err error) error {
+//gocognit:ignore
+func DomainErrToGRPC(err error) error {
+	if err == nil {
+		return err
+	}
+
 	if errors.Is(err, domain.ErrWrongInput) {
 		return status.Error(codes.InvalidArgument, err.Error())
 	} else if errors.Is(err, domain.ErrNotFound) {
@@ -27,6 +32,30 @@ func DomainErrToHTPP(err error) error {
 	}
 
 	return status.Error(codes.Internal, err.Error())
+}
+
+//gocyclo:ignore
+//gocognit:ignore
+func IsServiceError(err error) bool {
+	if err == nil {
+		return false
+	} else if errors.Is(err, domain.ErrWrongInput) {
+		return false
+	} else if errors.Is(err, domain.ErrNotFound) {
+		return false
+	} else if errors.Is(err, domain.ErrAlreadyExist) {
+		return false
+	} else if errors.Is(err, domain.ErrWrongStatus) {
+		return false
+	} else if errors.Is(err, domain.ErrExpirationDatePassed) {
+		return false
+	} else if errors.Is(err, domain.ErrNotExpirationDate) {
+		return false
+	} else if errors.Is(err, domain.ErrTwoDaysPassed) {
+		return false
+	}
+
+	return true
 }
 
 func OrderViewToProto(in []domain.OrderView) []*desc.OrderView {
