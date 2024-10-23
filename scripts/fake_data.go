@@ -47,6 +47,9 @@ func GenerateAddRequests(count int) []*dto.AddOrderRequest {
 		var req *dto.AddOrderRequest
 		gofakeit.Struct(&req)
 		req.Weight = generateWeightBasedOnContainerType(req.ContainerType)
+		if req.ContainerType == "tape" || req.ContainerType == "" {
+			req.UseTape = false
+		}
 		res = append(res, req)
 	}
 

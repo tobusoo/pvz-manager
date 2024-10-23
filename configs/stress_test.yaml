@@ -1,0 +1,8 @@
+grpc:
+  address: 0.0.0.0:8081
+
+test:
+  add_responses_count: 100000
+  give_responses_count: 50000
+  refund_responses_count: 25000
+  return_responses_count: 12500
