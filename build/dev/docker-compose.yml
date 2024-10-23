@@ -7,7 +7,8 @@ services:
       dockerfile: ${PWD}/build/dev/manager_service/Dockerfile
     volumes:
       - ./../../configs/manager_service.yaml:/configs/manager_service.yaml
-      - ./../..//pkg/manager-service/v1/manager-service.swagger.json:/pkg/manager-service/v1/manager-service.swagger.json
+      - ./../../pkg/manager-service/v1/manager-service.swagger.json:/pkg/manager-service/v1/manager-service.swagger.json
+      - ./../wait-for-kafka.sh:/wait-for-kafka.sh
     env_file:
       - ./../../.env
     ports:
@@ -16,6 +17,8 @@ services:
     depends_on:
       - postgres
       - kafka-init-topics
+    entrypoint: [ "/wait-for-kafka.sh" ]
+    command: [ "/bin/manager_service" ]
     restart: always
 
   notifier:
@@ -26,8 +29,11 @@ services:
       dockerfile: ${PWD}/build/dev/notifier/Dockerfile
     volumes:
       - ./../../configs/notifier.yaml:/configs/notifier.yaml
+      - ./../wait-for-kafka.sh:/wait-for-kafka.sh
     depends_on:
       - kafka-init-topics
+    entrypoint: [ "/wait-for-kafka.sh" ]
+    command: [ "/bin/notifier" ]
     restart: always
 
   prometheus:
@@ -45,6 +51,9 @@ services:
     image: grafana/grafana-enterprise
     volumes:
       - grafana-storage:/var/lib/grafana
+      - ./../../configs/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./../../configs/grafana/provisioning/dashboards.yml:/etc/grafana/provisioning/dashboards/all.yml
+      - ./../../configs/grafana/provisioning/datasources.yml:/etc/grafana/provisioning/datasources/all.yml
     ports:
       - 3000:3000
     depends_on:

@@ -1,6 +1,7 @@
 package strategy
 
 import (
+	"errors"
 	"fmt"
 )
 
@@ -13,6 +14,8 @@ const (
 	PackageMaxWeight = 10 * 1000
 	BoxMaxWeight     = 30 * 1000
 )
+
+var ErrTapeTwice = errors.New("can't use tape twice")
 
 var ContainerTypeMap = map[string]ContainerStrategy{
 	"":        &DefaultContainerStrategy{},
@@ -121,7 +124,7 @@ func (s *TapeStrategy) Type() string {
 }
 
 func (s *TapeStrategy) UseTape() error {
-	return fmt.Errorf("can't use tape twice")
+	return ErrTapeTwice
 }
 
 func (s *TapeStrategy) IsTaped() bool {

@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"gitlab.ozon.dev/chppppr/homework/internal/domain"
+	"gitlab.ozon.dev/chppppr/homework/internal/domain/strategy"
 	"gitlab.ozon.dev/chppppr/homework/internal/utils"
 	desc "gitlab.ozon.dev/chppppr/homework/pkg/manager-service/v1"
 	"google.golang.org/grpc/codes"
@@ -18,7 +19,8 @@ func DomainErrToGRPC(err error) error {
 		return err
 	}
 
-	if errors.Is(err, domain.ErrWrongInput) {
+	if errors.Is(err, domain.ErrWrongInput) ||
+		errors.Is(err, strategy.ErrTapeTwice) {
 		return status.Error(codes.InvalidArgument, err.Error())
 	} else if errors.Is(err, domain.ErrNotFound) {
 		return status.Error(codes.NotFound, err.Error())
@@ -52,6 +54,8 @@ func IsServiceError(err error) bool {
 	} else if errors.Is(err, domain.ErrNotExpirationDate) {
 		return false
 	} else if errors.Is(err, domain.ErrTwoDaysPassed) {
+		return false
+	} else if errors.Is(err, strategy.ErrTapeTwice) {
 		return false
 	}
 

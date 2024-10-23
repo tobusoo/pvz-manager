@@ -122,10 +122,10 @@ depgraph: depgraph-install depgraph-build
 docker-build: docker-build-service docker-build-notifier
 
 docker-build-service:
-	docker build -f $(SERVICE_DOCKERFILE_PATH) . -t $(SERVICE_DOCKER_CONTAINER_NAME)
+	docker build --no-cache -f $(SERVICE_DOCKERFILE_PATH) . -t $(SERVICE_DOCKER_CONTAINER_NAME)
 
 docker-build-notifier:
-	docker build -f $(NOTIFIER_DOCKERFILE_PATH) . -t $(NOTIFIER_DOCKER_CONTAINER_NAME)
+	docker build --no-cache -f $(NOTIFIER_DOCKERFILE_PATH) . -t $(NOTIFIER_DOCKER_CONTAINER_NAME)
 
 compose-up:
 	docker compose -f $(DOCKER_DEV_COMPOSE_PATH) up --detach
