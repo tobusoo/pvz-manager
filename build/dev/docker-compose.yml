@@ -5,6 +5,9 @@ services:
     build:
       context: ./../../
       dockerfile: ${PWD}/build/dev/manager_service/Dockerfile
+    volumes:
+      - ./../../configs/manager_service.yaml:/configs/manager_service.yaml
+      - ./../..//pkg/manager-service/v1/manager-service.swagger.json:/pkg/manager-service/v1/manager-service.swagger.json
     env_file:
       - ./../../.env
     ports:
@@ -21,6 +24,8 @@ services:
     build:
       context: ./../../
       dockerfile: ${PWD}/build/dev/notifier/Dockerfile
+    volumes:
+      - ./../../configs/notifier.yaml:/configs/notifier.yaml
     depends_on:
       - kafka-init-topics
     restart: always
