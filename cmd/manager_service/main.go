@@ -16,6 +16,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger/v2"
 	"gitlab.ozon.dev/chppppr/homework/internal/app/manager_service"
 	kafka_client "gitlab.ozon.dev/chppppr/homework/internal/clients/kafka"
@@ -100,6 +101,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	r.Mount("/api/v1/", mux)
+	r.Mount("/metrics", promhttp.Handler())
 	r.Get("/swagger.json", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "pkg/manager-service/v1/manager-service.swagger.json")
 	})

@@ -30,6 +30,27 @@ services:
       - kafka-init-topics
     restart: always
 
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./../../configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-storage:/prometheus
+    ports:
+      - 9090:9090
+    restart: always
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana-enterprise
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    restart: always
+
   postgres:
     container_name: postgres_db
     image: postgres:15-alpine
@@ -80,3 +101,7 @@ services:
     depends_on:
       - kafka0
     command: "bash -c 'echo Waiting for Kafka to be ready... && cub kafka-ready -b kafka0:29092 1 30 && kafka-topics --create --topic pvz.events-log --partitions 1 --replication-factor 1 --if-not-exists --bootstrap-server kafka0:29092'"
+
+volumes:
+  grafana-storage: {}
+  prometheus-storage: {}
