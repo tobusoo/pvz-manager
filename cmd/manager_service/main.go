@@ -97,7 +97,6 @@ func main() {
 	}()
 
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
 	r.Mount("/api/v1/", mux)
