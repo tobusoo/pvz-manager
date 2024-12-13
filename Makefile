@@ -32,7 +32,7 @@ DOCKER_DEV_COMPOSE_PATH=build/dev/docker-compose.yml
 DOCKER_TEST_COMPOSE_PATH=build/test/docker-compose.yml
 
 .PHONY: all mkdir-bin run build tidy clean gocyclo gocognit test coverage
-.PHONY: unit-test integration-test integration-test-db e2e-test benchmark
+.PHONY: unit-test integration-test integration-test-db benchmark
 
 all: bin-deps generate build compose-up goose-up
 
@@ -59,10 +59,6 @@ integration-test-intergnal:
 	@echo "Integration Tests:"
 	@go test -coverpkg=./internal/storage/storage_json -coverprofile=coverage_storage.out \
 		./tests/integration/storage_json/integration_test.go
-
-e2e-test: build
-	@echo "E2E Tests:"
-	@go test tests/e2e_test.go
 
 test: unit-test integration-test-intergnal integration-test
 	@echo "mode: set" > coverage.out
