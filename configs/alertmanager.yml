@@ -1,5 +1,5 @@
 global:
-  resolve_timeout: 10s
+  resolve_timeout: 5m
 
 route:
   group_by: ['alertname']
@@ -13,3 +13,4 @@ receivers:
     api_url: 'https://api.telegram.org'
     chat_id: 649538467
     parse_mode: 'HTML'
+  

@@ -1,5 +1,5 @@
 groups:
-  - name: alert.rules
+  - name: ErrorsAlertGroup
     rules:
       - alert: HighErrorRate
         expr: increase(manager_service_errors_total[10s]) >= 5
