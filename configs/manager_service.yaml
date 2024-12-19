@@ -5,7 +5,7 @@ http:
   address: 0.0.0.0:8080
 
 swagger:
-  address: localhost:8080
+  address: pvz.tbs.com
 
 kafka:
   topic: pvz.events-log

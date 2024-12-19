@@ -9,3 +9,4 @@ coverage_manager.out
 coverage.out
 coverage.html
 vendor.protogen
+configs/nginx/ssl/cert.*

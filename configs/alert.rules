@@ -1,0 +1,11 @@
+groups:
+  - name: alert.rules
+    rules:
+      - alert: HighErrorRate
+        expr: increase(manager_service_errors_total[10s]) >= 5
+        for: 0s
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "The service has experienced {{ $value }} errors in the last 10 seconds."
